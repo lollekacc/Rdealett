@@ -276,7 +276,7 @@ img {
   position: relative;
   z-index: 1;
   max-width: 970px;
-  padding: 108px 99px 40px 99px;
+  padding: 138px 99px 40px 99px;
 }
 
 .hero h1 {
@@ -305,41 +305,6 @@ img {
 .hero-actions a {
   display: inline-flex;
   align-items: center;
-}
-
-.about {
-  padding: 80px 99px 40px;
-}
-
-.about-inner {
-  max-width: 1091px;
-  margin: 0 auto;
-}
-
-.about-copy {
-  text-align: center;
-  max-width: 770px;
-  margin: 0 auto 40px;
-}
-
-.about-copy .eyebrow {
-  font-size: 21px;
-  letter-spacing: normal;
-  margin-bottom: 26px;
-}
-
-.about-copy h2 {
-  font-family: 'Suez One', serif;
-  font-size: 50px;
-  line-height: 1.2;
-  margin: 0;
-}
-
-.about-text {
-  margin: 32px auto 0;
-  max-width: 720px;
-  font-size: 18px;
-  line-height: 1.6;
 }
 
 .button {
@@ -371,14 +336,102 @@ img {
   border: 1px solid var(--accent);
 }
 
-.about-image {
-  margin: 0 auto;
-  max-width: 698px;
+.section-space {
+  padding: 90px 99px;
 }
 
-.about-image img {
+.page-shell {
+  max-width: 1091px;
+  margin: 0 auto;
+}
+
+.section-promo-ai {
+  background: linear-gradient(180deg, rgba(246, 244, 240, 0) 0%, rgba(255, 255, 255, 0.72) 100%);
+}
+
+.ai-promo-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
+  align-items: center;
+  gap: 44px;
+  padding: 44px;
+  border: 1px solid rgba(39, 36, 67, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 25px 50px rgba(39, 36, 67, 0.12);
+}
+
+.ai-promo-copy h3 {
+  margin: 0;
+  max-width: 620px;
+  font-family: 'Suez One', serif;
+  font-size: 42px;
+  line-height: 1.16;
+  color: var(--text);
+}
+
+.ai-promo-copy p {
+  margin: 24px 0 0;
+  max-width: 560px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(39, 36, 67, 0.82);
+}
+
+.ai-promo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  border: none;
+  border-radius: 10px;
+  padding: 0 28px;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'din-next-w01-light', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgba(218, 57, 43, 0.24);
+}
+
+.ai-promo-image-wrap {
+  position: relative;
+  overflow: hidden;
+  min-height: 360px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(218, 57, 43, 0.14), rgba(252, 255, 114, 0.12)), #f6f4f0;
+}
+
+.ai-promo-ribbon {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 2;
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 12px 24px rgba(218, 57, 43, 0.22);
+}
+
+.ai-promo-video {
   width: 100%;
-  border-radius: 20px;
+  height: 100%;
+  min-height: 360px;
   object-fit: cover;
 }
 
@@ -930,7 +983,7 @@ textarea {
 @media (max-width: 1160px) {
   .header-inner,
   .hero-content,
-  .about,
+  .section-space,
   .deployment-cards,
   .games,
   .contact,
@@ -965,7 +1018,7 @@ textarea {
     padding: 108px 40px 40px;
   }
 
-  .about,
+  .section-space,
   .deployment-cards,
   .games,
   .contact,
@@ -991,6 +1044,15 @@ textarea {
 
   .contact-inner {
     grid-template-columns: 1fr;
+  }
+
+  .ai-promo-card {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-promo-image-wrap,
+  .ai-promo-video {
+    min-height: 320px;
   }
 }
 
@@ -1026,7 +1088,6 @@ textarea {
     gap: 16px;
   }
 
-  .about-copy,
   .games-intro {
     text-align: center;
   }
@@ -1041,6 +1102,33 @@ textarea {
 
   .contact {
     padding: 40px 24px;
+  }
+
+  .section-space {
+    padding: 56px 24px;
+  }
+
+  .ai-promo-card {
+    gap: 28px;
+    padding: 28px;
+  }
+
+  .ai-promo-copy h3 {
+    font-size: 32px;
+  }
+
+  .ai-promo-copy p {
+    font-size: 16px;
+  }
+
+  .ai-promo-actions,
+  .btn-primary {
+    width: 100%;
+  }
+
+  .ai-promo-image-wrap,
+  .ai-promo-video {
+    min-height: 260px;
   }
 
   .deployment-cards {

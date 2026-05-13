@@ -266,9 +266,9 @@ img {
   content: '';
   position: absolute;
   inset: -4%;
-  background: url('./images/hero1.png') no-repeat center bottom / cover;
+  background: url('./images/hero1.png') no-repeat center top / cover;
   transform: translateX(var(--hero-shift)) scale(1.08);
-  transform-origin: center bottom;
+  transform-origin: 1850px 1000px;
   will-change: transform;
 }
 
@@ -519,21 +519,18 @@ img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 36px;
-  height: 26px;
-  padding: 0 5px;
+  width: 36px;
+  height: 30px;
   background: var(--provider-accent);
   color: #fff;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1;
+  border-radius: 7px;
+  flex-shrink: 0;
 }
 
-.provider-features li:first-child .provider-feature-icon {
-  font-size: 15px;
-  letter-spacing: 0;
+.provider-feature-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .provider-gift {
@@ -571,13 +568,20 @@ img {
 }
 
 .gift-icon {
-  font-size: 28px;
-  line-height: 1;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gift-icon svg {
+  width: 32px;
+  height: 32px;
+  display: block;
 }
 
 .gift-icon::before {
-  content: "🎁";
+  content: none;
 }
 
 .gift-icon::after {

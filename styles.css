@@ -92,7 +92,7 @@ img {
   margin: 0 auto;
   padding: 0 99px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 
@@ -107,6 +107,12 @@ img {
   font-family: 'reklamescriptw00-medium', cursive;
   font-size: 26px;
   line-height: 1;
+}
+
+.header-inner > .brand {
+  min-height: 60px;
+  padding: 0 25px;
+  border-radius: 0 0 10px 10px;
 }
 
 .site-nav {

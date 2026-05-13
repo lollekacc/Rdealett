@@ -430,6 +430,86 @@ img {
   object-fit: cover;
 }
 
+.gift-card-section {
+  padding-top: 30px;
+}
+
+.gift-card-copy {
+  max-width: 760px;
+  margin: 0 auto 34px;
+  text-align: center;
+}
+
+.gift-card-copy h2 {
+  margin: 0;
+  font-family: 'Suez One', serif;
+  font-size: 46px;
+  line-height: 1.16;
+  color: var(--text);
+}
+
+.gift-card-copy p:last-child {
+  margin: 18px auto 0;
+  max-width: 660px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(39, 36, 67, 0.78);
+}
+
+.gift-logo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.gift-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 94px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow: 0 16px 34px rgba(39, 36, 67, 0.08);
+}
+
+.gift-logo--apollo {
+  color: #ef6b2d;
+}
+
+.gift-logo--hm {
+  color: #c9002b;
+  font-family: 'Suez One', serif;
+}
+
+.gift-logo--hotel {
+  color: #5c4a9a;
+}
+
+.gift-logo--ica {
+  color: #d71920;
+}
+
+.gift-logo--mio {
+  color: #1e3150;
+}
+
+.gift-logo--zalando {
+  color: #f47b20;
+}
+
+.gift-logo--elgiganten {
+  color: #104f9e;
+}
+
+.gift-logo--ticket {
+  color: var(--accent);
+}
+
 .coverage-main {
   padding-top: 35px;
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), transparent 300px);
@@ -567,30 +647,29 @@ img {
 }
 
 .coverage-filter {
-  min-height: 44px;
-  border: 1.5px solid rgba(39, 36, 67, 0.09);
-  border-radius: 10px;
-  background: rgba(246, 244, 240, 0.7);
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1.5px solid rgba(39, 36, 67, 0.16);
+  border-radius: 999px;
+  background: #fff;
   color: var(--text);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .coverage-filter:hover {
-  transform: translateY(-1px);
-  background: rgba(218, 57, 43, 0.07);
   border-color: var(--accent);
   color: var(--accent);
+  background: rgba(218, 57, 43, 0.05);
 }
 
 .coverage-filter.is-active {
-  transform: translateY(-1px);
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(218, 57, 43, 0.22);
+  box-shadow: 0 4px 14px rgba(218, 57, 43, 0.25);
 }
 
 .sidebar-info-note {
@@ -679,11 +758,10 @@ img {
 }
 
 .map-search,
-.map-zoom,
 .map-bottom-pill,
 .map-zoom-group {
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 14px 30px rgba(39, 36, 67, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(39, 36, 67, 0.1);
   backdrop-filter: blur(10px);
 }
 
@@ -694,6 +772,7 @@ img {
   min-height: 50px;
   border-radius: 999px;
   padding: 0 16px 0 8px;
+  border: 1.5px solid rgba(39, 36, 67, 0.18);
   pointer-events: auto;
 }
 
@@ -728,14 +807,31 @@ img {
 }
 
 .map-zoom {
-  display: grid;
-  overflow: hidden;
-  width: 48px;
-  border-radius: 999px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: visible;
+  width: auto;
+  border-radius: 0;
+  background: transparent;
   pointer-events: auto;
 }
 
-.map-zoom button,
+.map-zoom button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-height: auto;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 14px rgba(39, 36, 67, 0.14);
+  backdrop-filter: blur(8px);
+  font-size: 20px;
+  font-weight: 700;
+}
+
 .map-zoom-btn {
   display: inline-flex;
   align-items: center;
@@ -1480,6 +1576,10 @@ textarea {
   .coverage-map-card {
     min-height: 560px;
   }
+
+  .gift-logo-grid {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
 }
 
 @media (max-width: 680px) {
@@ -1560,8 +1660,22 @@ textarea {
     font-size: 34px;
   }
 
-  .section-head p {
+  .gift-card-copy h2 {
+    font-size: 34px;
+  }
+
+  .section-head p,
+  .gift-card-copy p:last-child {
     font-size: 16px;
+  }
+
+  .gift-logo-grid {
+    gap: 12px;
+  }
+
+  .gift-logo {
+    min-height: 78px;
+    font-size: 21px;
   }
 
   .coverage-sidebar {

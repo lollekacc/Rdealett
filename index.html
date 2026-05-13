@@ -198,7 +198,113 @@
         </div>
       </section>
 
-      
+      <section class="coverage-main section-space" id="coverageApp">
+        <div class="page-shell">
+          <div class="section-head center">
+            <h2>V&auml;lj operat&ouml;r och utforska kartan</h2>
+            <p>Se t&auml;ckning, j&auml;mf&ouml;r n&auml;t och s&ouml;k direkt p&aring; adress eller stad f&ouml;r att f&aring; en tydligare bild av l&auml;get d&auml;r du bor.</p>
+          </div>
+
+          <div class="coverage-shell">
+            <div class="coverage-grid">
+              <aside class="coverage-sidebar">
+                <section class="coverage-card coverage-card--sidebar">
+                  <div class="coverage-card__head">
+                    <div>
+                      <p class="coverage-section-label">Operat&ouml;rer</p>
+                      <h3>V&auml;lj operat&ouml;r</h3>
+                    </div>
+                  </div>
+                  <div class="operator-list">
+                    <button class="operator-card is-active" data-operator="telia" type="button">
+                      <div class="operator-card__logo"><img src="images/telia.png" alt="Telia" /></div>
+                    </button>
+                    <button class="operator-card" data-operator="tele2" type="button">
+                      <div class="operator-card__logo"><img src="images/tele2.png" alt="Tele2" /></div>
+                    </button>
+                    <button class="operator-card" data-operator="telenor" type="button">
+                      <div class="operator-card__logo"><img src="images/telenor.jpg" alt="Telenor" /></div>
+                    </button>
+                    <button class="operator-card" data-operator="tre" type="button">
+                      <div class="operator-card__logo"><img src="images/tre.jpg" alt="Tre" /></div>
+                    </button>
+                    <button class="operator-card" data-operator="halebop" type="button">
+                      <div class="operator-card__logo"><img src="images/halebop.webp" alt="Halebop" /></div>
+                    </button>
+                  </div>
+                </section>
+
+                <section class="coverage-card coverage-card--sidebar">
+                  <div class="coverage-card__head">
+                    <div>
+                      <p class="coverage-section-label">Filter</p>
+                      <h3>N&auml;t</h3>
+                    </div>
+                  </div>
+                  <div class="coverage-filter-grid">
+                    <button class="coverage-filter is-active" type="button">2G</button>
+                    <button class="coverage-filter" type="button">3G</button>
+                    <button class="coverage-filter is-active" type="button">4G</button>
+                    <button class="coverage-filter" type="button">4G+</button>
+                    <button class="coverage-filter is-active" type="button">5G</button>
+                    <button class="coverage-filter" type="button">5G+</button>
+                  </div>
+                </section>
+
+                <div class="sidebar-info-note">
+                  <div class="sidebar-info-note__icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  </div>
+                  <p>T&auml;ckningsinformationen &auml;r en uppskattning och inte ett l&ouml;fte. <a href="jamfor-tackning.html" class="sidebar-info-link">L&auml;s mer &rarr;</a></p>
+                </div>
+              </aside>
+
+              <section class="coverage-map-area">
+                <div class="coverage-map-card">
+                  <div class="map-ui">
+                    <div class="map-search">
+                      <button id="mapSearchBtn" class="map-search__icon" type="button" aria-label="S&ouml;k">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      </button>
+                      <input id="mapSearchInput" type="text" placeholder="S&ouml;k adress eller plats" />
+                    </div>
+                    <div class="map-zoom">
+                      <button id="zoomInBtn" type="button">+</button>
+                      <button id="zoomOutBtn" type="button">&minus;</button>
+                    </div>
+                  </div>
+
+                  <div id="map" class="coverage-map"></div>
+
+                  <div class="map-legend-overlay">
+                    <div class="coverage-legend__item"><span class="legend-swatch legend-swatch--none"></span><span>Ingen t&auml;ckning</span></div>
+                    <div class="coverage-legend__item"><span class="legend-swatch legend-swatch--limited"></span><span>Begr&auml;nsad</span></div>
+                    <div class="coverage-legend__item"><span class="legend-swatch legend-swatch--basic"></span><span>Grundl&auml;ggande</span></div>
+                    <div class="coverage-legend__item"><span class="legend-swatch legend-swatch--good"></span><span>Bra</span></div>
+                    <div class="coverage-legend__item"><span class="legend-swatch legend-swatch--excellent"></span><span>Utm&auml;rkt t&auml;ckning</span></div>
+                  </div>
+
+                  <div class="map-bottom-bar">
+                    <button id="currentLocationBtn" class="map-bottom-pill" type="button">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      Nuvarande plats
+                    </button>
+                    <button id="fullscreenMapBtn" class="map-bottom-pill" type="button">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                      Helsk&auml;rm
+                    </button>
+                    <div class="map-zoom-group">
+                      <button id="zoomOutBtn2" class="map-zoom-btn" type="button" aria-label="Zooma ut">&minus;</button>
+                      <span class="map-zoom-label">Zoomniv&aring;: <strong id="visibleZoomLabel">5</strong></span>
+                      <button id="zoomInBtn2" class="map-zoom-btn" type="button" aria-label="Zooma in">+</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section id="kontakt" class="contact">
         <div class="contact-inner">
@@ -236,8 +342,8 @@
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-brand">
-          <a href="#" class="brand footer-brand-link">Tripo Games</a>
-          <p>En spelupplevelse som förtrollar</p>
+          <a href="#" class="brand footer-brand-link">Dealett</a>
+          <p>TextTextTextTextText</p>
         </div>
         <div class="footer-contact">
           <p class="footer-contact-title">Kontakt</p>

@@ -99,3 +99,60 @@ if (header || hero) {
 
   updateOnScroll();
 }
+
+const coverageApp = document.querySelector('#coverageApp');
+
+if (coverageApp) {
+  coverageApp.querySelectorAll('.operator-card').forEach((operatorButton) => {
+    operatorButton.addEventListener('click', () => {
+      coverageApp.querySelectorAll('.operator-card').forEach((button) => {
+        button.classList.remove('is-active');
+      });
+
+      operatorButton.classList.add('is-active');
+    });
+  });
+
+  coverageApp.querySelectorAll('.coverage-filter').forEach((filterButton) => {
+    filterButton.addEventListener('click', () => {
+      filterButton.classList.toggle('is-active');
+    });
+  });
+
+  const zoomLabel = coverageApp.querySelector('#visibleZoomLabel');
+  let mapZoom = zoomLabel ? Number(zoomLabel.textContent) || 5 : 5;
+
+  const setMapZoom = (nextZoom) => {
+    mapZoom = Math.min(Math.max(nextZoom, 1), 12);
+
+    if (zoomLabel) {
+      zoomLabel.textContent = mapZoom;
+    }
+  };
+
+  coverageApp.querySelectorAll('#zoomInBtn, #zoomInBtn2').forEach((button) => {
+    button.addEventListener('click', () => setMapZoom(mapZoom + 1));
+  });
+
+  coverageApp.querySelectorAll('#zoomOutBtn, #zoomOutBtn2').forEach((button) => {
+    button.addEventListener('click', () => setMapZoom(mapZoom - 1));
+  });
+
+  const mapSearchInput = coverageApp.querySelector('#mapSearchInput');
+  const mapSearchButton = coverageApp.querySelector('#mapSearchBtn');
+
+  if (mapSearchButton && mapSearchInput) {
+    mapSearchButton.addEventListener('click', () => {
+      mapSearchInput.focus();
+    });
+  }
+
+  const mapCard = coverageApp.querySelector('.coverage-map-card');
+  const fullscreenButton = coverageApp.querySelector('#fullscreenMapBtn');
+
+  if (mapCard && fullscreenButton) {
+    fullscreenButton.addEventListener('click', () => {
+      mapCard.classList.toggle('is-fullscreen');
+    });
+  }
+}

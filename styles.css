@@ -255,13 +255,26 @@ img {
 }
 
 .hero {
+  --hero-shift: 0px;
   position: relative;
+  overflow: hidden;
   min-height: 800px;
-  background: url('./images/hero.png') no-repeat center bottom / cover;
+  background: var(--bg);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: -4%;
+  background: url('./images/hero1.png') no-repeat center bottom / cover;
+  transform: translateX(var(--hero-shift)) scale(1.08);
+  transform-origin: center bottom;
+  will-change: transform;
 }
 
 .hero-content {
   position: relative;
+  z-index: 1;
   max-width: 970px;
   padding: 108px 99px 40px 99px;
 }
@@ -386,14 +399,22 @@ img {
 
 .deployment-card {
   --provider-accent: var(--accent);
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 520px;
   border: 1px solid rgba(39, 36, 67, 0.08);
+  border-top: 4px solid var(--provider-accent);
   border-radius: 14px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 14px 34px rgba(39, 36, 67, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.deployment-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 28px 56px rgba(39, 36, 67, 0.18);
 }
 
 .provider-card__media {
@@ -473,8 +494,8 @@ img {
 
 .provider-card__heading p {
   margin: 8px 0 0;
-  font-size: 16px;
-  color: #17142b;
+  font-size: 15px;
+  color: rgba(23, 20, 43, 0.55);
 }
 
 .provider-features {
@@ -489,7 +510,7 @@ img {
 
 .provider-features li {
   display: grid;
-  grid-template-columns: 34px 1fr;
+  grid-template-columns: 42px 1fr;
   align-items: center;
   gap: 8px;
 }
@@ -498,16 +519,21 @@ img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 24px;
-  color: var(--provider-accent);
-  font-size: 13px;
+  min-width: 36px;
+  height: 26px;
+  padding: 0 5px;
+  background: var(--provider-accent);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.02em;
   line-height: 1;
 }
 
 .provider-features li:first-child .provider-feature-icon {
-  font-size: 24px;
+  font-size: 15px;
+  letter-spacing: 0;
 }
 
 .provider-gift {
@@ -516,9 +542,10 @@ img {
   justify-content: center;
   gap: 14px;
   margin-top: auto;
-  padding: 15px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(218, 57, 43, 0.1), rgba(218, 57, 43, 0.04));
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(39, 36, 67, 0.04);
+  border: 1px solid rgba(39, 36, 67, 0.1);
   color: var(--provider-accent);
 }
 
@@ -529,44 +556,32 @@ img {
 
 .provider-gift strong {
   font-family: 'Roboto', sans-serif;
-  font-size: 27px;
+  font-size: 34px;
+  font-weight: 700;
   line-height: 1;
 }
 
 .provider-gift div span {
-  margin-top: 5px;
-  font-size: 15px;
+  margin-top: 4px;
+  font-size: 12px;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
 }
 
 .gift-icon {
-  position: relative;
-  width: 33px;
-  height: 31px;
-  border: 3px solid currentColor;
-  border-radius: 5px;
-}
-
-.gift-icon::before,
-.gift-icon::after {
-  content: '';
-  position: absolute;
-  background: currentColor;
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .gift-icon::before {
-  top: -3px;
-  left: 50%;
-  width: 3px;
-  height: 31px;
-  transform: translateX(-50%);
+  content: "🎁";
 }
 
 .gift-icon::after {
-  top: 8px;
-  left: -3px;
-  right: -3px;
-  height: 3px;
+  display: none;
 }
 
 .provider-button {
@@ -587,7 +602,7 @@ img {
 
 .provider-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(218, 57, 43, 0.22);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
 }
 
 .provider-button span {
@@ -595,32 +610,30 @@ img {
   line-height: 1;
 }
 
+.provider-card--telia { --provider-accent: #6E2380; }
+.provider-card--halebop { --provider-accent: #C8175C; }
+.provider-card--telenor { --provider-accent: #00437E; }
+.provider-card--tre { --provider-accent: #E65C00; }
+.provider-card--tele2 { --provider-accent: #003A6E; }
+
 .provider-card--telia .provider-card__media {
-  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.94), rgba(218, 57, 43, 0.12)), radial-gradient(circle at 78% 18%, rgba(164, 0, 221, 0.18), transparent 34%);
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(110, 35, 128, 0.1));
 }
 
 .provider-card--halebop .provider-card__media {
-  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.95), rgba(218, 57, 43, 0.13)), radial-gradient(circle at 20% 20%, rgba(184, 25, 122, 0.18), transparent 34%);
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(200, 23, 92, 0.1));
 }
 
 .provider-card--telenor .provider-card__media {
-  background-image: linear-gradient(135deg, rgba(218, 57, 43, 0.16), rgba(15, 95, 168, 0.14));
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.88), rgba(0, 67, 126, 0.14));
 }
 
 .provider-card--tre .provider-card__media {
-  background-image: linear-gradient(135deg, rgba(218, 57, 43, 0.16), rgba(252, 255, 114, 0.08));
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(230, 92, 0, 0.1));
 }
 
 .provider-card--tele2 .provider-card__media {
-  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.96), rgba(218, 57, 43, 0.1)), radial-gradient(circle at 78% 22%, rgba(0, 112, 130, 0.16), transparent 34%);
-}
-
-.provider-card--telia,
-.provider-card--halebop,
-.provider-card--telenor,
-.provider-card--tre,
-.provider-card--tele2 {
-  --provider-accent: var(--accent);
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(0, 58, 110, 0.1));
 }
 
 .games {

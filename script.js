@@ -1,4 +1,5 @@
 const header = document.querySelector('.site-header');
+const hero = document.querySelector('.hero');
 const dropdowns = document.querySelectorAll('.nav-item--dropdown');
 
 dropdowns.forEach((dropdown) => {
@@ -58,17 +59,27 @@ document.querySelectorAll('.nav-menu a[href]').forEach((link) => {
   }
 });
 
-if (header) {
+if (header || hero) {
   let lastScrollY = window.scrollY;
   let ticking = false;
 
-  const updateHeader = () => {
+  const updateOnScroll = () => {
     const nextScrollY = window.scrollY;
 
-    if (nextScrollY <= 0 || nextScrollY < lastScrollY) {
-      header.classList.remove('is-hidden');
-    } else if (nextScrollY > lastScrollY && nextScrollY > 80) {
-      header.classList.add('is-hidden');
+    if (header) {
+      if (nextScrollY <= 0 || nextScrollY < lastScrollY) {
+        header.classList.remove('is-hidden');
+      } else if (nextScrollY > lastScrollY && nextScrollY > 80) {
+        header.classList.add('is-hidden');
+      }
+    }
+
+    if (hero) {
+      const heroHeight = hero.offsetHeight || 1;
+      const progress = Math.min(Math.max(nextScrollY / heroHeight, 0), 1);
+      const shift = Math.round(progress * -90);
+
+      hero.style.setProperty('--hero-shift', `${shift}px`);
     }
 
     lastScrollY = Math.max(nextScrollY, 0);
@@ -79,10 +90,12 @@ if (header) {
     'scroll',
     () => {
       if (!ticking) {
-        window.requestAnimationFrame(updateHeader);
+        window.requestAnimationFrame(updateOnScroll);
         ticking = true;
       }
     },
     { passive: true }
   );
+
+  updateOnScroll();
 }

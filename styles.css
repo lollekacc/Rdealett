@@ -256,6 +256,9 @@ img {
 
 .hero {
   --hero-shift: 0px;
+  --hero-scale: 1.06;
+  --hero-position-x: 50%;
+  --hero-position-y: 0%;
   position: relative;
   overflow: hidden;
   min-height: 800px;
@@ -266,9 +269,9 @@ img {
   content: '';
   position: absolute;
   inset: -4%;
-  background: url('./images/hero-wide.png') no-repeat center top / cover;
-  transform: translateX(var(--hero-shift)) scale(1.06);
-  transform-origin: center top;
+  background: url('./images/hero-wide.png') no-repeat var(--hero-position-x) var(--hero-position-y) / cover;
+  transform: translateX(var(--hero-shift)) scale(var(--hero-scale));
+  transform-origin: var(--hero-position-x) var(--hero-position-y);
   will-change: transform;
 }
 
@@ -1533,6 +1536,12 @@ textarea {
     padding: 108px 40px 40px;
   }
 
+  .hero {
+    --hero-scale: 1.04;
+    --hero-position-x: 62%;
+    min-height: 720px;
+  }
+
   .section-space,
   .deployment-cards,
   .games,
@@ -1612,6 +1621,12 @@ textarea {
   .hero-content {
     padding: 92px 24px 32px;
     text-align: center;
+  }
+
+  .hero {
+    --hero-scale: 1.02;
+    --hero-position-x: 66%;
+    min-height: 680px;
   }
 
   .hero h1 {

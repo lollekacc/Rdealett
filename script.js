@@ -77,7 +77,8 @@ if (header || hero) {
     if (hero) {
       const heroHeight = hero.offsetHeight || 1;
       const progress = Math.min(Math.max(nextScrollY / heroHeight, 0), 1);
-      const shift = Math.round(progress * -90);
+      const maxShift = window.matchMedia('(max-width: 680px)').matches ? 32 : 90;
+      const shift = Math.round(progress * -maxShift);
 
       hero.style.setProperty('--hero-shift', `${shift}px`);
     }

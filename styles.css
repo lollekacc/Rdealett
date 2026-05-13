@@ -87,8 +87,8 @@ img {
 }
 
 .header-inner {
-  max-width: var(--page-width);
-  width: min(100%, var(--page-width));
+  max-width: 1700px;
+  width: min(100%, 1700px);
   margin: 0 auto;
   padding: 0 99px;
   display: flex;

@@ -521,7 +521,7 @@ img {
 
 .coverage-main {
   padding-top: 35px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), transparent 300px);
+  background: #f5eeec;
 }
 
 .coverage-main .page-shell {

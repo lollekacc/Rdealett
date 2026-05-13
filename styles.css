@@ -431,7 +431,16 @@ img {
 }
 
 .gift-card-section {
+  position: relative;
   padding-top: 30px;
+  background:
+    linear-gradient(180deg, rgba(246, 244, 240, 0.35), rgba(246, 244, 240, 0.78)),
+    url('./images/presentkort.png') center / cover no-repeat;
+}
+
+.gift-card-section .page-shell {
+  position: relative;
+  z-index: 1;
 }
 
 .gift-card-copy {

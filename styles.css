@@ -432,6 +432,7 @@ img {
 
 .coverage-main {
   padding-top: 35px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), transparent 300px);
 }
 
 .coverage-main .page-shell {
@@ -470,7 +471,7 @@ img {
 .coverage-grid {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
-  gap: 28px;
+  gap: 32px;
   align-items: start;
 }
 
@@ -480,9 +481,10 @@ img {
 }
 
 .coverage-card {
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 18px 40px rgba(39, 36, 67, 0.08);
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(39, 36, 67, 0.08);
+  box-shadow: 0 8px 28px rgba(39, 36, 67, 0.08);
 }
 
 .coverage-card--sidebar {
@@ -495,6 +497,8 @@ img {
   justify-content: space-between;
   gap: 14px;
   margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(39, 36, 67, 0.07);
 }
 
 .coverage-section-label {
@@ -523,18 +527,24 @@ img {
   width: 100%;
   min-height: 62px;
   padding: 11px 14px;
-  border: none;
+  border: 1.5px solid rgba(39, 36, 67, 0.08);
   border-radius: 10px;
-  background: rgba(246, 244, 240, 0.88);
+  background: rgba(246, 244, 240, 0.6);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.operator-card:hover,
-.operator-card.is-active {
-  transform: translateY(-1px);
+.operator-card:hover {
+  transform: translateY(-2px);
   background: #fff;
-  box-shadow: 0 12px 24px rgba(218, 57, 43, 0.14);
+  border-color: rgba(39, 36, 67, 0.15);
+  box-shadow: 0 8px 20px rgba(39, 36, 67, 0.1);
+}
+
+.operator-card.is-active {
+  background: rgba(218, 57, 43, 0.04);
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(218, 57, 43, 0.15);
 }
 
 .operator-card__logo {
@@ -558,20 +568,29 @@ img {
 
 .coverage-filter {
   min-height: 44px;
-  border: none;
+  border: 1.5px solid rgba(39, 36, 67, 0.09);
   border-radius: 10px;
-  background: rgba(246, 244, 240, 0.9);
+  background: rgba(246, 244, 240, 0.7);
   color: var(--text);
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.coverage-filter:hover,
+.coverage-filter:hover {
+  transform: translateY(-1px);
+  background: rgba(218, 57, 43, 0.07);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .coverage-filter.is-active {
   transform: translateY(-1px);
   background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
+  box-shadow: 0 4px 14px rgba(218, 57, 43, 0.22);
 }
 
 .sidebar-info-note {
@@ -611,9 +630,10 @@ img {
   position: relative;
   overflow: hidden;
   min-height: 620px;
-  border-radius: 14px;
+  border-radius: 20px;
   background: #e7efe9;
-  box-shadow: 0 25px 55px rgba(39, 36, 67, 0.12);
+  border: 1px solid rgba(39, 36, 67, 0.07);
+  box-shadow: 0 30px 70px rgba(39, 36, 67, 0.14);
 }
 
 .coverage-map {

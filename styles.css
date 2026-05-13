@@ -266,9 +266,9 @@ img {
   content: '';
   position: absolute;
   inset: -4%;
-  background: url('./images/hero1.png') no-repeat center top / cover;
-  transform: translateX(var(--hero-shift)) scale(1.08);
-  transform-origin: 1850px 1000px;
+  background: url('./images/hero-wide.png') no-repeat center top / cover;
+  transform: translateX(var(--hero-shift)) scale(1.06);
+  transform-origin: center top;
   will-change: transform;
 }
 

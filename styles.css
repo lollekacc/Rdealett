@@ -254,7 +254,7 @@ img {
 
 .hero {
   position: relative;
-  min-height: 560px;
+  min-height: 800px;
   background: url('https://static.wixstatic.com/media/c837a6_aa803204cef842e0b9ad7d820e64f77c~mv2.jpg/v1/fill/w_1501,h_800,al_b,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/c837a6_aa803204cef842e0b9ad7d820e64f77c~mv2.jpg') no-repeat center bottom / cover;
 }
 

@@ -2305,8 +2305,55 @@ textarea {
 }
 
 .offer-card__head {
+  position: relative;
+  min-height: 78px;
+  overflow: hidden;
+  border-radius: 10px;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #f7f4ef;
+  background-position: center;
+  background-size: cover;
+}
+
+.offer-card__head::before,
+.offer-card__head::after {
+  content: '';
+  position: absolute;
+  inset: auto -12% -38% -12%;
+  z-index: 1;
+  height: 62px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  transform: rotate(-5deg);
+}
+
+.offer-card__head::after {
+  inset: 14px -18% auto -18%;
+  height: 50px;
+  opacity: 0.18;
+  transform: rotate(8deg);
+}
+
+.offer-card.provider-card--telia .offer-card__head {
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(110, 35, 128, 0.1));
+}
+
+.offer-card.provider-card--halebop .offer-card__head {
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(200, 23, 92, 0.1));
+}
+
+.offer-card.provider-card--telenor .offer-card__head {
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.88), rgba(0, 67, 126, 0.14));
+}
+
+.offer-card.provider-card--tre .offer-card__head {
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(230, 92, 0, 0.1));
+}
+
+.offer-card.provider-card--tele2 .offer-card__head {
+  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(0, 58, 110, 0.1));
 }
 
 .offer-card__plan-title {
@@ -2317,9 +2364,22 @@ textarea {
 }
 
 .offer-card__logo {
-  width: 92px;
-  height: 42px;
+  position: relative;
+  z-index: 2;
+  width: 88%;
+  max-width: 190px;
+  height: 64px;
   object-fit: contain;
+}
+
+.offer-card__logo--telenor,
+.offer-card__logo--tre {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
 }
 
 .offer-card__desc {

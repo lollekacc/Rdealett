@@ -626,7 +626,12 @@ function createIndexQuiz() {
 
   function buildRecommendationCard(plan, index) {
     const article = document.createElement("article");
-    article.className = index === 0 ? "offer-card offer-card--top" : "offer-card";
+    const providerClass = getProviderClass(plan.operator);
+    article.className = [
+      "offer-card",
+      index === 0 ? "offer-card--top" : "",
+      providerClass ? `provider-card--${providerClass}` : ""
+    ].filter(Boolean).join(" ");
 
     const topLabel = index === 0 ? "Bäst match" : `Alternativ ${index + 1}`;
     const isMulti = state.persons && state.persons > 1;
@@ -641,7 +646,7 @@ function createIndexQuiz() {
       `    <span class="offer-card__label">${topLabel}</span>`,
       '  </div>',
       '  <div class="offer-card__head">',
-      `    <img src="${plan.logo}" alt="${plan.operator}" class="offer-card__logo" />`,
+      `    <img src="${plan.logo}" alt="${plan.operator}" class="offer-card__logo ${providerClass ? `offer-card__logo--${providerClass}` : ""}" />`,
       '  </div>',
       plan.text ? `  <p class="offer-card__desc">${plan.text}</p>` : '',
       '  <div class="offer-card__stats">',
@@ -666,6 +671,16 @@ function createIndexQuiz() {
     ].join("\n");
 
     return article;
+  }
+
+  function getProviderClass(operator) {
+    return String(operator || "")
+      .toLowerCase()
+      .replace("å", "a")
+      .replace("ä", "a")
+      .replace("ö", "o")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
   }
 
   return { init };

@@ -1826,13 +1826,17 @@ textarea {
   position: relative;
   z-index: 2;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   width: 100%;
   min-height: var(--quiz-card-height, 620px);
   margin: 0;
 }
 
 #quiz-steps-wrapper {
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 0;
+  height: var(--quiz-card-height, 620px);
   opacity: 1;
   transition: opacity 0.28s ease, transform 0.28s ease;
 }
@@ -1844,16 +1848,21 @@ textarea {
 
 #quiz-card-stack {
   position: relative;
+  width: 100%;
   height: var(--quiz-card-height, 620px);
   overflow: hidden;
 }
 
 .quiz-step-card {
   display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .quiz-step-card.active-step {
-  display: block;
+  display: flex;
   animation: quizFadeIn 0.28s ease both;
 }
 
@@ -2482,6 +2491,7 @@ textarea {
 
   .hero-quiz-mount {
     width: min(calc(100% - 48px), 840px);
+    height: var(--quiz-card-height, 620px);
     min-height: 0;
     margin: 0 auto 48px;
   }
@@ -2528,6 +2538,7 @@ textarea {
 
   .hero-quiz-mount {
     width: calc(100% - 32px);
+    height: var(--quiz-card-height, 620px);
   }
 
   .quiz-card {

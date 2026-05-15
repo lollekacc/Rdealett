@@ -88,7 +88,20 @@
   position: relative;
 }
 
-
+.family-page .offer-card-logo::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 12px 11px, var(--family-green) 0 6px, transparent 7px),
+    radial-gradient(circle at 28px 11px, var(--accent) 0 6px, transparent 7px),
+    rgba(255, 255, 255, 0.82);
+  box-shadow: 0 7px 16px rgba(39, 36, 67, 0.12);
+}
 
 .family-page .offer-card p {
   color: rgba(39, 36, 67, 0.74);

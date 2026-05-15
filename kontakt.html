@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kontakt | Dealett</title>
+    <title>Kundservice | Dealett</title>
+    <meta
+      name="description"
+      content="Kundservice hos Dealett. F&aring; hj&auml;lp med fr&aring;gor om abonnemang, erbjudanden och hur tj&auml;nsten fungerar."
+    />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="./assets/kontakt.css" />
   </head>
-  <body>
+  <body class="support-page">
     <header class="site-header">
       <div class="header-inner">
         <a href="index.html" class="brand">Dealett</a>
@@ -29,7 +35,202 @@
       </div>
     </header>
 
-    <main class="blank-page"></main>
+    <main class="support-main">
+      <section class="support-hero" data-header-anchor-target>
+        <img
+          src="images/hero-device.jpg"
+          alt="Kundservice f&ouml;r mobil och bredband"
+          class="support-hero-image"
+          fetchpriority="high"
+          decoding="async"
+        />
+
+        <div class="support-hero-inner">
+          <div class="support-hero-copy">
+            <span class="support-eyebrow">Kundservice</span>
+            <h1>Vi hj&auml;lper dig vidare utan kr&aring;ngel</h1>
+            <p>
+              H&auml;r hittar du svar p&aring; vanliga fr&aring;gor och ett enklare s&auml;tt att kontakta oss
+              om du beh&ouml;ver personlig hj&auml;lp.
+            </p>
+
+            <ul class="support-hero-tags" aria-label="Supportf&ouml;rdelar">
+              <li><i class="fa-solid fa-bolt"></i><span>Snabb hj&auml;lp</span></li>
+              <li><i class="fa-solid fa-message"></i><span>Tydliga svar</span></li>
+              <li><i class="fa-solid fa-mobile-screen"></i><span>Mobil &amp; bredband</span></li>
+            </ul>
+          </div>
+
+          <aside class="support-hero-panel" aria-label="Direktv&auml;g">
+            <article class="support-panel-card">
+              <span>Direktv&auml;g</span>
+              <strong>Testa Dealett-AI f&ouml;rst</strong>
+              <p>
+                F&ouml;r snabba fr&aring;gor om surf, pris, familjeuppl&auml;gg eller erbjudanden kan
+                du b&ouml;rja med chatten.
+              </p>
+            </article>
+
+            <div class="support-panel-mini">
+              <div>
+                <span>Vanligt &auml;mne</span>
+                <strong>Abonnemangsval</strong>
+              </div>
+              <div>
+                <span>Typ av hj&auml;lp</span>
+                <strong>Guide &amp; kontakt</strong>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="support-section">
+        <div class="support-shell">
+          <div class="support-head">
+            <span class="support-eyebrow">Vanliga fr&aring;gor</span>
+            <h2>Vanliga fr&aring;gor</h2>
+            <p>N&aring;gra snabba svar p&aring; det vanligaste kring Dealett och hur du hittar r&auml;tt uppl&auml;gg.</p>
+          </div>
+
+          <div class="support-faq-grid">
+            <details class="support-faq-item" open>
+              <summary>
+                <span class="support-faq-left"><i class="fa-solid fa-signal"></i> Hur v&auml;ljer jag r&auml;tt abonnemang?</span>
+                <i class="fa-solid fa-plus support-faq-plus"></i>
+              </summary>
+              <p>Anv&auml;nd v&aring;ra guider och quiz f&ouml;r att j&auml;mf&ouml;ra surf, pris, t&auml;ckning och behov p&aring; ett enklare s&auml;tt.</p>
+            </details>
+
+            <details class="support-faq-item">
+              <summary>
+                <span class="support-faq-left"><i class="fa-solid fa-user-group"></i> Kan jag l&auml;gga till familjemedlemmar i efterhand?</span>
+                <i class="fa-solid fa-plus support-faq-plus"></i>
+              </summary>
+              <p>Ja, m&aring;nga operat&ouml;rer erbjuder flexibla familjel&ouml;sningar d&auml;r du kan ut&ouml;ka senare beroende p&aring; deras villkor.</p>
+            </details>
+
+            <details class="support-faq-item">
+              <summary>
+                <span class="support-faq-left"><i class="fa-solid fa-gift"></i> Hur fungerar kampanjer och erbjudanden?</span>
+                <i class="fa-solid fa-plus support-faq-plus"></i>
+              </summary>
+              <p>Kampanjer varierar &ouml;ver tid och kan inneh&aring;lla till exempel rabatter, bonusar, presentkort eller extra surf.</p>
+            </details>
+
+            <details class="support-faq-item">
+              <summary>
+                <span class="support-faq-left"><i class="fa-solid fa-shield-halved"></i> &Auml;r mina uppgifter s&auml;kra hos er?</span>
+                <i class="fa-solid fa-plus support-faq-plus"></i>
+              </summary>
+              <p>Vi str&auml;var efter att hantera information ansvarsfullt och leda dig vidare p&aring; ett tryggt s&auml;tt n&auml;r du v&auml;ljer ett erbjudande.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="support-section support-contact-section">
+        <div class="support-shell">
+          <div class="support-contact-wrap">
+            <div class="support-contact-info">
+              <span class="support-eyebrow">Kontakt</span>
+              <h2>Skicka ett meddelande</h2>
+              <p>
+                Har du fr&aring;gor om abonnemang, bredband eller erbjudanden? Beskriv kort vad
+                du beh&ouml;ver hj&auml;lp med s&aring; blir det l&auml;ttare att guida dig r&auml;tt.
+              </p>
+
+              <div class="support-info-list">
+                <article>
+                  <i class="fa-solid fa-comments"></i>
+                  <div>
+                    <strong>Snabbt f&ouml;rst</strong>
+                    <p>B&ouml;rja g&auml;rna i chatten f&ouml;r enklare fr&aring;gor.</p>
+                  </div>
+                </article>
+
+                <article>
+                  <i class="fa-solid fa-circle-info"></i>
+                  <div>
+                    <strong>Ju tydligare desto b&auml;ttre</strong>
+                    <p>Skriv g&auml;rna vilket abonnemang eller behov det g&auml;ller.</p>
+                  </div>
+                </article>
+
+                <article>
+                  <i class="fa-solid fa-layer-group"></i>
+                  <div>
+                    <strong>R&auml;tt uppl&auml;gg</strong>
+                    <p>Vi hj&auml;lper dig j&auml;mf&ouml;ra olika alternativ enklare.</p>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <form class="support-form" action="mailto:Info@minsida.com" method="post" enctype="text/plain">
+              <div class="support-field">
+                <label for="name">Namn</label>
+                <input id="name" name="name" type="text" placeholder="Ditt namn" />
+              </div>
+
+              <div class="support-field">
+                <label for="email">E-post</label>
+                <input id="email" name="email" type="email" placeholder="namn@exempel.se" />
+              </div>
+
+              <div class="support-field">
+                <label for="topic">&Auml;mne</label>
+                <select id="topic" name="topic">
+                  <option value="">V&auml;lj &auml;mne</option>
+                  <option value="abonnemang">Abonnemang</option>
+                  <option value="bredband">Bredband</option>
+                  <option value="erbjudande">Erbjudande</option>
+                  <option value="ovrigt">&Ouml;vrigt</option>
+                </select>
+              </div>
+
+              <div class="support-field">
+                <label for="message">Meddelande</label>
+                <textarea id="message" name="message" rows="6" placeholder="Skriv ditt meddelande h&auml;r..."></textarea>
+              </div>
+
+              <button type="submit" class="support-btn support-btn-primary">Skicka meddelande</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="support-cta">
+        <div class="support-shell support-cta-box">
+          <div>
+            <span class="support-eyebrow">N&auml;sta steg</span>
+            <h2>Vill du j&auml;mf&ouml;ra direkt?</h2>
+            <p>G&aring; vidare och hitta ett abonnemang som passar dig b&auml;ttre.</p>
+          </div>
+
+          <div class="support-cta-actions">
+            <a href="mobilabonnemang.html" class="support-btn support-btn-light">J&auml;mf&ouml;r abonnemang</a>
+            <a href="index.html" class="support-btn support-btn-ghost">Till startsidan</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a href="#" class="brand footer-brand-link">Dealett</a>
+          <p>TextTextTextTextText</p>
+        </div>
+        <div class="footer-contact">
+          <p class="footer-contact-title">Kontakt</p>
+          <a href="mailto:Info@minsida.com">Info@minsida.com</a>
+          <p>Tel: 08-123 45 67</p>
+          <p>Hamngatan 20</p>
+          <p>111 47 Stockholm</p>
+        </div>
+      </div>
+    </footer>
 
     <script src="script.js"></script>
   </body>

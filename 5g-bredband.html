@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>5G-Bredband | Dealett</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./assets/5g-bredband.css" />
   </head>
-  <body>
+  <body class="bredband-page">
     <header class="site-header">
       <div class="header-inner">
         <a href="index.html" class="brand">Dealett</a>
@@ -29,8 +32,241 @@
       </div>
     </header>
 
-    <main class="blank-page"></main>
+    <main class="bredband-main">
+      <section class="bredband-hero" data-header-anchor-target>
+        <img
+          src="images/hero-device.jpg"
+          alt="Hem med snabbt tr&aring;dl&ouml;st bredband"
+          class="bredband-hero-image"
+          fetchpriority="high"
+          decoding="async"
+        />
 
+        <div class="bredband-hero-inner">
+          <div class="bredband-hero-copy">
+            <span class="bredband-kicker">5G-Bredband · J&auml;mf&ouml;r smartare</span>
+            <h1>Snabbt 5G-bredband f&ouml;r hela hemmet</h1>
+            <p>
+              J&auml;mf&ouml;r hastighet, pris, bindningstid och tv-paket p&aring; ett st&auml;lle.
+              Helt tr&aring;dl&ouml;st, snabbt att komma ig&aring;ng och enkelt att v&auml;lja.
+            </p>
+
+            <div class="bredband-hero-actions">
+              <button id="openCoverageModal" class="bredband-primary-btn" type="button">
+                <i class="fa-solid fa-map-location-dot"></i>
+                Se t&auml;ckning
+              </button>
+              <a class="bredband-secondary-btn" href="#offersSection">
+                <i class="fa-solid fa-arrow-down"></i>
+                Visa erbjudanden
+              </a>
+            </div>
+
+            <ul class="bredband-trust-row" aria-label="F&ouml;rdelar">
+              <li><i class="fa-solid fa-wifi"></i><span>5G hemma</span></li>
+              <li><i class="fa-solid fa-bolt"></i><span>Snabb j&auml;mf&ouml;relse</span></li>
+              <li><i class="fa-solid fa-gift"></i><span>Presentkort</span></li>
+            </ul>
+          </div>
+
+          <form id="addressSearchForm" class="bredband-search-panel">
+            <div class="bredband-search-head">
+              <span>S&ouml;k adress</span>
+              <h2>Se vad som passar d&auml;r du bor</h2>
+              <p>Fyll i adress eller stad f&ouml;r att filtrera fram aktuella 5G-erbjudanden.</p>
+            </div>
+
+            <label class="bredband-input-wrap" for="addressInput">
+              <i class="fa-solid fa-location-dot"></i>
+              <input id="addressInput" type="text" placeholder="Ex. Storgatan 3, Stockholm" autocomplete="street-address" />
+            </label>
+
+            <button id="searchBtn" class="bredband-search-btn" type="submit">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              S&ouml;k bredband
+            </button>
+
+            <p id="searchMsg" class="bredband-search-msg" role="status"></p>
+          </form>
+        </div>
+      </section>
+
+      <section id="offersSection" class="bredband-results-section">
+        <div class="bredband-results-shell">
+          <div class="bredband-results-top">
+            <div>
+              <p class="section-label">Resultat</p>
+              <h2>Tillg&auml;ngliga 5G-bredband</h2>
+            </div>
+            <div id="resultsCount" class="bredband-results-count">0 erbjudanden</div>
+          </div>
+
+          <div id="filtersBar" class="bredband-filters">
+            <div class="bredband-filter-group">
+              <label for="techFilter">Teknik</label>
+              <select id="techFilter">
+                <option value="all">Alla tekniker</option>
+                <option value="5g">5G</option>
+                <option value="fiber">Fiber</option>
+              </select>
+            </div>
+
+            <div class="bredband-filter-group">
+              <label for="speedFilter">Hastighet</label>
+              <select id="speedFilter">
+                <option value="0">Alla hastigheter</option>
+                <option value="100">Minst 100 Mbit/s</option>
+                <option value="250">Minst 250 Mbit/s</option>
+                <option value="500">Minst 500 Mbit/s</option>
+                <option value="1000">1 Gbit/s</option>
+              </select>
+            </div>
+
+            <div class="bredband-filter-group">
+              <label for="sortSelect">Sortera</label>
+              <select id="sortSelect">
+                <option value="price">L&auml;gst pris</option>
+                <option value="speed">Snabbast</option>
+                <option value="value">B&auml;st v&auml;rde</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="offers" class="bredband-offers-grid" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <div id="stickyBar" class="bredband-sticky-bar hidden">
+      <div class="bredband-sticky-inner">
+        <div>
+          <p>Valt bredband</p>
+          <strong id="selectedPlanText">Inget valt &auml;nnu</strong>
+        </div>
+        <button id="continueBtn" class="bredband-primary-btn" type="button" disabled>
+          <i class="fa-solid fa-cart-shopping"></i>
+          L&auml;gg i varukorgen
+        </button>
+      </div>
+    </div>
+
+    <div id="channelsModal" class="bredband-modal hidden" aria-hidden="true">
+      <div class="bredband-modal-overlay" data-modal-close></div>
+      <section class="bredband-modal-card" role="dialog" aria-modal="true" aria-labelledby="channelsTitle">
+        <button id="closeChannelsModal" class="modal-close-btn" type="button" aria-label="St&auml;ng">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="bredband-modal-head">
+          <p class="section-label">TV-paket</p>
+          <h3 id="channelsTitle">Ing&aring;ende kanaler</h3>
+        </div>
+        <div id="channelsGrid" class="bredband-channels-grid"></div>
+      </section>
+    </div>
+
+    <div id="coverageModal" class="bredband-modal hidden" aria-hidden="true">
+      <div id="coverageOverlay" class="bredband-modal-overlay"></div>
+      <section class="coverage-modal-card" role="dialog" aria-modal="true" aria-labelledby="coverageTitle">
+        <button id="closeCoverageModal" class="modal-close-btn" type="button" aria-label="St&auml;ng">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="coverage-modal-body">
+          <aside class="coverage-modal-sidebar">
+            <p class="section-label">T&auml;ckningskarta</p>
+            <h2 id="coverageTitle">V&auml;lj operat&ouml;r och utforska kartan</h2>
+            <p class="coverage-modal-copy">
+              S&ouml;k p&aring; adress eller stad och se ett visuellt t&auml;ckningslager f&ouml;r varje operat&ouml;r.
+            </p>
+
+            <div class="coverage-operator-list" aria-label="Operat&ouml;rer">
+              <button class="coverage-operator is-active" data-operator="telia" type="button">
+                <img src="images/telia.png" alt="Telia" />
+              </button>
+              <button class="coverage-operator" data-operator="tele2" type="button">
+                <img src="images/tele2.png" alt="Tele2" />
+              </button>
+              <button class="coverage-operator" data-operator="telenor" type="button">
+                <img src="images/telenor.jpg" alt="Telenor" />
+              </button>
+              <button class="coverage-operator" data-operator="tre" type="button">
+                <img src="images/tre.jpg" alt="Tre" />
+              </button>
+            </div>
+
+            <div class="coverage-modal-actions">
+              <button id="resetViewBtn" class="coverage-soft-btn" type="button">Återst&auml;ll vy</button>
+              <button id="clearLayerBtn" class="coverage-soft-btn" type="button">Ta bort mark&ouml;r</button>
+            </div>
+          </aside>
+
+          <div class="coverage-map-panel">
+            <div class="map-ui">
+              <div class="map-search">
+                <button id="mapSearchBtn" class="map-search__icon" type="button" aria-label="S&ouml;k">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                <input id="mapSearchInput" type="text" placeholder="S&ouml;k adress eller stad" />
+              </div>
+
+              <div class="map-zoom">
+                <button id="zoomInBtn" type="button" aria-label="Zooma in">+</button>
+                <button id="zoomOutBtn" type="button" aria-label="Zooma ut">&minus;</button>
+              </div>
+            </div>
+
+            <div id="coverageLeafletMap" class="coverage-leaflet-map"></div>
+
+            <div class="coverage-legend">
+              <div><span class="legend-swatch legend-swatch--base"></span> Bakgrundskarta</div>
+              <div><span class="legend-swatch legend-swatch--overlay"></span> Aktivt t&auml;ckningslager</div>
+              <div><span class="legend-swatch legend-swatch--focus"></span> Vald operat&ouml;r</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="cartDrawer" class="cart-drawer hidden" aria-hidden="true">
+      <div id="cartOverlay" class="cart-drawer-overlay"></div>
+      <aside class="cart-drawer-panel" aria-label="Din varukorg">
+        <div class="cart-drawer-head">
+          <h2>Din varukorg</h2>
+          <button id="closeCart" class="cart-drawer-close" type="button" aria-label="St&auml;ng varukorg">&times;</button>
+        </div>
+
+        <div id="cartItems" class="cart-drawer-items"></div>
+
+        <div class="cart-drawer-footer">
+          <div id="summaryArea" class="cart-drawer-summary"></div>
+          <div class="cart-drawer-total-row">
+            <span>Totalt</span>
+            <strong id="totalPrice">0 kr/m&aring;n</strong>
+          </div>
+          <button class="adeala-btn full-btn" type="button">BankID-signering</button>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a href="#" class="brand footer-brand-link">Dealett</a>
+          <p>TextTextTextTextText</p>
+        </div>
+        <div class="footer-contact">
+          <p class="footer-contact-title">Kontakt</p>
+          <a href="mailto:Info@minsida.com">Info@minsida.com</a>
+          <p>Tel: 08-123 45 67</p>
+          <p>Hamngatan 20</p>
+          <p>111 47 Stockholm</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
+    <script src="./assets/cart.js"></script>
+    <script src="./assets/5g-bredband.js"></script>
   </body>
 </html>

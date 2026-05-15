@@ -1,0 +1,107 @@
+[
+  {
+    "id": "telia-5g-300",
+    "operator": "Telia",
+    "title": "Telia 5G Hemma 300",
+    "technology": "5g",
+    "speed": "5G Hemma 300",
+    "speedMbps": 300,
+    "price": 399,
+    "bindingMonths": 0,
+    "features": [
+      "Obegränsad datamängd",
+      "Router kan ingå",
+      "Stabil uppkoppling för streaming",
+      "Kom igång utan fiberinstallation"
+    ],
+    "tv": {
+      "channels": ["svt1", "svt2", "tv3", "tv4", "kanal5", "tv6", "sjuan", "tv8"]
+    }
+  },
+  {
+    "id": "tele2-5g-500",
+    "operator": "Tele2",
+    "title": "Tele2 5G Bredband 500",
+    "technology": "5g",
+    "speed": "5G Bredband 500",
+    "speedMbps": 500,
+    "price": 429,
+    "bindingMonths": 0,
+    "features": [
+      "Obegränsad surf",
+      "Passar större hushåll",
+      "WiFi-router till hemmet",
+      "Flexibelt bredband utan grävning"
+    ],
+    "tv": {
+      "channels": ["svt1", "svt2", "tv3", "tv4", "kanal5", "tv6", "kanal9", "tv10"]
+    }
+  },
+  {
+    "id": "tre-5g-1000",
+    "operator": "Tre",
+    "title": "Tre 5G Heminternet Max",
+    "technology": "5g",
+    "speed": "5G Heminternet Max",
+    "speedMbps": 1000,
+    "price": 449,
+    "bindingMonths": 24,
+    "features": [
+      "Upp till 1 Gbit/s",
+      "Obegränsad datamängd",
+      "För gaming och streaming",
+      "5G-router för hemmet"
+    ]
+  },
+  {
+    "id": "telenor-5g-250",
+    "operator": "Telenor",
+    "title": "Telenor 5G Hemma 250",
+    "technology": "5g",
+    "speed": "5G Hemma 250",
+    "speedMbps": 250,
+    "price": 349,
+    "bindingMonths": 0,
+    "features": [
+      "Obegränsad surf hemma",
+      "Snabb leverans",
+      "Enkel installation",
+      "Support ingår"
+    ]
+  },
+  {
+    "id": "telia-fiber-1000",
+    "operator": "Telia",
+    "title": "Telia Fiber 1000",
+    "technology": "fiber",
+    "speed": "Fiber 1000",
+    "speedMbps": 1000,
+    "price": 549,
+    "bindingMonths": 12,
+    "features": [
+      "Fiberanslutning",
+      "Mycket stabil hastighet",
+      "Passar många enheter",
+      "Kan kombineras med TV-paket"
+    ],
+    "tv": {
+      "channels": ["svt1", "svt2", "tv4", "kanal5", "tv6", "sjuan", "tv8", "kanal9"]
+    }
+  },
+  {
+    "id": "tele2-fiber-500",
+    "operator": "Tele2",
+    "title": "Tele2 Fiber 500",
+    "technology": "fiber",
+    "speed": "Fiber 500",
+    "speedMbps": 500,
+    "price": 499,
+    "bindingMonths": 12,
+    "features": [
+      "Fiber till bostaden",
+      "Bra för streaming i flera rum",
+      "Stabil anslutning",
+      "Support ingår"
+    ]
+  }
+]

@@ -629,7 +629,6 @@ function createIndexQuiz() {
     article.className = index === 0 ? "offer-card offer-card--top" : "offer-card";
 
     const topLabel = index === 0 ? "Bäst match" : `Alternativ ${index + 1}`;
-    const currentOperator = state.operators.includes(plan.operator) ? "Nuvarande operatör" : "Nytt alternativ";
     const isMulti = state.persons && state.persons > 1;
     const priceMain = isMulti ? `${plan.pricePerPerson} kr/p` : `${plan.finalPrice} kr/mån`;
     const priceSub  = isMulti ? `${plan.finalPrice} kr totalt` : null;
@@ -640,13 +639,8 @@ function createIndexQuiz() {
       '<div class="offer-card__inner">',
       '  <div class="offer-card__top">',
       `    <span class="offer-card__label">${topLabel}</span>`,
-      `    <span class="offer-card__type">${currentOperator}</span>`,
       '  </div>',
       '  <div class="offer-card__head">',
-      '    <div>',
-      `      <h4 class="offer-card__name">${plan.operator}</h4>`,
-      `      <p class="offer-card__plan-title">${plan.title}</p>`,
-      '    </div>',
       `    <img src="${plan.logo}" alt="${plan.operator}" class="offer-card__logo" />`,
       '  </div>',
       plan.text ? `  <p class="offer-card__desc">${plan.text}</p>` : '',

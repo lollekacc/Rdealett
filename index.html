@@ -73,13 +73,8 @@
                     </div>
 
                     <div class="quiz-card-body mx-auto w-full max-w-3xl text-center">
-                      <span class="quiz-pill inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                        <i class="fa-solid fa-users text-emerald-600"></i>
-                        Hushåll
-                      </span>
-
                       <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
-                        Hur många personer?
+                        Hur många abonnemang vill ni ha?
                       </p>
 
                       <div class="quiz-person-grid mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -87,7 +82,19 @@
                         <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="2" type="button">2</button>
                         <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="3" type="button">3</button>
                         <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="4" type="button">4</button>
-                        <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md col-span-2 sm:col-span-1" data-persons="5" type="button">5+</button>
+                        <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="5" type="button">5</button>
+                      </div>
+
+                      <button id="person-more-toggle" class="quiz-more-toggle" type="button" data-person-toggle aria-expanded="false" aria-controls="person-extra-options">
+                        Visa 6-10
+                      </button>
+
+                      <div id="person-extra-options" class="quiz-person-grid quiz-person-grid--extra hidden">
+                        <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="6" type="button">6</button>
+                        <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="7" type="button">7</button>
+                        <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="8" type="button">8</button>
+                        <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="9" type="button">9</button>
+                        <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="10" type="button">10</button>
                       </div>
                     </div>
                   </div>
@@ -117,23 +124,53 @@
                     </div>
 
                     <div class="quiz-card-body mx-auto w-full max-w-5xl text-center">
-                      <span class="quiz-pill inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                        <i class="fa-solid fa-tower-cell text-emerald-600"></i>
-                        Operatör
-                      </span>
-
                       <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
-                        Nuvarande operatör?
+                        Har någon av er redan abonnemang idag?
                       </p>
 
-                      <p class="quiz-help mt-3 text-base text-slate-600">
-                        Välj för varje person.
+                      <div id="customer-operator-grid" class="customer-operator-grid">
+                        <button type="button" class="quiz-option customer-operator-option" data-current-operator="Tele2">
+                          <img src="images/tele2.png" class="partner-logo" alt="Tele2" />
+                        </button>
+                        <button type="button" class="quiz-option customer-operator-option" data-current-operator="Telia">
+                          <img src="images/telia.png" class="partner-logo" alt="Telia" />
+                        </button>
+                        <button type="button" class="quiz-option customer-operator-option" data-current-operator="Telenor">
+                          <img src="images/telenor.jpg" class="partner-logo" alt="Telenor" />
+                        </button>
+                        <button type="button" class="quiz-option customer-operator-option" data-current-operator="Tre">
+                          <img src="images/tre.jpg" class="partner-logo" alt="Tre" />
+                        </button>
+                        <button type="button" class="quiz-option customer-operator-option" data-current-operator="Halebop">
+                          <img src="images/halebop.webp" class="partner-logo" alt="Halebop" />
+                        </button>
+                        <button type="button" class="quiz-option customer-operator-option customer-operator-option--text" data-current-operator="Other">
+                          Annan
+                        </button>
+                      </div>
+
+                      <p id="customer-status-question" class="customer-status-question">
+                        Har någon av er redan abonnemang hos vald operatör idag?
                       </p>
 
-                      <div
-                        id="operator-per-person"
-                        class="operator-per-person mt-8 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]"
-                      ></div>
+                      <div class="customer-status-grid">
+                        <button type="button" class="quiz-option customer-status-option" data-customer-status="none">
+                          Nej, alla blir nya kunder
+                        </button>
+                        <button type="button" class="quiz-option customer-status-option" data-customer-status="partial">
+                          Ja, vissa har redan abonnemang
+                        </button>
+                        <button type="button" class="quiz-option customer-status-option" data-customer-status="all">
+                          Ja, alla har redan abonnemang
+                        </button>
+                      </div>
+
+                      <div id="new-customers-field" class="new-customers-field hidden">
+                        <label for="new-customers-select">Hur många blir nya kunder?</label>
+                        <select id="new-customers-select" class="new-customers-select">
+                          <option value="">Välj antal</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -197,11 +234,6 @@
                     </div>
 
                     <div class="quiz-card-body mx-auto w-full max-w-3xl text-center">
-                      <span class="quiz-pill inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                        <i class="fa-solid fa-signal text-emerald-600"></i>
-                        Surfbehov
-                      </span>
-
                       <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
                         Hur används mobilen?
                       </p>
@@ -250,11 +282,6 @@
                     </div>
 
                     <div class="quiz-card-body mx-auto w-full max-w-3xl text-center">
-                      <span class="quiz-pill inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                        <i class="fa-solid fa-wallet text-emerald-600"></i>
-                        Pris
-                      </span>
-
                       <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
                         Pris per abonnemang idag?
                       </p>
@@ -298,11 +325,6 @@
                     </div>
 
                     <div class="quiz-card-body mx-auto w-full max-w-3xl text-center">
-                      <span class="quiz-pill inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
-                        <i class="fa-solid fa-link text-emerald-600"></i>
-                        Bindningstid
-                      </span>
-
                       <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
                         Bindningstid kvar?
                       </p>
@@ -336,10 +358,6 @@
                     </div>
 
                     <div class="result-header">
-                      <span class="result-badge">
-                        <i class="fa-solid fa-circle-check"></i>
-                        Analys klar
-                      </span>
                       <h3 class="result-title">Vi hittade dina bästa alternativ</h3>
                       <p class="result-desc">Baserat på dina svar har vi matchat de abonnemang som passar ditt hushålls behov och budget bäst.</p>
                     </div>

@@ -8,6 +8,9 @@ function createIndexQuiz() {
     currentStep: 0,
     persons: null,
     operators: [],
+    selectedOperator: null,
+    customerStatus: null,
+    newCustomers: null,
     data: null,
     price: null,
     binding: null
@@ -26,6 +29,12 @@ function createIndexQuiz() {
     familyOfferGrid: document.querySelector(".family-offer-grid"),
     operatorContainer: document.getElementById("operator-per-person"),
     operatorTemplate: document.getElementById("operator-picker-template"),
+    personExtraOptions: document.getElementById("person-extra-options"),
+    personMoreToggle: document.getElementById("person-more-toggle"),
+    customerOperatorGrid: document.getElementById("customer-operator-grid"),
+    customerStatusQuestion: document.getElementById("customer-status-question"),
+    newCustomersField: document.getElementById("new-customers-field"),
+    newCustomersSelect: document.getElementById("new-customers-select"),
     offersContainer: document.getElementById("offers-container")
   };
 
@@ -34,6 +43,7 @@ function createIndexQuiz() {
   const resultStepIndex = Math.max(steps.length - 1, 0);
   const sectionWrapperAnchor = document.createComment("quiz section mount");
   let plans = null;
+  let recommendationsRequestId = 0;
 
   function init() {
     if (!dom.wrapper || !dom.stack || !steps.length) return;
@@ -54,6 +64,7 @@ function createIndexQuiz() {
     });
     dom.familyOfferGrid?.addEventListener("click", handleFamilyOfferClick);
     dom.wrapper.addEventListener("click", handleWrapperClick);
+    dom.wrapper.addEventListener("change", handleWrapperChange);
     window.addEventListener("resize", syncStackHeight);
 
     steps.forEach((step, index) => {
@@ -72,6 +83,12 @@ function createIndexQuiz() {
   }
 
   function handleWrapperClick(event) {
+    const personToggle = event.target.closest("[data-person-toggle]");
+    if (personToggle) {
+      toggleExtraPersonOptions();
+      return;
+    }
+
     const option = event.target.closest(".quiz-option");
     if (option) {
       handleOptionClick(option);
@@ -85,6 +102,17 @@ function createIndexQuiz() {
     if (stackedIndex >= 0) {
       showStep(stackedIndex);
     }
+  }
+
+  function handleWrapperChange(event) {
+    if (event.target !== dom.newCustomersSelect) return;
+
+    const newCustomers = Number(dom.newCustomersSelect.value);
+    if (!newCustomers) return;
+
+    state.newCustomers = newCustomers;
+    applyCustomerState();
+    showStep(2);
   }
 
   function handleFamilyOfferClick(event) {
@@ -199,27 +227,117 @@ function createIndexQuiz() {
     if (!persons) return;
 
     state.persons = persons;
-    state.operators = Array.from({ length: persons }, (_, index) => state.operators[index] || null);
+    state.operators = Array.from({ length: persons }, () => null);
+    state.selectedOperator = null;
+    state.customerStatus = null;
+    state.newCustomers = null;
 
     setSelected(step, "[data-persons]", option);
-    renderOperatorChoices();
+    resetCustomerStep();
     showStep(1);
   }
 
   function handleOperatorStep(option) {
-    const personIndex = Number(option.dataset.personIndex);
-    if (Number.isNaN(personIndex)) return;
-
-    state.operators[personIndex] = option.dataset.operator || null;
-
-    const group = option.closest("[data-operator-group]");
-    if (!group) return;
-
-    setSelected(group, "[data-operator]", option);
-
-    if (state.operators.every(Boolean)) {
-      showStep(2);
+    if (option.dataset.currentOperator) {
+      state.selectedOperator = option.dataset.currentOperator;
+      setSelected(steps[1], "[data-current-operator]", option);
+      updateCustomerStatusQuestion();
+      return;
     }
+
+    if (!option.dataset.customerStatus) return;
+
+    if (!state.selectedOperator) {
+      dom.customerOperatorGrid?.classList.add("needs-choice");
+      window.setTimeout(() => dom.customerOperatorGrid?.classList.remove("needs-choice"), 420);
+      return;
+    }
+
+    state.customerStatus = option.dataset.customerStatus;
+    setSelected(steps[1], "[data-customer-status]", option);
+
+    if (state.customerStatus === "partial") {
+      renderNewCustomersSelect();
+      dom.newCustomersField?.classList.remove("hidden");
+      return;
+    }
+
+    state.newCustomers = state.customerStatus === "none" ? state.persons : 0;
+    dom.newCustomersField?.classList.add("hidden");
+    applyCustomerState();
+    showStep(2);
+  }
+
+  function toggleExtraPersonOptions() {
+    if (!dom.personExtraOptions || !dom.personMoreToggle) return;
+
+    const isOpening = dom.personExtraOptions.classList.contains("hidden");
+    dom.personExtraOptions.classList.toggle("hidden", !isOpening);
+    dom.personMoreToggle.setAttribute("aria-expanded", String(isOpening));
+    dom.personMoreToggle.textContent = isOpening ? "Dölj 6-10" : "Visa 6-10";
+  }
+
+  function resetCustomerStep() {
+    const customerStep = steps[1];
+    if (!customerStep) return;
+
+    customerStep.querySelectorAll("[data-current-operator], [data-customer-status]").forEach(button => {
+      button.classList.remove("selected", "active");
+      button.setAttribute("aria-pressed", "false");
+    });
+
+    const partialOption = customerStep.querySelector('[data-customer-status="partial"]');
+    if (partialOption) {
+      partialOption.disabled = (state.persons || 0) < 2;
+    }
+
+    dom.newCustomersField?.classList.add("hidden");
+    if (dom.newCustomersSelect) {
+      dom.newCustomersSelect.innerHTML = '<option value="">Välj antal</option>';
+    }
+
+    updateCustomerStatusQuestion();
+  }
+
+  function updateCustomerStatusQuestion() {
+    if (!dom.customerStatusQuestion) return;
+
+    const operator = state.selectedOperator && state.selectedOperator !== "Other"
+      ? state.selectedOperator
+      : "vald operatör";
+
+    dom.customerStatusQuestion.textContent = `Har någon av er redan abonnemang hos ${operator} idag?`;
+  }
+
+  function renderNewCustomersSelect() {
+    if (!dom.newCustomersSelect) return;
+
+    const persons = state.persons || 1;
+    const maxNewCustomers = Math.max(persons - 1, 1);
+    const options = ['<option value="">Välj antal</option>'];
+
+    for (let index = 1; index <= maxNewCustomers; index += 1) {
+      options.push(`<option value="${index}">${index}</option>`);
+    }
+
+    dom.newCustomersSelect.innerHTML = options.join("");
+  }
+
+  function applyCustomerState() {
+    const persons = state.persons || 1;
+    const operators = Array.from({ length: persons }, () => null);
+
+    if (state.selectedOperator && state.selectedOperator !== "Other" && state.customerStatus !== "none") {
+      const existingCustomers = state.customerStatus === "all"
+        ? persons
+        : Math.max(persons - (state.newCustomers || 0), 0);
+
+      for (let index = 0; index < existingCustomers; index += 1) {
+        operators[index] = state.selectedOperator;
+      }
+    }
+
+    state.operators = operators;
   }
 
   function handleSingleChoiceStep(step, selector, option, applyState) {
@@ -374,7 +492,21 @@ function createIndexQuiz() {
   async function renderRecommendations() {
     if (!dom.offersContainer) return;
 
-    const recommendedPlans = await getRecommendedPlans();
+    const requestId = ++recommendationsRequestId;
+    dom.offersContainer.innerHTML = [
+      '<div class="quiz-loading" role="status" aria-live="polite">',
+      '  <span class="quiz-loading-spinner" aria-hidden="true"></span>',
+      '  <span>Analyserar svar...</span>',
+      '</div>'
+    ].join("");
+
+    const [recommendedPlans] = await Promise.all([
+      getRecommendedPlans(),
+      wait(850)
+    ]);
+
+    if (requestId !== recommendationsRequestId) return;
+
     dom.offersContainer.innerHTML = "";
 
     if (!recommendedPlans.length) {
@@ -393,6 +525,12 @@ function createIndexQuiz() {
     });
 
     syncStackHeight();
+  }
+
+  function wait(duration) {
+    return new Promise(resolve => {
+      window.setTimeout(resolve, duration);
+    });
   }
 
   async function getRecommendedPlans() {

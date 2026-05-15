@@ -307,7 +307,6 @@ function createIndexQuiz() {
     requestAnimationFrame(() => {
       dom.wrapper?.classList.remove("opacity-0");
       showStep(0);
-      dom.wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
 

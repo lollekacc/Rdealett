@@ -664,6 +664,7 @@ function createIndexQuiz() {
     dom.operatorContainer.innerHTML = "";
     dom.operatorContainer.classList.toggle("hidden", count <= 0);
     dom.operatorContainer.closest(".quiz-card-body")?.classList.toggle("quiz-card-body--operator-active", count > 0);
+    updateOperatorQuestionTitle(count);
     dom.customerOperatorQuestion?.classList.toggle("hidden", count <= 0);
     dom.operatorContinueBtn?.classList.toggle("hidden", count <= 0);
 
@@ -709,6 +710,14 @@ function createIndexQuiz() {
     });
 
     syncStackHeight();
+  }
+
+  function updateOperatorQuestionTitle(count) {
+    if (!dom.customerOperatorQuestion) return;
+
+    dom.customerOperatorQuestion.textContent = count === 1
+      ? "Vilken operatör har du?"
+      : "Vilka operatörer har ni?";
   }
 
   function mountQuizInHero() {

@@ -151,7 +151,7 @@ const renderOffers = () => {
     logoWrap.append(logo);
 
     const copy = createElement('div');
-    copy.append(createElement('h3', '', offer.provider), createElement('p', '', `${offer.members} | ${offer.surf}`));
+    copy.append(createElement('p', '', `${offer.members} | ${offer.surf}`));
 
     const meta = createElement('ul', 'offer-card-meta');
     ['Samlad faktura', 'Fria samtal och sms', `${formatCurrency(offer.reward)} kr presentkort`].forEach((item) => {

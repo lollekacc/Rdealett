@@ -121,6 +121,111 @@ const selectOffer = (offer, card) => {
   rewardSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
+const resetOfferQuestions = () => {
+  offersContainer?.querySelectorAll('.offer-card').forEach((card) => {
+    card.classList.remove('is-answering', 'is-selected');
+    card.querySelector('.offer-card-questions')?.remove();
+    card.querySelector('.offer-card-action')?.classList.remove('is-hidden');
+  });
+};
+
+const finishOfferQuestions = (offer, card, answers) => {
+  offer.answers = answers;
+  const questionBox = card.querySelector('.offer-card-questions');
+
+  if (questionBox) {
+    questionBox.innerHTML = [
+      '<p class="offer-question-kicker">Svar sparade</p>',
+      '<h4>Du kan forts&auml;tta med presentkortet.</h4>'
+    ].join('');
+  }
+
+  selectOffer(offer, card);
+};
+
+const renderBindingQuestion = (offer, card, answers) => {
+  const questionBox = card.querySelector('.offer-card-questions');
+  if (!questionBox) return;
+
+  questionBox.innerHTML = [
+    '<p class="offer-question-kicker">Fr&aring;ga 2 av 2</p>',
+    '<h4>Har du bindningstid?</h4>',
+    '<div class="offer-question-actions">',
+    '  <button type="button" data-binding="yes">Ja</button>',
+    '  <button type="button" data-binding="no">Nej</button>',
+    '  <button type="button" data-binding="unknown">Vet ej</button>',
+    '</div>',
+    '<div class="offer-binding-date is-hidden">',
+    '  <label for="bindingEndDate">N&auml;r upph&ouml;r den?</label>',
+    '  <input id="bindingEndDate" type="date" />',
+    '  <button class="offer-card-action" type="button" data-finish-date>Forts&auml;tt</button>',
+    '</div>'
+  ].join('');
+
+  questionBox.querySelectorAll('[data-binding]').forEach((button) => {
+    button.addEventListener('click', () => {
+      answers.binding = button.dataset.binding;
+
+      if (answers.binding === 'yes') {
+        questionBox.querySelector('.offer-binding-date')?.classList.remove('is-hidden');
+        questionBox.querySelector('#bindingEndDate')?.focus();
+        return;
+      }
+
+      answers.bindingEndDate = null;
+      finishOfferQuestions(offer, card, answers);
+    });
+  });
+
+  questionBox.querySelector('[data-finish-date]')?.addEventListener('click', () => {
+    const dateInput = questionBox.querySelector('#bindingEndDate');
+    answers.bindingEndDate = dateInput?.value || null;
+
+    if (!answers.bindingEndDate) {
+      dateInput?.focus();
+      return;
+    }
+
+    finishOfferQuestions(offer, card, answers);
+  });
+};
+
+const startOfferQuestions = (offer, card) => {
+  resetOfferQuestions();
+  selectedOffer = null;
+  rewardSection?.classList.add('is-hidden');
+
+  const answers = {};
+  const questionBox = createElement('div', 'offer-card-questions');
+  questionBox.innerHTML = [
+    '<p class="offer-question-kicker">Fr&aring;ga 1 av 2</p>',
+    `<h4>Har du ${offer.provider} idag?</h4>`,
+    '<div class="offer-question-actions">',
+    '  <button type="button" data-current-operator="yes">Ja</button>',
+    '  <button type="button" data-current-operator="no">Nej</button>',
+    '</div>'
+  ].join('');
+
+  card.classList.add('is-answering');
+  card.querySelector('.offer-card-action')?.classList.add('is-hidden');
+  card.append(questionBox);
+
+  questionBox.querySelectorAll('[data-current-operator]').forEach((button) => {
+    button.addEventListener('click', () => {
+      answers.currentOperator = button.dataset.currentOperator;
+
+      if (answers.currentOperator === 'no') {
+        answers.binding = 'no';
+        answers.bindingEndDate = null;
+        finishOfferQuestions(offer, card, answers);
+        return;
+      }
+
+      renderBindingQuestion(offer, card, answers);
+    });
+  });
+};
+
 const renderOffers = () => {
   if (!offersContainer) {
     return;
@@ -141,7 +246,7 @@ const renderOffers = () => {
     logoWrap.append(logo);
 
     const copy = createElement('div');
-    copy.append(createElement('h3', '', offer.provider), createElement('p', '', 'Obegränsad surf'));
+    copy.append(createElement('p', '', 'Obegränsad surf'));
 
     const meta = createElement('ul', 'offer-card-meta');
     ['Fria samtal och sms', '5G & eSIM', `${formatCurrency(offer.reward)} kr presentkort`].forEach((item) => {
@@ -150,7 +255,7 @@ const renderOffers = () => {
 
     const button = createElement('button', 'offer-card-action', 'Välj');
     button.type = 'button';
-    button.addEventListener('click', () => selectOffer(offer, card));
+    button.addEventListener('click', () => startOfferQuestions(offer, card));
 
     card.append(logoWrap, copy, meta, button);
     fragment.append(card);

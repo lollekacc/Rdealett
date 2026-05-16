@@ -106,7 +106,7 @@ const ensureCartDrawer = () => {
     '      <span>Totalt</span>',
     '      <strong id="totalPrice">0 kr/m&aring;n</strong>',
     '    </div>',
-    '    <button id="cartBankIdButton" class="adeala-btn full-btn" type="button">BankID-signering</button>',
+    '    <button id="cartBankIdButton" class="adeala-btn full-btn" type="button">Fortsätt till varukorg</button>',
     '  </div>',
     '</aside>',
   ].join('');

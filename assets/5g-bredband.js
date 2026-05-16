@@ -55,6 +55,7 @@ const els = {
   totalPrice: document.querySelector('#totalPrice'),
   cartOverlay: document.querySelector('#cartOverlay'),
   closeCart: document.querySelector('#closeCart'),
+  cartContinueBtn: document.querySelector('#cartContinueBtn'),
 };
 
 let bredbandPlans = [];
@@ -266,6 +267,25 @@ const addSelectedPlanToCart = () => {
 
   const reward = calculateReward(selectedPlan.price);
   const logo = providerLogos[selectedPlan.operator] || '';
+  const cartItem = {
+    cartItemId: `${selectedPlan.id}-${Date.now()}`,
+    offerId: selectedPlan.id,
+    operator: selectedPlan.operator,
+    title: selectedPlan.title || selectedPlan.speed || '5G-bredband',
+    logo,
+    data: selectedPlan.speed,
+    price: selectedPlan.price || 0,
+    pricePerPerson: 0,
+    persons: 1,
+    rewardTotal: reward,
+    rewardMixLabel: `Presentkort ${formatCurrency(reward)} kr`,
+    rewards: { Presentkort: reward },
+    features: [
+      formatBinding(selectedPlan),
+      `${selectedPlan.technology.toUpperCase()} · ${formatCurrency(selectedPlan.speedMbps)} Mbit/s`,
+      ...(selectedPlan.features || []),
+    ].filter(Boolean),
+  };
 
   els.cartItems.innerHTML = `
     <div class="cart-line">
@@ -281,6 +301,26 @@ const addSelectedPlanToCart = () => {
     <div>Månadspris: ${formatCurrency(selectedPlan.price)} kr/mån</div>
   `;
   els.totalPrice.textContent = `${formatCurrency(selectedPlan.price)} kr/mån`;
+
+  localStorage.setItem('dealettCart', JSON.stringify([cartItem]));
+  localStorage.setItem('selectedOffer', JSON.stringify({
+    id: cartItem.offerId,
+    operator: cartItem.operator,
+    title: cartItem.title,
+    logo: cartItem.logo,
+    finalPrice: cartItem.price,
+    pricePerPerson: cartItem.pricePerPerson,
+    rewardTotal: cartItem.rewardTotal,
+    rewardMixLabel: cartItem.rewardMixLabel,
+  }));
+  localStorage.setItem('dealettState', JSON.stringify({
+    persons: 1,
+    operator: cartItem.operator,
+    wishes: ['5G-bredband'],
+    answers: {},
+  }));
+  localStorage.setItem('rewardDistribution', JSON.stringify(cartItem.rewards));
+  localStorage.removeItem('rewardChoice');
 
   openCart();
 };
@@ -451,6 +491,9 @@ const bindEvents = () => {
   els.continueBtn?.addEventListener('click', addSelectedPlanToCart);
   els.cartOverlay?.addEventListener('click', closeBredbandCart);
   els.closeCart?.addEventListener('click', closeBredbandCart);
+  els.cartContinueBtn?.addEventListener('click', () => {
+    window.location.href = 'varukorg.html';
+  });
 
   els.openCoverageModal?.addEventListener('click', openCoverageModal);
   els.closeCoverageModal?.addEventListener('click', closeCoverageModal);

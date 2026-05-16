@@ -223,6 +223,47 @@ function createIndexQuiz() {
       : card.querySelector(".provider-button")?.getAttribute("href") || "varukorg.html";
   }
 
+  function saveRecommendationAndNavigate(plan) {
+    const item = buildRecommendationCartItem(plan);
+    const cart = readCart();
+    cart.push(item);
+
+    localStorage.setItem("dealettCart", JSON.stringify(cart));
+    localStorage.setItem("selectedOffer", JSON.stringify({
+      id: item.offerId,
+      operator: item.operator,
+      title: item.title,
+      logo: item.logo,
+      dataAmount: item.dataAmount,
+      finalPrice: item.price,
+      pricePerPerson: item.pricePerPerson,
+      rewardTotal: item.rewardTotal,
+      rewardMixLabel: item.rewardMixLabel
+    }));
+    localStorage.setItem("dealettState", JSON.stringify({
+      persons: item.persons,
+      data: state.data || getDataTier(item.dataAmount),
+      operator: item.operator,
+      binding: state.binding,
+      bindingEndDate: null,
+      wishes: [item.productType === "family" ? "Familjeabonnemang" : "Mobilabonnemang"],
+      answers: {
+        customerStatus: state.customerStatus,
+        newCustomers: state.newCustomers,
+        currentOperator: state.selectedOperator,
+        binding: state.binding
+      },
+      operatorsByPerson: state.operators.length ? state.operators : Array.from({ length: item.persons }, () => "Andra / Ingen"),
+      bindingsByPerson: Array.from({ length: item.persons }, () => state.binding || null),
+      bindingEndDatesByPerson: Array.from({ length: item.persons }, () => null)
+    }));
+    localStorage.removeItem("rewardChoice");
+    localStorage.setItem("rewardDistribution", JSON.stringify(item.rewards));
+
+    window.DEALETT_updateCartCount?.();
+    window.location.href = "varukorg.html";
+  }
+
   function buildStaticCartItem(card) {
     const rewardTotal = Number(card.dataset.rewardTotal) || 0;
     const title = card.dataset.title || "4 abonnemang";
@@ -285,6 +326,43 @@ function createIndexQuiz() {
       rewardTotal,
       rewardMixLabel: card.dataset.rewardMixLabel || "",
       rewards: rewardTotal > 0 ? { Presentkort: rewardTotal } : {}
+    };
+  }
+
+  function buildRecommendationCartItem(plan) {
+    const persons = state.persons || 1;
+    const rewardTotal = 4000;
+
+    return {
+      cartItemId: `${plan.id || "recommended-offer"}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      offerId: plan.id || plan.title,
+      operator: plan.operator,
+      title: plan.title || plan.data || "Mobilabonnemang",
+      logo: plan.logo,
+      data: plan.data || (plan.dataAmount >= 999 ? "Obegränsad" : `${plan.dataAmount} GB`),
+      dataAmount: Number(plan.dataAmount) || 0,
+      price: Number(plan.finalPrice ?? plan.price) || 0,
+      pricePerPerson: persons > 1 ? Number(plan.pricePerPerson) || 0 : 0,
+      persons,
+      phoneLines: persons,
+      productType: persons > 1 ? "family" : "mobile",
+      unitLabel: "abonnemang",
+      rewardTotal,
+      rewardMixLabel: `Presentkort ${new Intl.NumberFormat("sv-SE").format(rewardTotal)} kr`,
+      rewards: { Presentkort: rewardTotal },
+      answers: {
+        customerStatus: state.customerStatus,
+        newCustomers: state.newCustomers,
+        currentOperator: state.selectedOperator,
+        binding: state.binding
+      },
+      features: [
+        persons > 1 ? `${persons} abonnemang` : "1 abonnemang",
+        "Fria samtal och sms",
+        "5G & eSIM",
+        plan.text || "",
+      ].filter(Boolean),
+      source: "homepage-quiz"
     };
   }
 
@@ -772,9 +850,14 @@ function createIndexQuiz() {
       '      </div>',
       '    </div>',
       '  </div>',
-      '  <a href="mobilabonnemang.html" class="offer-card__cta">Se abonnemang <i class="fa-solid fa-arrow-right"></i></a>',
+      '  <a href="varukorg.html" class="offer-card__cta" data-recommendation-cart>Till varukorg <i class="fa-solid fa-cart-shopping"></i></a>',
       '</div>'
     ].join("\n");
+
+    article.querySelector("[data-recommendation-cart]")?.addEventListener("click", event => {
+      event.preventDefault();
+      saveRecommendationAndNavigate(plan);
+    });
 
     return article;
   }

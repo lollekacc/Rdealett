@@ -390,7 +390,7 @@ const renderOffers = () => {
 };
 
 rewardContinueBtn?.addEventListener('click', () => {
-  if (!selectedOffer || !rewardGrid || !cartDrawer || !cartItems || !summaryArea) {
+  if (!selectedOffer || !rewardGrid) {
     return;
   }
 
@@ -401,6 +401,54 @@ rewardContinueBtn?.addEventListener('click', () => {
       return { name, value };
     })
     .filter((item) => item.value > 0);
+  const rewards = allocations.reduce((result, item) => {
+    result[item.name] = item.value;
+    return result;
+  }, {});
+  const persons = Number(selectedOffer.answers?.persons) || Number.parseInt(selectedOffer.members, 10) || 1;
+  const cartItem = {
+    cartItemId: `${selectedOffer.operator || selectedOffer.provider}-${Date.now()}`,
+    offerId: selectedOffer.title,
+    operator: selectedOffer.operator || selectedOffer.provider,
+    title: selectedOffer.title || 'Familjepaket',
+    logo: selectedOffer.logo,
+    data: selectedOffer.surf || selectedOffer.data,
+    price: selectedOffer.price || 0,
+    pricePerPerson: selectedOffer.pricePerPerson || 0,
+    persons,
+    rewardTotal: selectedOffer.reward,
+    rewardMixLabel: `Presentkort ${formatCurrency(selectedOffer.reward)} kr`,
+    rewards,
+    answers: selectedOffer.answers || {},
+    features: [
+      selectedOffer.members,
+      'Samlad faktura',
+      'Fria samtal och sms',
+      selectedOffer.addonPrice ? `Extra abonnemang ${formatCurrency(selectedOffer.addonPrice)} kr/st` : '',
+    ].filter(Boolean),
+  };
+
+  localStorage.setItem('dealettCart', JSON.stringify([cartItem]));
+  localStorage.setItem('selectedOffer', JSON.stringify({
+    id: cartItem.offerId,
+    operator: cartItem.operator,
+    title: cartItem.title,
+    logo: cartItem.logo,
+    finalPrice: cartItem.price,
+    pricePerPerson: cartItem.pricePerPerson,
+    rewardTotal: cartItem.rewardTotal,
+    rewardMixLabel: cartItem.rewardMixLabel,
+  }));
+  localStorage.setItem('dealettState', JSON.stringify({
+    persons,
+    operator: cartItem.operator,
+    wishes: ['Familjabonnemang'],
+    answers: cartItem.answers,
+  }));
+  localStorage.setItem('rewardDistribution', JSON.stringify(rewards));
+  localStorage.removeItem('rewardChoice');
+  window.location.href = 'varukorg.html';
+  return;
 
   const cartLine = createElement('div', 'cart-line');
   cartLine.append(

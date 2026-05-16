@@ -402,7 +402,7 @@ const renderOffers = () => {
 };
 
 rewardContinueBtn?.addEventListener('click', () => {
-  if (!selectedOffer || !rewardGrid || !cartDrawer || !cartItems || !summaryArea) {
+  if (!selectedOffer || !rewardGrid) {
     return;
   }
 
@@ -413,6 +413,53 @@ rewardContinueBtn?.addEventListener('click', () => {
       return { name, value };
     })
     .filter((item) => item.value > 0);
+  const rewards = allocations.reduce((result, item) => {
+    result[item.name] = item.value;
+    return result;
+  }, {});
+
+  const cartItem = {
+    cartItemId: `${selectedOffer.operator || selectedOffer.provider}-${Date.now()}`,
+    offerId: selectedOffer.title,
+    operator: selectedOffer.operator || selectedOffer.provider,
+    title: selectedOffer.title || selectedOffer.data || 'Mobilabonnemang',
+    logo: selectedOffer.logo,
+    data: selectedOffer.data,
+    price: selectedOffer.price || 0,
+    pricePerPerson: selectedOffer.pricePerPerson || 0,
+    rewardTotal: selectedOffer.reward,
+    rewardMixLabel: `Presentkort ${formatCurrency(selectedOffer.reward)} kr`,
+    rewards,
+    addon: selectedOffer.addon || null,
+    answers: selectedOffer.answers || {},
+    features: [
+      'Fria samtal och sms',
+      '5G & eSIM',
+      selectedOffer.addon ? selectedOffer.addon.title : '',
+    ].filter(Boolean),
+  };
+
+  localStorage.setItem('dealettCart', JSON.stringify([cartItem]));
+  localStorage.setItem('selectedOffer', JSON.stringify({
+    id: cartItem.offerId,
+    operator: cartItem.operator,
+    title: cartItem.title,
+    logo: cartItem.logo,
+    finalPrice: cartItem.price,
+    pricePerPerson: cartItem.pricePerPerson,
+    rewardTotal: cartItem.rewardTotal,
+    rewardMixLabel: cartItem.rewardMixLabel,
+  }));
+  localStorage.setItem('dealettState', JSON.stringify({
+    persons: 1,
+    operator: cartItem.operator,
+    wishes: ['Mobilabonnemang'],
+    answers: cartItem.answers,
+  }));
+  localStorage.setItem('rewardDistribution', JSON.stringify(rewards));
+  localStorage.removeItem('rewardChoice');
+  window.location.href = 'varukorg.html';
+  return;
 
   const planText = [
     selectedOffer.data || selectedOffer.title || 'Mobilabonnemang',

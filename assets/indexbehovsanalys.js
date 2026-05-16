@@ -33,8 +33,6 @@ function createIndexQuiz() {
     operatorTemplate: document.getElementById("operator-picker-template"),
     personExtraOptions: document.getElementById("person-extra-options"),
     personMoreToggle: document.getElementById("person-more-toggle"),
-    customerOperatorGrid: document.getElementById("customer-operator-grid"),
-    customerStatusQuestion: document.getElementById("customer-status-question"),
     customerOperatorQuestion: document.getElementById("customer-operator-question"),
     newCustomersField: document.getElementById("new-customers-field"),
     newCustomersSelect: document.getElementById("new-customers-select"),
@@ -433,12 +431,13 @@ function createIndexQuiz() {
     state.operators = Array.from({ length: persons }, () => null);
     state.operatorDates = Array.from({ length: persons }, () => null);
     state.selectedOperator = null;
-    state.customerStatus = null;
-    state.existingCustomers = null;
-    state.newCustomers = null;
+    state.customerStatus = "all";
+    state.existingCustomers = persons;
+    state.newCustomers = 0;
 
     setSelected(step, "[data-persons]", option);
     resetCustomerStep();
+    prepareOperatorQuestion(persons);
     showStep(1);
   }
 
@@ -502,19 +501,11 @@ function createIndexQuiz() {
     }
 
     dom.newCustomersField?.classList.add("hidden");
-    dom.customerOperatorGrid?.classList.add("hidden");
     if (dom.newCustomersSelect) {
       dom.newCustomersSelect.innerHTML = '<option value="">Välj antal</option>';
     }
 
     hideOperatorQuestion();
-    updateCustomerStatusQuestion();
-  }
-
-  function updateCustomerStatusQuestion() {
-    if (!dom.customerStatusQuestion) return;
-
-    dom.customerStatusQuestion.textContent = "Har någon av er redan abonnemang idag?";
   }
 
   function renderNewCustomersSelect() {
@@ -544,7 +535,6 @@ function createIndexQuiz() {
     ));
     state.selectedOperator = state.operators.find(Boolean) || null;
 
-    dom.customerOperatorGrid?.classList.add("hidden");
     renderOperatorChoices(boundedExistingCount);
     updateOperatorContinueState();
   }

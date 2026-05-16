@@ -102,8 +102,9 @@ if (header || hero) {
 }
 
 const coverageApp = document.querySelector('#coverageApp');
+const hasDedicatedCoverageController = document.body.classList.contains('jamfor-page');
 
-if (coverageApp) {
+if (coverageApp && !hasDedicatedCoverageController) {
   coverageApp.querySelectorAll('.operator-card').forEach((operatorButton) => {
     operatorButton.addEventListener('click', () => {
       coverageApp.querySelectorAll('.operator-card').forEach((button) => {

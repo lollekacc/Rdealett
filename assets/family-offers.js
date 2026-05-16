@@ -1,3 +1,4 @@
+(() => {
 const offersContainer = document.querySelector('#offers-container');
 const rewardSection = document.querySelector('#rewardSection');
 const rewardGrid = document.querySelector('#rewardGrid');
@@ -5,10 +6,6 @@ const totalReward = document.querySelector('#totalReward');
 const remainingSum = document.querySelector('#remainingSum');
 const rewardProgressFill = document.querySelector('#rewardProgressFill');
 const rewardContinueBtn = document.querySelector('#rewardContinueBtn');
-const cartDrawer = document.querySelector('#cartDrawer');
-const cartItems = document.querySelector('#cartItems');
-const summaryArea = document.querySelector('#summaryArea');
-const totalPrice = document.querySelector('#totalPrice');
 
 const currency = new Intl.NumberFormat('sv-SE');
 
@@ -448,24 +445,7 @@ rewardContinueBtn?.addEventListener('click', () => {
   localStorage.setItem('rewardDistribution', JSON.stringify(rewards));
   localStorage.removeItem('rewardChoice');
   window.location.href = 'varukorg.html';
-  return;
-
-  const cartLine = createElement('div', 'cart-line');
-  cartLine.append(
-    createElement('strong', '', selectedOffer.provider),
-    createElement('span', '', `${selectedOffer.members} | ${selectedOffer.surf}`),
-    createElement('span', '', `${formatCurrency(selectedOffer.price)} kr/m\u00e5n totalt`),
-    createElement('span', '', allocations.map((item) => `${item.name}: ${formatCurrency(item.value)} kr`).join(' | '))
-  );
-
-  cartItems.replaceChildren(cartLine);
-  summaryArea.replaceChildren(createElement('div', '', `Bel\u00f6ningsv\u00e4rde: ${formatCurrency(selectedOffer.reward)} kr`));
-
-  if (totalPrice) {
-    totalPrice.textContent = `${formatCurrency(selectedOffer.price)} kr`;
-  }
-
-  cartDrawer.classList.remove('hidden');
 });
 
 renderOffers();
+})();

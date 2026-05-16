@@ -1,3 +1,4 @@
+(() => {
 const offersContainer = document.querySelector('#offers-container');
 const rewardSection = document.querySelector('#rewardSection');
 const rewardGrid = document.querySelector('#rewardGrid');
@@ -5,9 +6,6 @@ const totalReward = document.querySelector('#totalReward');
 const remainingSum = document.querySelector('#remainingSum');
 const rewardProgressFill = document.querySelector('#rewardProgressFill');
 const rewardContinueBtn = document.querySelector('#rewardContinueBtn');
-const cartDrawer = document.querySelector('#cartDrawer');
-const cartItems = document.querySelector('#cartItems');
-const summaryArea = document.querySelector('#summaryArea');
 
 const currency = new Intl.NumberFormat('sv-SE');
 
@@ -262,7 +260,13 @@ const renderPlanOffers = async (offer, answers) => {
         createElement('p', '', addonPlan.text || `Extra familjemedlem för ${formatCurrency(addonPlan.price)} kr/mån`)
       );
 
-const meta = createElement('ul', 'offer-card-meta');
+      const meta = createElement('ul', 'offer-card-meta');
+      [
+        `${formatCurrency(addonPlan.addonPrice ?? addonPlan.price)} kr/mån`,
+        'Extra familjemedlem',
+      ].forEach((item) => {
+        meta.append(createElement('li', '', item));
+      });
 
       const button = createElement('button', 'offer-card-action', 'Välj abonnemang först');
       button.type = 'button';
@@ -459,27 +463,7 @@ rewardContinueBtn?.addEventListener('click', () => {
   localStorage.setItem('rewardDistribution', JSON.stringify(rewards));
   localStorage.removeItem('rewardChoice');
   window.location.href = 'varukorg.html';
-  return;
-
-  const planText = [
-    selectedOffer.data || selectedOffer.title || 'Mobilabonnemang',
-    selectedOffer.price ? `${formatCurrency(selectedOffer.price)} kr/m\u00e5n` : '',
-  ].filter(Boolean).join(' | ');
-  const addonText = selectedOffer.addon
-    ? `${selectedOffer.addon.title}: ${formatCurrency(selectedOffer.addon.price)} kr/mån`
-    : '';
-
-  const cartLine = createElement('div', 'cart-line');
-  cartLine.append(
-    createElement('strong', '', selectedOffer.provider),
-    createElement('span', '', planText),
-    ...(addonText ? [createElement('span', '', addonText)] : []),
-    createElement('span', '', allocations.map((item) => `${item.name}: ${formatCurrency(item.value)} kr`).join(' | '))
-  );
-
-  cartItems.replaceChildren(cartLine);
-  summaryArea.replaceChildren(createElement('div', '', `Bel\u00f6ningsv\u00e4rde: ${formatCurrency(selectedOffer.reward)} kr`));
-  cartDrawer.classList.remove('hidden');
 });
 
 renderOffers();
+})();

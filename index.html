@@ -150,7 +150,7 @@
                       </div>
 
                       <p id="customer-operator-question" class="customer-status-question hidden">
-                        Vilken operatör använder de idag?
+                        Välj operatör och datum för varje person.
                       </p>
 
                       <div id="operator-per-person" class="operator-per-person hidden"></div>
@@ -169,30 +169,42 @@
                       Person <span data-person-number></span>
                     </p>
 
-                    <div class="operator-choice-grid grid grid-cols-2 gap-3">
-                      <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Tele2">
-                        <img src="images/tele2.png" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Tele2" />
-                      </button>
+                    <div class="operator-card-controls">
+                      <div class="operator-choice-grid grid grid-cols-2 gap-3">
+                        <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Tele2">
+                          <img src="images/tele2.png" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Tele2" />
+                        </button>
 
-                      <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Telia">
-                        <img src="images/telia.png" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Telia" />
-                      </button>
+                        <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Telia">
+                          <img src="images/telia.png" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Telia" />
+                        </button>
 
-                      <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Telenor">
-                        <img src="images/telenor.jpg" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Telenor" />
-                      </button>
+                        <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Telenor">
+                          <img src="images/telenor.jpg" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Telenor" />
+                        </button>
 
-                      <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Tre">
-                        <img src="images/tre.jpg" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Tre" />
-                      </button>
+                        <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Tre">
+                          <img src="images/tre.jpg" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Tre" />
+                        </button>
 
-                      <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Halebop">
-                        <img src="images/halebop.webp" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Halebop" />
-                      </button>
+                        <button type="button" class="partner-wrapper quiz-option familj-opt flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Halebop">
+                          <img src="images/halebop.webp" class="partner-logo h-10 w-auto object-contain transition hover:scale-105" alt="Halebop" />
+                        </button>
 
-                      <button type="button" class="quiz-option familj-opt inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-bold text-slate-800 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Other">
-                        Andra
-                      </button>
+                        <button type="button" class="quiz-option familj-opt inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-bold text-slate-800 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-white" data-operator="Other">
+                          Andra
+                        </button>
+                      </div>
+
+                      <label class="operator-date-field">
+                        <span class="operator-date-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M7 2v3M17 2v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+                          </svg>
+                        </span>
+                        <span class="operator-date-label">Datum</span>
+                        <input type="date" data-operator-date required />
+                      </label>
                     </div>
                   </div>
                 </template>

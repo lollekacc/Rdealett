@@ -8,6 +8,7 @@ function createIndexQuiz() {
     currentStep: 0,
     persons: null,
     operators: [],
+    operatorDates: [],
     selectedOperator: null,
     customerStatus: null,
     existingCustomers: null,
@@ -116,6 +117,11 @@ function createIndexQuiz() {
   }
 
   function handleWrapperChange(event) {
+    if (event.target.matches("[data-operator-date]")) {
+      handleOperatorDateChange(event.target);
+      return;
+    }
+
     if (event.target !== dom.newCustomersSelect) return;
 
     const existingCustomers = Number(dom.newCustomersSelect.value);
@@ -261,11 +267,12 @@ function createIndexQuiz() {
         existingCustomers: state.existingCustomers,
         newCustomers: state.newCustomers,
         currentOperator: state.selectedOperator,
+        operatorDates: state.operatorDates,
         binding: state.binding
       },
       operatorsByPerson: state.operators.length ? state.operators : Array.from({ length: item.persons }, () => "Andra / Ingen"),
       bindingsByPerson: Array.from({ length: item.persons }, () => state.binding || null),
-      bindingEndDatesByPerson: Array.from({ length: item.persons }, () => null)
+      bindingEndDatesByPerson: state.operatorDates.length ? state.operatorDates : Array.from({ length: item.persons }, () => null)
     }));
     localStorage.removeItem("rewardChoice");
     localStorage.setItem("rewardDistribution", JSON.stringify(item.rewards));
@@ -365,6 +372,7 @@ function createIndexQuiz() {
         existingCustomers: state.existingCustomers,
         newCustomers: state.newCustomers,
         currentOperator: state.selectedOperator,
+        operatorDates: state.operatorDates,
         binding: state.binding
       },
       features: [
@@ -423,6 +431,7 @@ function createIndexQuiz() {
 
     state.persons = persons;
     state.operators = Array.from({ length: persons }, () => null);
+    state.operatorDates = Array.from({ length: persons }, () => null);
     state.selectedOperator = null;
     state.customerStatus = null;
     state.existingCustomers = null;
@@ -449,6 +458,7 @@ function createIndexQuiz() {
       state.newCustomers = state.persons || 1;
       state.selectedOperator = null;
       state.operators = Array.from({ length: state.persons || 1 }, () => null);
+      state.operatorDates = Array.from({ length: state.persons || 1 }, () => null);
       dom.newCustomersField?.classList.add("hidden");
       hideOperatorQuestion();
       showStep(2);
@@ -529,6 +539,9 @@ function createIndexQuiz() {
     state.operators = Array.from({ length: persons }, (_, index) => (
       index < boundedExistingCount ? state.operators[index] || null : null
     ));
+    state.operatorDates = Array.from({ length: persons }, (_, index) => (
+      index < boundedExistingCount ? state.operatorDates[index] || null : null
+    ));
     state.selectedOperator = state.operators.find(Boolean) || null;
 
     dom.customerOperatorGrid?.classList.add("hidden");
@@ -539,6 +552,7 @@ function createIndexQuiz() {
   function hideOperatorQuestion() {
     dom.customerOperatorQuestion?.classList.add("hidden");
     dom.operatorContainer?.classList.add("hidden");
+    dom.operatorContainer?.closest(".quiz-card-body")?.classList.remove("quiz-card-body--operator-active");
     dom.operatorContinueBtn?.classList.add("hidden");
 
     if (dom.operatorContinueBtn) {
@@ -563,12 +577,21 @@ function createIndexQuiz() {
     updateOperatorContinueState();
   }
 
+  function handleOperatorDateChange(input) {
+    const personIndex = Number(input.dataset.personIndex);
+    if (!Number.isInteger(personIndex)) return;
+
+    state.operatorDates[personIndex] = input.value || null;
+    updateOperatorContinueState();
+  }
+
   function updateOperatorContinueState() {
     const existingCount = state.existingCustomers || 0;
     const selectedCount = state.operators.slice(0, existingCount).filter(Boolean).length;
+    const dateCount = state.operatorDates.slice(0, existingCount).filter(Boolean).length;
 
     if (dom.operatorContinueBtn) {
-      dom.operatorContinueBtn.disabled = selectedCount !== existingCount;
+      dom.operatorContinueBtn.disabled = selectedCount !== existingCount || dateCount !== existingCount;
     }
   }
 
@@ -603,6 +626,7 @@ function createIndexQuiz() {
 
     dom.operatorContainer.innerHTML = "";
     dom.operatorContainer.classList.toggle("hidden", count <= 0);
+    dom.operatorContainer.closest(".quiz-card-body")?.classList.toggle("quiz-card-body--operator-active", count > 0);
     dom.customerOperatorQuestion?.classList.toggle("hidden", count <= 0);
     dom.operatorContinueBtn?.classList.toggle("hidden", count <= 0);
 
@@ -626,6 +650,11 @@ function createIndexQuiz() {
         } else {
           button.classList.remove("selected", "active");
         }
+      });
+
+      fragment.querySelectorAll("[data-operator-date]").forEach(input => {
+        input.dataset.personIndex = String(personIndex);
+        input.value = state.operatorDates[personIndex] || "";
       });
 
       dom.operatorContainer.appendChild(fragment);

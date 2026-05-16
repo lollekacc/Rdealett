@@ -2077,6 +2077,12 @@ textarea {
   max-width: 980px;
 }
 
+.quiz-card-body--operator-active {
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .quiz-pill,
 .result-badge {
   display: none;
@@ -2298,7 +2304,7 @@ textarea {
 
 .operator-per-person {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
   gap: 18px;
   margin-top: 34px;
 }
@@ -2319,16 +2325,81 @@ textarea {
   text-align: left;
 }
 
+.operator-card-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(132px, 160px);
+  gap: 12px;
+  align-items: stretch;
+}
+
 .operator-choice-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .operator-choice-grid .quiz-option {
-  min-height: 82px;
-  padding: 12px;
+  min-height: 54px;
+  padding: 8px;
   background: #fff;
+}
+
+.operator-choice-grid .partner-logo {
+  max-width: 72px;
+  max-height: 26px;
+}
+
+.operator-date-field {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 8px;
+  min-height: 100%;
+  border: 1.5px solid rgba(39, 36, 67, 0.12);
+  border-radius: 12px;
+  padding: 11px;
+  background: #fff;
+  text-align: left;
+}
+
+.operator-date-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(218, 57, 43, 0.08);
+  color: var(--accent);
+}
+
+.operator-date-icon svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.operator-date-label {
+  color: rgba(39, 36, 67, 0.72);
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.operator-date-field input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(39, 36, 67, 0.14);
+  border-radius: 10px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  background: rgba(246, 244, 240, 0.42);
 }
 
 .operator-continue-btn {
@@ -2781,6 +2852,10 @@ textarea {
 
   .quiz-person-grid,
   .operator-per-person {
+    grid-template-columns: 1fr;
+  }
+
+  .operator-card-controls {
     grid-template-columns: 1fr;
   }
 

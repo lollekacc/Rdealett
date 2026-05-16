@@ -2100,10 +2100,23 @@ textarea {
   color: var(--text);
 }
 
+.quiz-title-nowrap {
+  white-space: nowrap;
+}
+
 .quiz-help {
   margin: 12px 0 0;
   color: rgba(39, 36, 67, 0.68);
   font-size: 17px;
+}
+
+.quiz-subtitle {
+  margin: 12px 0 0;
+  color: rgba(39, 36, 67, 0.58);
+  font-family: 'Roboto', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .quiz-person-grid {

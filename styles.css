@@ -191,6 +191,18 @@ img {
   border-radius: 0 0 10px 10px;
 }
 
+.brand--with-tagline {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand--with-tagline small {
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .site-nav {
   position: relative;
 }

@@ -47,6 +47,7 @@ const offers = [
 const giftCards = ['Apollo', 'H&M', 'Hotel', 'ICA Maxi', 'Mio', 'Zalando', 'Elgiganten', 'Ticketmaster'];
 
 let selectedOffer = null;
+let plansCache = null;
 
 const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
 
@@ -62,6 +63,46 @@ const createElement = (tag, className, text) => {
   }
 
   return element;
+};
+
+const getOperatorOffer = (operator) => offers.find((offer) => offer.provider === operator) || {};
+
+const getPlanDataLabel = (plan) => {
+  if (plan.data) return plan.data;
+  if (Number(plan.dataAmount) >= 999) return 'Obegr\u00e4nsad';
+  if (Number(plan.dataAmount) > 0) return `${plan.dataAmount} GB`;
+  return plan.title || 'Mobilabonnemang';
+};
+
+const loadPlans = async () => {
+  if (plansCache) return plansCache;
+
+  const response = await fetch('./data/plans.json');
+  plansCache = await response.json();
+  return plansCache;
+};
+
+const buildSelectedPlanOffer = (plan, answers) => {
+  const operatorOffer = getOperatorOffer(plan.operator);
+
+  return {
+    provider: plan.operator,
+    operator: plan.operator,
+    title: plan.title,
+    data: getPlanDataLabel(plan),
+    price: plan.price,
+    logo: plan.logo,
+    reward: operatorOffer.reward || 4000,
+    accent: operatorOffer.accent || 'var(--accent)',
+    answers,
+  };
+};
+
+const syncAddonButtons = () => {
+  offersContainer?.querySelectorAll('[data-addon-button]').forEach((button) => {
+    button.disabled = !selectedOffer;
+    button.textContent = selectedOffer ? 'Lägg till' : 'Välj abonnemang först';
+  });
 };
 
 const updateRewardState = () => {
@@ -109,7 +150,7 @@ const renderRewards = (offer) => {
 };
 
 const selectOffer = (offer, card) => {
-  selectedOffer = offer;
+  selectedOffer = { ...offer, addon: null };
 
   offersContainer?.querySelectorAll('.offer-card').forEach((item) => {
     item.classList.remove('is-selected');
@@ -118,29 +159,131 @@ const selectOffer = (offer, card) => {
   card.classList.add('is-selected');
   rewardSection?.classList.remove('is-hidden');
   renderRewards(offer);
+  syncAddonButtons();
   rewardSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+const selectAddon = (addon, card) => {
+  if (!selectedOffer) return;
+
+  selectedOffer.addon = {
+    title: addon.title,
+    price: addon.price,
+    addonPrice: addon.addonPrice,
+    text: addon.text,
+  };
+
+  offersContainer?.querySelectorAll('.offer-card--addon').forEach((item) => {
+    item.classList.remove('is-selected');
+  });
+
+  card.classList.add('is-selected');
+  card.querySelector('[data-addon-button]').textContent = 'Tillagd';
 };
 
 const resetOfferQuestions = () => {
   offersContainer?.querySelectorAll('.offer-card').forEach((card) => {
     card.classList.remove('is-answering', 'is-selected');
     card.querySelector('.offer-card-questions')?.remove();
-    card.querySelector('.offer-card-action')?.classList.remove('is-hidden');
+    card.querySelector('.offer-card-details')?.classList.remove('is-hidden');
   });
 };
 
-const finishOfferQuestions = (offer, card, answers) => {
-  offer.answers = answers;
-  const questionBox = card.querySelector('.offer-card-questions');
+const renderPlanOffers = async (offer, answers) => {
+  if (!offersContainer) return;
 
-  if (questionBox) {
-    questionBox.innerHTML = [
-      '<p class="offer-question-kicker">Svar sparade</p>',
-      '<h4>Du kan forts&auml;tta med presentkortet.</h4>'
-    ].join('');
+  offersContainer.innerHTML = '<div class="offers-loading">H\u00e4mtar abonnemang...</div>';
+
+  try {
+    const plans = await loadPlans();
+    const operatorPlans = plans
+      .filter((plan) => plan.category === 'mobil' && !plan.isFamilyPlan && plan.operator === offer.provider)
+      .sort((left, right) => (left.dataAmount || 0) - (right.dataAmount || 0));
+    const addonPlan = plans.find((plan) =>
+      plan.category === 'mobil' &&
+      plan.isFamilyPlan &&
+      plan.familyPriceType === 'addon' &&
+      plan.operator === offer.provider
+    );
+
+    const fragment = document.createDocumentFragment();
+
+    operatorPlans.forEach((plan) => {
+      const selectedPlan = buildSelectedPlanOffer(plan, answers);
+      const card = createElement('article', 'offer-card offer-card--plan');
+      card.style.setProperty('--offer-accent', selectedPlan.accent);
+
+      const logoWrap = createElement('div', 'offer-card-logo');
+      const logo = document.createElement('img');
+      logo.src = plan.logo;
+      logo.alt = plan.operator;
+      logo.loading = 'lazy';
+      logo.decoding = 'async';
+      logoWrap.append(logo);
+
+      const copy = createElement('div', 'offer-card-copy');
+      copy.append(
+        createElement('h3', '', plan.title),
+        createElement('p', '', plan.text || 'Fria samtal och sms')
+      );
+
+      const meta = createElement('ul', 'offer-card-meta');
+      [
+        `${getPlanDataLabel(plan)} surf`,
+        `${formatCurrency(plan.price)} kr/m\u00e5n`,
+        `${formatCurrency(selectedPlan.reward)} kr presentkort`,
+      ].forEach((item) => {
+        meta.append(createElement('li', '', item));
+      });
+
+      const button = createElement('button', 'offer-card-action', 'V\u00e4lj abonnemang');
+      button.type = 'button';
+      button.addEventListener('click', () => selectOffer(selectedPlan, card));
+
+      card.append(logoWrap, copy, meta, button);
+      fragment.append(card);
+    });
+
+    if (addonPlan) {
+      const card = createElement('article', 'offer-card offer-card--addon');
+      card.style.setProperty('--offer-accent', offer.accent);
+
+      const logoWrap = createElement('div', 'offer-card-logo');
+      const logo = document.createElement('img');
+      logo.src = addonPlan.logo;
+      logo.alt = addonPlan.operator;
+      logo.loading = 'lazy';
+      logo.decoding = 'async';
+      logoWrap.append(logo);
+
+      const copy = createElement('div', 'offer-card-copy');
+      copy.append(
+        createElement('h3', '', addonPlan.title),
+        createElement('p', '', addonPlan.text || `Extra familjemedlem för ${formatCurrency(addonPlan.price)} kr/mån`)
+      );
+
+const meta = createElement('ul', 'offer-card-meta');
+
+      const button = createElement('button', 'offer-card-action', 'Välj abonnemang först');
+      button.type = 'button';
+      button.disabled = true;
+      button.dataset.addonButton = 'true';
+      button.addEventListener('click', () => selectAddon(addonPlan, card));
+
+      card.append(logoWrap, copy, meta, button);
+      fragment.append(card);
+    }
+
+    offersContainer.replaceChildren(fragment);
+    syncAddonButtons();
+  } catch {
+    offersContainer.innerHTML = '<div class="offers-loading">Kunde inte h\u00e4mta abonnemang just nu.</div>';
   }
+};
 
-  selectOffer(offer, card);
+const finishOfferQuestions = (offer, answers) => {
+  offer.answers = answers;
+  renderPlanOffers(offer, answers);
 };
 
 const renderBindingQuestion = (offer, card, answers) => {
@@ -159,7 +302,7 @@ const renderBindingQuestion = (offer, card, answers) => {
     '  <label for="bindingEndDate">N&auml;r upph&ouml;r den?</label>',
     '  <input id="bindingEndDate" type="date" />',
     '  <button class="offer-card-action" type="button" data-finish-date>Forts&auml;tt</button>',
-    '</div>'
+    '</div>',
   ].join('');
 
   questionBox.querySelectorAll('[data-binding]').forEach((button) => {
@@ -173,7 +316,7 @@ const renderBindingQuestion = (offer, card, answers) => {
       }
 
       answers.bindingEndDate = null;
-      finishOfferQuestions(offer, card, answers);
+      finishOfferQuestions(offer, answers);
     });
   });
 
@@ -186,7 +329,7 @@ const renderBindingQuestion = (offer, card, answers) => {
       return;
     }
 
-    finishOfferQuestions(offer, card, answers);
+    finishOfferQuestions(offer, answers);
   });
 };
 
@@ -203,24 +346,16 @@ const startOfferQuestions = (offer, card) => {
     '<div class="offer-question-actions">',
     '  <button type="button" data-current-operator="yes">Ja</button>',
     '  <button type="button" data-current-operator="no">Nej</button>',
-    '</div>'
+    '</div>',
   ].join('');
 
   card.classList.add('is-answering');
-  card.querySelector('.offer-card-action')?.classList.add('is-hidden');
+  card.querySelector('.offer-card-details')?.classList.add('is-hidden');
   card.append(questionBox);
 
   questionBox.querySelectorAll('[data-current-operator]').forEach((button) => {
     button.addEventListener('click', () => {
       answers.currentOperator = button.dataset.currentOperator;
-
-      if (answers.currentOperator === 'no') {
-        answers.binding = 'no';
-        answers.bindingEndDate = null;
-        finishOfferQuestions(offer, card, answers);
-        return;
-      }
-
       renderBindingQuestion(offer, card, answers);
     });
   });
@@ -245,19 +380,21 @@ const renderOffers = () => {
     logo.decoding = 'async';
     logoWrap.append(logo);
 
+    const details = createElement('div', 'offer-card-details');
     const copy = createElement('div');
-    copy.append(createElement('p', '', 'Obegränsad surf'));
+    copy.append(createElement('p', '', 'Obegr\u00e4nsad surf'));
 
     const meta = createElement('ul', 'offer-card-meta');
     ['Fria samtal och sms', '5G & eSIM', `${formatCurrency(offer.reward)} kr presentkort`].forEach((item) => {
       meta.append(createElement('li', '', item));
     });
 
-    const button = createElement('button', 'offer-card-action', 'Välj');
+    const button = createElement('button', 'offer-card-action', 'V\u00e4lj');
     button.type = 'button';
     button.addEventListener('click', () => startOfferQuestions(offer, card));
 
-    card.append(logoWrap, copy, meta, button);
+    details.append(copy, meta, button);
+    card.append(logoWrap, details);
     fragment.append(card);
   });
 
@@ -277,15 +414,24 @@ rewardContinueBtn?.addEventListener('click', () => {
     })
     .filter((item) => item.value > 0);
 
+  const planText = [
+    selectedOffer.data || selectedOffer.title || 'Mobilabonnemang',
+    selectedOffer.price ? `${formatCurrency(selectedOffer.price)} kr/m\u00e5n` : '',
+  ].filter(Boolean).join(' | ');
+  const addonText = selectedOffer.addon
+    ? `${selectedOffer.addon.title}: ${formatCurrency(selectedOffer.addon.price)} kr/mån`
+    : '';
+
   const cartLine = createElement('div', 'cart-line');
   cartLine.append(
     createElement('strong', '', selectedOffer.provider),
-    createElement('span', '', 'Obegränsad surf'),
+    createElement('span', '', planText),
+    ...(addonText ? [createElement('span', '', addonText)] : []),
     createElement('span', '', allocations.map((item) => `${item.name}: ${formatCurrency(item.value)} kr`).join(' | '))
   );
 
   cartItems.replaceChildren(cartLine);
-  summaryArea.replaceChildren(createElement('div', '', `Belöningsvärde: ${formatCurrency(selectedOffer.reward)} kr`));
+  summaryArea.replaceChildren(createElement('div', '', `Bel\u00f6ningsv\u00e4rde: ${formatCurrency(selectedOffer.reward)} kr`));
   cartDrawer.classList.remove('hidden');
 });
 

@@ -255,6 +255,18 @@
   object-fit: contain;
 }
 
+.offer-card-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.offer-card-copy {
+  display: grid;
+  gap: 8px;
+}
+
 .offer-card h3 {
   margin: 0;
   font-family: 'Roboto', sans-serif;
@@ -361,6 +373,17 @@
   cursor: pointer;
 }
 
+.offer-card-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+.offer-card--addon {
+  border-style: dashed;
+}
+
 .offer-binding-date {
   display: grid;
   gap: 10px;
@@ -375,6 +398,17 @@
   min-height: 42px;
   padding: 0 10px;
   border-radius: 8px;
+}
+
+.offers-loading {
+  grid-column: 1 / -1;
+  padding: 26px;
+  border: 1px solid rgba(39, 36, 67, 0.08);
+  border-radius: 12px;
+  background: #fff;
+  color: rgba(39, 36, 67, 0.72);
+  font-weight: 700;
+  text-align: center;
 }
 
 .pro-card {

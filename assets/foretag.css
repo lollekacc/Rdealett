@@ -1,0 +1,315 @@
+.business-page {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.business-hero {
+  position: relative;
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 150px 40px 90px;
+  text-align: center;
+  color: #fff;
+}
+
+.business-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+}
+
+.business-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(23, 20, 43, 0.84), rgba(39, 36, 67, 0.76)),
+    linear-gradient(180deg, rgba(218, 57, 43, 0.14), rgba(39, 36, 67, 0.24));
+}
+
+.business-hero-content {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 820px);
+}
+
+.business-kicker,
+.business-plan-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.business-hero h1 {
+  margin: 22px 0 0;
+  font-family: 'Suez One', serif;
+  font-size: clamp(44px, 6vw, 78px);
+  line-height: 1.06;
+}
+
+.business-hero p {
+  margin: 22px auto 0;
+  max-width: 720px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 19px;
+  line-height: 1.75;
+}
+
+.business-shell {
+  width: min(100%, 1280px);
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.business-size-section {
+  padding: 70px 0 44px;
+}
+
+.business-size-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.business-size {
+  min-height: 96px;
+  border: 2px solid rgba(218, 57, 43, 0.32);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(39, 36, 67, 0.08);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.business-size:hover,
+.business-size.is-selected {
+  transform: translateY(-3px);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 20px 42px rgba(218, 57, 43, 0.18);
+}
+
+.business-plans-section {
+  padding: 44px 0 86px;
+}
+
+.business-operator-stack {
+  display: grid;
+  gap: 28px;
+}
+
+.business-operator {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 22px;
+  padding: 28px;
+  border: 1px solid rgba(39, 36, 67, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20px 48px rgba(39, 36, 67, 0.1);
+}
+
+.business-operator-info {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding-top: 8px;
+}
+
+.business-operator-info img {
+  max-width: 170px;
+  max-height: 70px;
+  object-fit: contain;
+}
+
+.business-operator-info p {
+  margin: 0;
+  color: rgba(39, 36, 67, 0.72);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.business-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.business-plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 410px;
+  padding: 24px;
+  border: 1px solid rgba(39, 36, 67, 0.08);
+  border-top: 4px solid var(--accent);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(39, 36, 67, 0.08);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.business-plan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px rgba(39, 36, 67, 0.14);
+}
+
+.business-plan-card.is-featured {
+  border-color: rgba(218, 57, 43, 0.34);
+  box-shadow: 0 18px 46px rgba(218, 57, 43, 0.12);
+}
+
+.business-plan-card--soft {
+  background: rgba(218, 57, 43, 0.04);
+}
+
+.business-plan-badge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 10px 22px rgba(218, 57, 43, 0.24);
+}
+
+.business-plan-tag {
+  align-self: flex-start;
+  background: rgba(218, 57, 43, 0.1);
+  color: var(--accent);
+}
+
+.business-plan-card h3 {
+  margin: 0;
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.business-plan-card ul {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.business-plan-card li {
+  position: relative;
+  padding-left: 18px;
+  color: rgba(39, 36, 67, 0.74);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.business-plan-card li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.business-plan-card small {
+  margin-top: auto;
+  color: rgba(39, 36, 67, 0.48);
+  font-size: 13px;
+  text-decoration: line-through;
+}
+
+.business-plan-card strong {
+  margin-top: auto;
+  color: var(--accent);
+  font-family: 'Roboto', sans-serif;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.business-plan-card small + strong {
+  margin-top: 0;
+}
+
+.business-plan-card p {
+  margin: 0;
+  color: rgba(39, 36, 67, 0.56);
+  font-size: 13px;
+}
+
+.business-plan-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: auto;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+@media (max-width: 1120px) {
+  .business-operator {
+    grid-template-columns: 1fr;
+  }
+
+  .business-plan-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .business-shell {
+    padding: 0 24px;
+  }
+
+  .business-hero {
+    min-height: 540px;
+    padding: 160px 24px 72px;
+  }
+
+  .business-size-grid,
+  .business-plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .business-operator {
+    padding: 20px;
+  }
+
+  .business-plan-card {
+    min-height: 0;
+  }
+}

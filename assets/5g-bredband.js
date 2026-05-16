@@ -277,6 +277,9 @@ const addSelectedPlanToCart = () => {
     price: selectedPlan.price || 0,
     pricePerPerson: 0,
     persons: 1,
+    phoneLines: 0,
+    productType: 'broadband',
+    unitLabel: 'bredband',
     rewardTotal: reward,
     rewardMixLabel: `Presentkort ${formatCurrency(reward)} kr`,
     rewards: { Presentkort: reward },
@@ -287,40 +290,20 @@ const addSelectedPlanToCart = () => {
     ].filter(Boolean),
   };
 
-  els.cartItems.innerHTML = `
-    <div class="cart-line">
-      <strong>${selectedPlan.operator} ${selectedPlan.speed}</strong>
-      <span>${formatBinding(selectedPlan)}</span>
-      <span>${selectedPlan.technology.toUpperCase()} · ${formatCurrency(selectedPlan.speedMbps)} Mbit/s</span>
-      ${logo ? `<img src="${logo}" alt="${selectedPlan.operator}" style="max-width: 120px; max-height: 42px; object-fit: contain;" />` : ''}
-    </div>
-  `;
+  const cart = window.DealettCart.appendItem(cartItem, {
+    state: {
+      persons: 1,
+      operator: cartItem.operator,
+      wishes: ['5G-bredband'],
+      answers: {},
+    },
+  });
 
-  els.summaryArea.innerHTML = `
-    <div>Presentkort: ${formatCurrency(reward)} kr</div>
-    <div>Månadspris: ${formatCurrency(selectedPlan.price)} kr/mån</div>
-  `;
-  els.totalPrice.textContent = `${formatCurrency(selectedPlan.price)} kr/mån`;
-
-  localStorage.setItem('dealettCart', JSON.stringify([cartItem]));
-  localStorage.setItem('selectedOffer', JSON.stringify({
-    id: cartItem.offerId,
-    operator: cartItem.operator,
-    title: cartItem.title,
-    logo: cartItem.logo,
-    finalPrice: cartItem.price,
-    pricePerPerson: cartItem.pricePerPerson,
-    rewardTotal: cartItem.rewardTotal,
-    rewardMixLabel: cartItem.rewardMixLabel,
-  }));
-  localStorage.setItem('dealettState', JSON.stringify({
-    persons: 1,
-    operator: cartItem.operator,
-    wishes: ['5G-bredband'],
-    answers: {},
-  }));
-  localStorage.setItem('rewardDistribution', JSON.stringify(cartItem.rewards));
-  localStorage.removeItem('rewardChoice');
+  window.DealettCart.renderDrawer({
+    cartItems: els.cartItems,
+    summaryArea: els.summaryArea,
+    totalPrice: els.totalPrice,
+  }, cart);
 
   openCart();
 };

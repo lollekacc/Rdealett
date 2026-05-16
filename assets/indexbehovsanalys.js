@@ -181,9 +181,13 @@ function createIndexQuiz() {
 
   function saveStaticOfferAndNavigate(card) {
     const item = buildStaticCartItem(card);
+    let savedOffer = false;
 
     try {
-      localStorage.setItem("dealettCart", JSON.stringify([item]));
+      const cart = readCart();
+      cart.push(item);
+
+      localStorage.setItem("dealettCart", JSON.stringify(cart));
       localStorage.setItem("selectedOffer", JSON.stringify({
         id: item.offerId,
         operator: item.operator,
@@ -208,12 +212,15 @@ function createIndexQuiz() {
       }));
       localStorage.removeItem("rewardChoice");
       localStorage.setItem("rewardDistribution", JSON.stringify(item.rewards));
+      savedOffer = true;
     } catch {
       // The query string fallback still lets the cart page render the selected offer.
     }
 
     window.DEALETT_updateCartCount?.();
-    window.location.href = card.querySelector(".provider-button")?.getAttribute("href") || "varukorg.html";
+    window.location.href = savedOffer
+      ? "varukorg.html"
+      : card.querySelector(".provider-button")?.getAttribute("href") || "varukorg.html";
   }
 
   function buildStaticCartItem(card) {
@@ -237,6 +244,9 @@ function createIndexQuiz() {
       price: Number(card.dataset.price) || 0,
       pricePerPerson: Number(card.dataset.pricePerPerson) || 0,
       persons,
+      phoneLines: persons,
+      productType: "family",
+      unitLabel: "abonnemang",
       rewardTotal,
       rewardMixLabel: rewardTotal ? `Presentkort ${new Intl.NumberFormat("sv-SE").format(rewardTotal)} kr` : "",
       rewards: rewardTotal > 0 ? { Presentkort: rewardTotal } : {},
@@ -256,16 +266,22 @@ function createIndexQuiz() {
 
   function buildFamilyCartItem(card) {
     const rewardTotal = Number(card.dataset.rewardTotal) || 0;
+    const title = card.dataset.title || "Familjeabonnemang";
+    const persons = Number((title.match(/\d+/) || [])[0]) || 1;
 
     return {
       cartItemId: `${card.dataset.offerId}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       offerId: card.dataset.offerId,
       operator: card.dataset.operator,
-      title: card.dataset.title,
+      title,
       logo: card.dataset.logo,
       dataAmount: Number(card.dataset.dataAmount) || 0,
       price: Number(card.dataset.price) || 0,
       pricePerPerson: Number(card.dataset.pricePerPerson) || 0,
+      persons,
+      phoneLines: persons,
+      productType: "family",
+      unitLabel: "abonnemang",
       rewardTotal,
       rewardMixLabel: card.dataset.rewardMixLabel || "",
       rewards: rewardTotal > 0 ? { Presentkort: rewardTotal } : {}

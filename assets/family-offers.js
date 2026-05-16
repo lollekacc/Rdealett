@@ -130,36 +130,17 @@ const closeCartDrawer = () => {
   cartDrawer?.setAttribute('aria-hidden', 'true');
 };
 
-const renderCartDrawer = (cartItem) => {
+const renderCartDrawer = (cart) => {
   ensureCartDrawer();
 
   const { cartItems, summaryArea, totalPrice } = getCartDrawerElements();
   if (!cartItems || !summaryArea || !totalPrice) return;
 
-  const rewardEntries = Object.entries(cartItem.rewards || {}).filter(([, value]) => Number(value) > 0);
-  const rewardText = rewardEntries.length
-    ? rewardEntries.map(([name, value]) => `${escapeHtml(name)} ${formatCurrency(value)} kr`).join(', ')
-    : `${formatCurrency(cartItem.rewardTotal)} kr`;
-  const features = (cartItem.features || []).filter(Boolean).map(escapeHtml).join(' · ');
-
-  cartItems.innerHTML = `
-    <div class="cart-line">
-      <strong>${escapeHtml(cartItem.operator)} ${escapeHtml(cartItem.title)}</strong>
-      ${cartItem.data ? `<span>${escapeHtml(cartItem.data)}</span>` : ''}
-      ${features ? `<span>${features}</span>` : ''}
-      ${cartItem.logo ? `<img src="${escapeHtml(cartItem.logo)}" alt="${escapeHtml(cartItem.operator)}" style="max-width: 120px; max-height: 42px; object-fit: contain;" />` : ''}
-    </div>
-  `;
-
-  summaryArea.innerHTML = `
-    <div>Presentkort: ${rewardText}</div>
-    <div>Månadspris: ${formatCurrency(cartItem.price)} kr/mån</div>
-  `;
-  totalPrice.textContent = `${formatCurrency(cartItem.price)} kr/mån`;
+  window.DealettCart?.renderDrawer({ cartItems, summaryArea, totalPrice }, cart);
 };
 
-const openCartDrawer = (cartItem) => {
-  renderCartDrawer(cartItem);
+const openCartDrawer = (cart) => {
+  renderCartDrawer(cart);
 
   const { cartDrawer, cartBankIdButton } = getCartDrawerElements();
   cartDrawer?.classList.remove('hidden');
@@ -519,6 +500,9 @@ rewardContinueBtn?.addEventListener('click', () => {
     price: selectedOffer.price || 0,
     pricePerPerson: selectedOffer.pricePerPerson || 0,
     persons,
+    phoneLines: persons,
+    productType: 'family',
+    unitLabel: 'abonnemang',
     rewardTotal: selectedOffer.reward,
     rewardMixLabel: `Presentkort ${formatCurrency(selectedOffer.reward)} kr`,
     rewards,
@@ -531,26 +515,15 @@ rewardContinueBtn?.addEventListener('click', () => {
     ].filter(Boolean),
   };
 
-  localStorage.setItem('dealettCart', JSON.stringify([cartItem]));
-  localStorage.setItem('selectedOffer', JSON.stringify({
-    id: cartItem.offerId,
-    operator: cartItem.operator,
-    title: cartItem.title,
-    logo: cartItem.logo,
-    finalPrice: cartItem.price,
-    pricePerPerson: cartItem.pricePerPerson,
-    rewardTotal: cartItem.rewardTotal,
-    rewardMixLabel: cartItem.rewardMixLabel,
-  }));
-  localStorage.setItem('dealettState', JSON.stringify({
-    persons,
-    operator: cartItem.operator,
-    wishes: ['Familjabonnemang'],
-    answers: cartItem.answers,
-  }));
-  localStorage.setItem('rewardDistribution', JSON.stringify(rewards));
-  localStorage.removeItem('rewardChoice');
-  openCartDrawer(cartItem);
+  const cart = window.DealettCart.appendItem(cartItem, {
+    state: {
+      persons,
+      operator: cartItem.operator,
+      wishes: ['Familjabonnemang'],
+      answers: cartItem.answers,
+    },
+  });
+  openCartDrawer(cart);
 });
 
 bindCartDrawerEvents();

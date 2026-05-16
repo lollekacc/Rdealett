@@ -137,7 +137,7 @@
   };
 
   const getPersons = (item, state) => {
-    if (Number(item.persons)) return Number(item.persons);
+    if (Number.isFinite(Number(item.persons)) && Number(item.persons) > 0) return Number(item.persons);
     if (Number(state?.persons)) return Number(state.persons);
 
     const titleMatch = String(item.title || item.members || '').match(/\d+/);
@@ -150,6 +150,12 @@
       : rewardDistribution;
     const rewardTotal = Number(item.rewardTotal ?? item.reward) || sumRewards(rewards);
     const title = item.title || item.members || 'Abonnemang';
+    const productType = item.productType || window.DealettCart?.getProductType(item) || 'mobile';
+    const persons = getPersons(item, state);
+    const phoneLines = Number.isFinite(Number(item.phoneLines))
+      ? Math.max(Number(item.phoneLines), 0)
+      : productType === 'broadband' ? 0 : persons;
+    const unitLabel = item.unitLabel || (productType === 'broadband' ? 'bredband' : 'abonnemang');
 
     return {
       cartItemId: item.cartItemId || `${item.offerId || item.id || 'offer'}-${Date.now()}`,
@@ -161,7 +167,10 @@
       dataAmount: Number(item.dataAmount) || 0,
       price: Number(item.price ?? item.finalPrice) || 0,
       pricePerPerson: Number(item.pricePerPerson) || 0,
-      persons: getPersons(item, state),
+      persons,
+      phoneLines,
+      productType,
+      unitLabel,
       rewardTotal,
       rewardMixLabel: item.rewardMixLabel || (rewardTotal ? `Presentkort ${formatCurrency(rewardTotal)} kr` : ''),
       rewards: rewards || {},
@@ -242,6 +251,7 @@
     const priceNote = item.price > 0
       ? `Presentkort: ${formatCurrency(item.rewardTotal)} kr`
       : 'M\u00e5nadspris bekr\u00e4ftas vid signering.';
+    const countIcon = item.productType === 'broadband' ? 'fa-wifi' : 'fa-users';
 
     return [
       `<article class="cart-summary-card" style="--cart-accent:${accent}; --cart-accent-soft:${accentSoft};">`,
@@ -253,7 +263,7 @@
       `      <h3>${escapeHtml(item.operator)} ${escapeHtml(item.title)}</h3>`,
       `      <p>${escapeHtml(item.data)}</p>`,
       '      <div class="cart-summary-meta">',
-      `        <span class="cart-summary-pill"><i class="fa-solid fa-users"></i>${item.persons} abonnemang</span>`,
+      `        <span class="cart-summary-pill"><i class="fa-solid ${countIcon}"></i>${item.persons} ${escapeHtml(item.unitLabel || 'abonnemang')}</span>`,
       `        <span class="cart-summary-pill"><i class="fa-solid fa-gift"></i>${escapeHtml(rewardLabel)}</span>`,
       item.pricePerPerson ? `        <span class="cart-summary-pill"><i class="fa-solid fa-tag"></i>${formatCurrency(item.pricePerPerson)} kr/person</span>` : '',
       '      </div>',
@@ -295,10 +305,18 @@
     section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const getPhoneLineCount = () => cart.reduce((sum, item) => sum + Math.max(Number(item.phoneLines) || 0, 0), 0);
+
   const renderPhoneInputs = () => {
     if (!els.phoneInputsContainer || !els.confirmNumbersBtn) return;
 
-    const count = Math.max(...cart.map((item) => item.persons), 1);
+    const count = getPhoneLineCount();
+    if (count <= 0) {
+      els.phoneInputsContainer.replaceChildren();
+      els.confirmNumbersBtn.classList.add('is-hidden');
+      return;
+    }
+
     const fragment = document.createDocumentFragment();
 
     for (let index = 1; index <= count; index += 1) {
@@ -419,9 +437,17 @@
 
     showMessage(els.contactMessage, '');
     saveCheckout();
-    renderPhoneInputs();
-    els.numberSection?.classList.remove('is-hidden');
-    scrollToSection(els.numberSection);
+
+    if (getPhoneLineCount() > 0) {
+      renderPhoneInputs();
+      els.numberSection?.classList.remove('is-hidden');
+      scrollToSection(els.numberSection);
+      return;
+    }
+
+    saveCheckout({ phoneNumbers: [] });
+    els.startDateSection?.classList.remove('is-hidden');
+    scrollToSection(els.startDateSection);
   };
 
   const handleConfirmNumbers = () => {

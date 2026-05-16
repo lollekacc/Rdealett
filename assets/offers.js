@@ -115,37 +115,17 @@ const closeCartDrawer = () => {
   cartDrawer?.setAttribute('aria-hidden', 'true');
 };
 
-const renderCartDrawer = (cartItem) => {
+const renderCartDrawer = (cart) => {
   ensureCartDrawer();
 
   const { cartItems, summaryArea, totalPrice } = getCartDrawerElements();
   if (!cartItems || !summaryArea || !totalPrice) return;
 
-  const rewardEntries = Object.entries(cartItem.rewards || {}).filter(([, value]) => Number(value) > 0);
-  const rewardText = rewardEntries.length
-    ? rewardEntries.map(([name, value]) => `${escapeHtml(name)} ${formatCurrency(value)} kr`).join(', ')
-    : `${formatCurrency(cartItem.rewardTotal)} kr`;
-  const features = (cartItem.features || []).filter(Boolean).map(escapeHtml).join(' · ');
-
-  cartItems.innerHTML = `
-    <div class="cart-line">
-      <strong>${escapeHtml(cartItem.operator)} ${escapeHtml(cartItem.title)}</strong>
-      ${cartItem.data ? `<span>${escapeHtml(cartItem.data)}</span>` : ''}
-      ${features ? `<span>${features}</span>` : ''}
-      ${cartItem.addon ? `<span>Tillägg: ${escapeHtml(cartItem.addon.title)}</span>` : ''}
-      ${cartItem.logo ? `<img src="${escapeHtml(cartItem.logo)}" alt="${escapeHtml(cartItem.operator)}" style="max-width: 120px; max-height: 42px; object-fit: contain;" />` : ''}
-    </div>
-  `;
-
-  summaryArea.innerHTML = `
-    <div>Presentkort: ${rewardText}</div>
-    <div>Månadspris: ${formatCurrency(cartItem.price)} kr/mån</div>
-  `;
-  totalPrice.textContent = `${formatCurrency(cartItem.price)} kr/mån`;
+  window.DealettCart?.renderDrawer({ cartItems, summaryArea, totalPrice }, cart);
 };
 
-const openCartDrawer = (cartItem) => {
-  renderCartDrawer(cartItem);
+const openCartDrawer = (cart) => {
+  renderCartDrawer(cart);
 
   const { cartDrawer, cartBankIdButton } = getCartDrawerElements();
   cartDrawer?.classList.remove('hidden');
@@ -529,6 +509,9 @@ rewardContinueBtn?.addEventListener('click', () => {
     return result;
   }, {});
 
+  const addonPrice = Number(selectedOffer.addon?.addonPrice ?? selectedOffer.addon?.price) || 0;
+  const persons = selectedOffer.addon ? 2 : 1;
+  const monthlyPrice = (Number(selectedOffer.price) || 0) + addonPrice;
   const cartItem = {
     cartItemId: `${selectedOffer.operator || selectedOffer.provider}-${Date.now()}`,
     offerId: selectedOffer.title,
@@ -536,8 +519,12 @@ rewardContinueBtn?.addEventListener('click', () => {
     title: selectedOffer.title || selectedOffer.data || 'Mobilabonnemang',
     logo: selectedOffer.logo,
     data: selectedOffer.data,
-    price: selectedOffer.price || 0,
-    pricePerPerson: selectedOffer.pricePerPerson || 0,
+    price: monthlyPrice,
+    pricePerPerson: persons > 1 ? Math.round(monthlyPrice / persons) : 0,
+    persons,
+    phoneLines: persons,
+    productType: 'mobile',
+    unitLabel: 'abonnemang',
     rewardTotal: selectedOffer.reward,
     rewardMixLabel: `Presentkort ${formatCurrency(selectedOffer.reward)} kr`,
     rewards,
@@ -546,30 +533,19 @@ rewardContinueBtn?.addEventListener('click', () => {
     features: [
       'Fria samtal och sms',
       '5G & eSIM',
-      selectedOffer.addon ? selectedOffer.addon.title : '',
+      selectedOffer.addon ? `${selectedOffer.addon.title} ${formatCurrency(addonPrice)} kr/mån` : '',
     ].filter(Boolean),
   };
 
-  localStorage.setItem('dealettCart', JSON.stringify([cartItem]));
-  localStorage.setItem('selectedOffer', JSON.stringify({
-    id: cartItem.offerId,
-    operator: cartItem.operator,
-    title: cartItem.title,
-    logo: cartItem.logo,
-    finalPrice: cartItem.price,
-    pricePerPerson: cartItem.pricePerPerson,
-    rewardTotal: cartItem.rewardTotal,
-    rewardMixLabel: cartItem.rewardMixLabel,
-  }));
-  localStorage.setItem('dealettState', JSON.stringify({
-    persons: 1,
-    operator: cartItem.operator,
-    wishes: ['Mobilabonnemang'],
-    answers: cartItem.answers,
-  }));
-  localStorage.setItem('rewardDistribution', JSON.stringify(rewards));
-  localStorage.removeItem('rewardChoice');
-  openCartDrawer(cartItem);
+  const cart = window.DealettCart.appendItem(cartItem, {
+    state: {
+      persons,
+      operator: cartItem.operator,
+      wishes: ['Mobilabonnemang'],
+      answers: cartItem.answers,
+    },
+  });
+  openCartDrawer(cart);
 });
 
 bindCartDrawerEvents();

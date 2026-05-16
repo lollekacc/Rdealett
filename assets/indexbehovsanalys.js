@@ -35,7 +35,8 @@ function createIndexQuiz() {
     customerStatusQuestion: document.getElementById("customer-status-question"),
     newCustomersField: document.getElementById("new-customers-field"),
     newCustomersSelect: document.getElementById("new-customers-select"),
-    offersContainer: document.getElementById("offers-container")
+    offersContainer: document.getElementById("offers-container"),
+    deploymentGrid: document.querySelector(".deployment-card-grid")
   };
 
   const steps = Array.from(document.querySelectorAll("#quiz-card-stack .quiz-step-card"));
@@ -66,6 +67,7 @@ function createIndexQuiz() {
     dom.wrapper.addEventListener("click", handleWrapperClick);
     dom.wrapper.addEventListener("change", handleWrapperChange);
     window.addEventListener("resize", syncStackHeight);
+    bindStaticOfferCards();
 
     steps.forEach((step, index) => {
       const backButton = step.querySelector(".quiz-back-inline");
@@ -153,6 +155,94 @@ function createIndexQuiz() {
 
     window.DEALETT_updateCartCount?.();
     window.location.href = "varukorg.html";
+  }
+
+  function bindStaticOfferCards() {
+    if (!dom.deploymentGrid) return;
+
+    dom.deploymentGrid.addEventListener("click", event => {
+      const card = event.target.closest("[data-static-offer]");
+      if (!card || !dom.deploymentGrid.contains(card)) return;
+
+      event.preventDefault();
+      saveStaticOfferAndNavigate(card);
+    });
+
+    dom.deploymentGrid.addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+
+      const card = event.target.closest("[data-static-offer]");
+      if (!card || !dom.deploymentGrid.contains(card)) return;
+
+      event.preventDefault();
+      saveStaticOfferAndNavigate(card);
+    });
+  }
+
+  function saveStaticOfferAndNavigate(card) {
+    const item = buildStaticCartItem(card);
+
+    try {
+      localStorage.setItem("dealettCart", JSON.stringify([item]));
+      localStorage.setItem("selectedOffer", JSON.stringify({
+        id: item.offerId,
+        operator: item.operator,
+        title: item.title,
+        logo: item.logo,
+        dataAmount: item.dataAmount,
+        finalPrice: item.price,
+        pricePerPerson: item.pricePerPerson,
+        rewardTotal: item.rewardTotal,
+        rewardMixLabel: item.rewardMixLabel
+      }));
+      localStorage.setItem("dealettState", JSON.stringify({
+        persons: item.persons,
+        data: "high",
+        operator: item.operator,
+        binding: null,
+        bindingEndDate: null,
+        wishes: ["Startsida"],
+        operatorsByPerson: Array.from({ length: item.persons }, () => "Andra / Ingen"),
+        bindingsByPerson: Array.from({ length: item.persons }, () => null),
+        bindingEndDatesByPerson: Array.from({ length: item.persons }, () => null)
+      }));
+      localStorage.removeItem("rewardChoice");
+      localStorage.setItem("rewardDistribution", JSON.stringify(item.rewards));
+    } catch {
+      // The query string fallback still lets the cart page render the selected offer.
+    }
+
+    window.DEALETT_updateCartCount?.();
+    window.location.href = card.querySelector(".provider-button")?.getAttribute("href") || "varukorg.html";
+  }
+
+  function buildStaticCartItem(card) {
+    const rewardTotal = Number(card.dataset.rewardTotal) || 0;
+    const title = card.dataset.title || "4 abonnemang";
+    const persons = Number((title.match(/\d+/) || [])[0]) || 1;
+    const dataTitle = card.dataset.dataTitle || "Obegr\u00e4nsad surf";
+    const features = String(card.dataset.features || "")
+      .split("|")
+      .map(item => item.trim())
+      .filter(Boolean);
+
+    return {
+      cartItemId: `${card.dataset.offerId || "homepage-offer"}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      offerId: card.dataset.offerId || "",
+      operator: card.dataset.operator || "",
+      title,
+      logo: card.dataset.logo || "",
+      data: dataTitle,
+      dataAmount: Number(card.dataset.dataAmount) || 0,
+      price: Number(card.dataset.price) || 0,
+      pricePerPerson: Number(card.dataset.pricePerPerson) || 0,
+      persons,
+      rewardTotal,
+      rewardMixLabel: rewardTotal ? `Presentkort ${new Intl.NumberFormat("sv-SE").format(rewardTotal)} kr` : "",
+      rewards: rewardTotal > 0 ? { Presentkort: rewardTotal } : {},
+      features,
+      source: "homepage-provider-card"
+    };
   }
 
   function readCart() {

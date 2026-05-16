@@ -987,12 +987,18 @@ img {
   overflow: hidden;
   background: #fff;
   box-shadow: 0 14px 34px rgba(39, 36, 67, 0.1);
+  cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .deployment-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 28px 56px rgba(39, 36, 67, 0.18);
+}
+
+.deployment-card:focus-visible {
+  outline: 3px solid var(--provider-accent);
+  outline-offset: 4px;
 }
 
 .provider-card__media {

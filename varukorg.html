@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dealett - Varukorg</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="./assets/mobilabonnemang.css" />
+  <link rel="stylesheet" href="./assets/varukorg.css" />
+</head>
+<body class="abon-page varukorg-page">
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="brand">Dealett</a>
+      <nav class="site-nav" aria-label="Hemsida">
+        <ul class="nav-menu">
+          <li class="nav-item nav-item--start"><a class="nav-link" href="index.html">Start</a></li>
+          <li class="nav-item nav-item--dropdown">
+            <button class="nav-link nav-dropdown-toggle" type="button">Tj&auml;nster <span class="nav-arrow">&#9662;</span></button>
+            <ul class="dropdown-menu">
+              <li><a href="mobilabonnemang.html">Mobilabonnemang</a></li>
+              <li><a href="familjabonnemang.html">Familjabonnemang</a></li>
+              <li><a href="5g-bredband.html">5G-Bredband</a></li>
+            </ul>
+          </li>
+          <li class="nav-item nav-item--career"><a class="nav-link" href="jamfor-tackning.html">J&auml;mf&ouml;r t&auml;ckning</a></li>
+          <li class="nav-item nav-item--about"><a class="nav-link" href="om-oss.html">Om oss</a></li>
+          <li class="nav-item nav-item--contact"><a class="nav-link" href="kontakt.html">Kontakt</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="abon-main cart-main">
+    <section id="cartSummarySection" class="result-section cart-summary-section">
+      <div class="result-shell result-medium">
+        <div class="section-head center reveal">
+          <span class="section-kicker">Varukorg</span>
+          <h2>Din best&auml;llning</h2>
+          <p>Kontrollera abonnemang och presentkort innan du forts&auml;tter.</p>
+        </div>
+        <div id="cartSummaryContainer" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="contactSection" class="result-section">
+      <div class="result-shell result-medium">
+        <div class="pro-card contact-card reveal">
+          <div class="section-head left-tight">
+            <span class="section-kicker">Leverans</span>
+            <h2>Leverans och bekr&auml;ftelse</h2>
+            <p>Mejl anv&auml;nds f&ouml;r orderbekr&auml;ftelse och mobilnummer f&ouml;r sms-avisering.</p>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="contactEmail">Mejladress</label>
+              <input type="email" id="contactEmail" placeholder="din@email.se" autocomplete="email" />
+            </div>
+
+            <div class="form-field">
+              <label for="contactPhone">Mobilnummer</label>
+              <input type="tel" id="contactPhone" placeholder="07XXXXXXXX" autocomplete="tel" />
+            </div>
+          </div>
+
+          <p id="contactMessage" class="form-message" aria-live="polite"></p>
+          <button id="contactContinueBtn" class="primary-btn full-btn" type="button">G&aring; vidare</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="numberSection" class="result-section is-hidden">
+      <div class="result-shell result-medium">
+        <div class="pro-card checkout-card reveal">
+          <div class="section-head left-tight">
+            <span class="section-kicker">Nummerflytt</span>
+            <h2 id="numberFlowTitle">Fyll i numren som ska flyttas</h2>
+            <p id="numberFlowText">Vi g&aring;r igenom en person i taget.</p>
+          </div>
+
+          <div id="phoneInputsContainer" class="phone-inputs"></div>
+          <p id="numberMessage" class="form-message" aria-live="polite"></p>
+          <button id="confirmNumbersBtn" class="primary-btn full-btn is-hidden" type="button">Bekr&auml;fta</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="startDateSection" class="result-section is-hidden">
+      <div class="result-shell result-medium">
+        <div class="pro-card checkout-card reveal">
+          <div class="section-head left-tight">
+            <span class="section-kicker">Startdatum</span>
+            <h2>N&auml;r vill du b&ouml;rja abonnemanget?</h2>
+            <p>V&auml;lj n&auml;r abonnemanget ska aktiveras.</p>
+          </div>
+
+          <div id="startDateOptions" class="start-date-options"></div>
+          <p id="startDateText" class="start-date-text is-hidden">Startdatum: <strong id="startDateValue"></strong></p>
+
+          <button id="goToSignBtn" class="primary-btn full-btn" type="button">
+            Forts&auml;tt till signering
+          </button>
+          <p id="signMessage" class="form-message success-message" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="brand footer-brand-link">Dealett</a>
+        <p>TextTextTextTextText</p>
+      </div>
+      <div class="footer-contact">
+        <p class="footer-contact-title">Kontakt</p>
+        <a href="mailto:Info@minsida.com">Info@minsida.com</a>
+        <p>Tel: 08-123 45 67</p>
+        <p>Hamngatan 20</p>
+        <p>111 47 Stockholm</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="./assets/varukorg.js"></script>
+</body>
+</html>

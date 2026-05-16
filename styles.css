@@ -386,6 +386,10 @@ img {
   margin: 0;
 }
 
+.hero-title-nowrap {
+  white-space: nowrap;
+}
+
 .hero p {
   margin: 26px 0 0;
   font-family: 'roboto-thin', 'Roboto', sans-serif;

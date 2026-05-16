@@ -458,7 +458,7 @@ function createIndexQuiz() {
     const isOpening = dom.personExtraOptions.classList.contains("hidden");
     dom.personExtraOptions.classList.toggle("hidden", !isOpening);
     dom.personMoreToggle.setAttribute("aria-expanded", String(isOpening));
-    dom.personMoreToggle.textContent = isOpening ? "Dölj 6-10" : "Visa 6-10";
+    dom.personMoreToggle.textContent = isOpening ? "Dölj" : "Visa fler";
   }
 
   function resetCustomerStep() {

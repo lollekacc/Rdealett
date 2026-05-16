@@ -152,15 +152,21 @@
                         </button>
                       </div>
 
-                      <label class="operator-date-field">
-                        <span class="operator-date-icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24" focusable="false">
-                            <path d="M7 2v3M17 2v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
-                          </svg>
-                        </span>
-                        <span class="operator-date-label">Datum</span>
-                        <input type="date" data-operator-date required />
-                      </label>
+                      <div class="operator-binding-controls">
+                        <label class="operator-date-field">
+                          <span class="operator-date-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                              <path d="M7 2v3M17 2v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+                            </svg>
+                          </span>
+                          <span class="operator-date-label">Datum</span>
+                          <input type="date" data-operator-date />
+                        </label>
+
+                        <button type="button" class="operator-no-binding-button" data-no-binding aria-pressed="false">
+                          Ingen bindningstid
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </template>

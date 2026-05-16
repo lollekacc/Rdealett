@@ -9,6 +9,7 @@ function createIndexQuiz() {
     persons: null,
     operators: [],
     operatorDates: [],
+    operatorNoBinding: [],
     selectedOperator: null,
     customerStatus: null,
     existingCustomers: null,
@@ -96,6 +97,12 @@ function createIndexQuiz() {
     const operatorContinue = event.target.closest("[data-operator-continue]");
     if (operatorContinue) {
       finishOperatorQuestion();
+      return;
+    }
+
+    const noBindingOption = event.target.closest("[data-no-binding]");
+    if (noBindingOption) {
+      handleOperatorNoBinding(noBindingOption);
       return;
     }
 
@@ -266,6 +273,7 @@ function createIndexQuiz() {
         newCustomers: state.newCustomers,
         currentOperator: state.selectedOperator,
         operatorDates: state.operatorDates,
+        operatorNoBinding: state.operatorNoBinding,
         binding: state.binding
       },
       operatorsByPerson: state.operators.length ? state.operators : Array.from({ length: item.persons }, () => "Andra / Ingen"),
@@ -371,6 +379,7 @@ function createIndexQuiz() {
         newCustomers: state.newCustomers,
         currentOperator: state.selectedOperator,
         operatorDates: state.operatorDates,
+        operatorNoBinding: state.operatorNoBinding,
         binding: state.binding
       },
       features: [
@@ -430,6 +439,7 @@ function createIndexQuiz() {
     state.persons = persons;
     state.operators = Array.from({ length: persons }, () => null);
     state.operatorDates = Array.from({ length: persons }, () => null);
+    state.operatorNoBinding = Array.from({ length: persons }, () => false);
     state.selectedOperator = null;
     state.customerStatus = "all";
     state.existingCustomers = persons;
@@ -442,6 +452,11 @@ function createIndexQuiz() {
   }
 
   function handleOperatorStep(option) {
+    if (option.dataset.noBinding !== undefined) {
+      handleOperatorNoBinding(option);
+      return;
+    }
+
     if (option.dataset.operator) {
       handlePerPersonOperator(option);
       return;
@@ -458,6 +473,7 @@ function createIndexQuiz() {
       state.selectedOperator = null;
       state.operators = Array.from({ length: state.persons || 1 }, () => null);
       state.operatorDates = Array.from({ length: state.persons || 1 }, () => null);
+      state.operatorNoBinding = Array.from({ length: state.persons || 1 }, () => false);
       dom.newCustomersField?.classList.add("hidden");
       hideOperatorQuestion();
       showStep(2);
@@ -533,6 +549,9 @@ function createIndexQuiz() {
     state.operatorDates = Array.from({ length: persons }, (_, index) => (
       index < boundedExistingCount ? state.operatorDates[index] || null : null
     ));
+    state.operatorNoBinding = Array.from({ length: persons }, (_, index) => (
+      index < boundedExistingCount ? Boolean(state.operatorNoBinding[index]) : false
+    ));
     state.selectedOperator = state.operators.find(Boolean) || null;
 
     renderOperatorChoices(boundedExistingCount);
@@ -572,16 +591,44 @@ function createIndexQuiz() {
     if (!Number.isInteger(personIndex)) return;
 
     state.operatorDates[personIndex] = input.value || null;
+    if (input.value) {
+      state.operatorNoBinding[personIndex] = false;
+      const group = input.closest("[data-operator-group]");
+      group?.querySelector("[data-no-binding]")?.classList.remove("selected", "active");
+      group?.querySelector("[data-no-binding]")?.setAttribute("aria-pressed", "false");
+    }
+
+    updateOperatorContinueState();
+  }
+
+  function handleOperatorNoBinding(option) {
+    const personIndex = Number(option.dataset.personIndex);
+    if (!Number.isInteger(personIndex)) return;
+
+    state.operatorNoBinding[personIndex] = true;
+    state.operatorDates[personIndex] = null;
+
+    const group = option.closest("[data-operator-group]");
+    const dateInput = group?.querySelector("[data-operator-date]");
+    if (dateInput) {
+      dateInput.value = "";
+    }
+
+    option.classList.add("selected", "active");
+    option.setAttribute("aria-pressed", "true");
     updateOperatorContinueState();
   }
 
   function updateOperatorContinueState() {
     const existingCount = state.existingCustomers || 0;
     const selectedCount = state.operators.slice(0, existingCount).filter(Boolean).length;
-    const dateCount = state.operatorDates.slice(0, existingCount).filter(Boolean).length;
+    const bindingChoiceCount = state.operatorDates
+      .slice(0, existingCount)
+      .filter((date, index) => date || state.operatorNoBinding[index])
+      .length;
 
     if (dom.operatorContinueBtn) {
-      dom.operatorContinueBtn.disabled = selectedCount !== existingCount || dateCount !== existingCount;
+      dom.operatorContinueBtn.disabled = selectedCount !== existingCount || bindingChoiceCount !== existingCount;
     }
   }
 
@@ -645,6 +692,17 @@ function createIndexQuiz() {
       fragment.querySelectorAll("[data-operator-date]").forEach(input => {
         input.dataset.personIndex = String(personIndex);
         input.value = state.operatorDates[personIndex] || "";
+      });
+
+      fragment.querySelectorAll("[data-no-binding]").forEach(button => {
+        button.dataset.personIndex = String(personIndex);
+        button.setAttribute("aria-pressed", state.operatorNoBinding[personIndex] ? "true" : "false");
+
+        if (state.operatorNoBinding[personIndex]) {
+          button.classList.add("selected", "active");
+        } else {
+          button.classList.remove("selected", "active");
+        }
       });
 
       dom.operatorContainer.appendChild(fragment);

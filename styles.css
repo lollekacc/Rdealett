@@ -2327,7 +2327,7 @@ textarea {
 
 .operator-card-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(132px, 160px);
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 300px);
   gap: 12px;
   align-items: stretch;
 }
@@ -2347,6 +2347,12 @@ textarea {
 .operator-choice-grid .partner-logo {
   max-width: 72px;
   max-height: 26px;
+}
+
+.operator-binding-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
 }
 
 .operator-date-field {
@@ -2400,6 +2406,38 @@ textarea {
   font-weight: 700;
   color: var(--text);
   background: rgba(246, 244, 240, 0.42);
+}
+
+.operator-no-binding-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  border: 1.5px solid rgba(39, 36, 67, 0.12);
+  border-radius: 12px;
+  padding: 11px;
+  background: #fff;
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.operator-no-binding-button:hover {
+  border-color: var(--accent);
+  box-shadow: 0 12px 22px rgba(39, 36, 67, 0.09);
+  transform: translateY(-2px);
+}
+
+.operator-no-binding-button.selected,
+.operator-no-binding-button.active {
+  border-color: var(--accent);
+  background: rgba(218, 57, 43, 0.06);
+  box-shadow: 0 12px 24px rgba(218, 57, 43, 0.16);
 }
 
 .operator-continue-btn {
@@ -2856,6 +2894,10 @@ textarea {
   }
 
   .operator-card-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .operator-binding-controls {
     grid-template-columns: 1fr;
   }
 

@@ -109,6 +109,36 @@
   color: var(--cart-accent, var(--accent));
 }
 
+.cart-summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.cart-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(39, 36, 67, 0.14);
+  border-radius: 10px;
+  background: #fff;
+  color: rgba(39, 36, 67, 0.82);
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.cart-remove-btn:hover {
+  border-color: var(--cart-accent, var(--accent));
+  color: var(--cart-accent, var(--accent));
+  transform: translateY(-1px);
+}
+
 .cart-summary-bottom {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 0.38fr);

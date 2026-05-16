@@ -90,6 +90,7 @@
     }
 
     localStorage.removeItem('rewardChoice');
+    window.DEALETT_updateCartCount?.();
     return cart;
   };
 

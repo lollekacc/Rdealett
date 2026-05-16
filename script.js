@@ -6,6 +6,27 @@
 
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
+  const readCartCount = () => {
+    try {
+      const cart = JSON.parse(localStorage.getItem('dealettCart') || '[]');
+      return Array.isArray(cart) ? cart.length : 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  const updateCartCount = () => {
+    const count = readCartCount();
+
+    document.querySelectorAll('[data-cart-count]').forEach((badge) => {
+      badge.textContent = String(count);
+      badge.classList.toggle('is-hidden', count <= 0);
+      badge.setAttribute('aria-label', `${count} ${count === 1 ? 'vara' : 'varor'} i varukorgen`);
+    });
+  };
+
+  window.DEALETT_updateCartCount = updateCartCount;
+
   const includePartials = async () => {
     const includeTargets = [...document.querySelectorAll('[data-include]')];
 
@@ -213,10 +234,17 @@
 
   const initGlobalBehaviors = () => {
     setHeaderActiveState();
+    updateCartCount();
     initDropdowns();
     initHeaderMotion();
     initCoveragePreview();
   };
+
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'dealettCart') {
+      updateCartCount();
+    }
+  });
 
   window.DEALETT_includesReady = includePartials().finally(initGlobalBehaviors);
 })();

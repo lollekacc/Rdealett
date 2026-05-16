@@ -81,6 +81,14 @@
     }
   };
 
+  const removeStorage = (key) => {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // Ignore storage failures so the checkout UI remains usable.
+    }
+  };
+
   const escapeHtml = (value) => String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -180,6 +188,18 @@
     };
   };
 
+  const toSelectedOffer = (item) => ({
+    id: item.offerId,
+    operator: item.operator,
+    title: item.title,
+    logo: item.logo,
+    dataAmount: item.dataAmount,
+    finalPrice: item.price,
+    pricePerPerson: item.pricePerPerson,
+    rewardTotal: item.rewardTotal,
+    rewardMixLabel: item.rewardMixLabel
+  });
+
   const loadCart = () => {
     const state = readJson('dealettState', {});
     const rewardDistribution = readJson('rewardDistribution', {});
@@ -242,7 +262,7 @@
     els.contactSection?.classList.add('is-hidden');
   };
 
-  const renderSummaryCard = (item) => {
+  const renderSummaryCard = (item, index) => {
     const accent = getAccent(item.operator);
     const accentSoft = `${accent}14`;
     const rewardLabel = item.rewardTotal ? `${formatCurrency(item.rewardTotal)} kr presentkort` : 'Presentkort v\u00e4ljs senare';
@@ -266,6 +286,9 @@
       `        <span class="cart-summary-pill"><i class="fa-solid ${countIcon}"></i>${item.persons} ${escapeHtml(item.unitLabel || 'abonnemang')}</span>`,
       `        <span class="cart-summary-pill"><i class="fa-solid fa-gift"></i>${escapeHtml(rewardLabel)}</span>`,
       item.pricePerPerson ? `        <span class="cart-summary-pill"><i class="fa-solid fa-tag"></i>${formatCurrency(item.pricePerPerson)} kr/person</span>` : '',
+      '      </div>',
+      '      <div class="cart-summary-actions">',
+      `        <button class="cart-remove-btn" type="button" data-remove-cart-item="${index}" aria-label="Ta bort ${escapeHtml(item.operator)} ${escapeHtml(item.title)}">Ta bort</button>`,
       '      </div>',
       '    </div>',
       '  </div>',
@@ -306,6 +329,62 @@
   };
 
   const getPhoneLineCount = () => cart.reduce((sum, item) => sum + Math.max(Number(item.phoneLines) || 0, 0), 0);
+
+  const syncStoredCart = () => {
+    writeJson('dealettCart', cart);
+
+    if (!cart.length) {
+      removeStorage('selectedOffer');
+      removeStorage('rewardDistribution');
+      removeStorage('dealettState');
+      removeStorage('dealettCheckout');
+      window.DEALETT_updateCartCount?.();
+      return;
+    }
+
+    const latestItem = cart[cart.length - 1];
+    writeJson('selectedOffer', toSelectedOffer(latestItem));
+    writeJson('rewardDistribution', latestItem.rewards || {});
+    window.DEALETT_updateCartCount?.();
+  };
+
+  const refreshCheckoutAfterCartChange = () => {
+    if (!cart.length) {
+      els.contactSection?.classList.add('is-hidden');
+      els.numberSection?.classList.add('is-hidden');
+      els.startDateSection?.classList.add('is-hidden');
+      els.phoneInputsContainer?.replaceChildren();
+      els.confirmNumbersBtn?.classList.add('is-hidden');
+      showMessage(els.contactMessage, '');
+      showMessage(els.numberMessage, '');
+      showMessage(els.signMessage, '');
+      return;
+    }
+
+    els.contactSection?.classList.remove('is-hidden');
+
+    if (!els.numberSection?.classList.contains('is-hidden')) {
+      if (getPhoneLineCount() > 0) {
+        renderPhoneInputs();
+      } else {
+        els.numberSection.classList.add('is-hidden');
+        els.phoneInputsContainer?.replaceChildren();
+        els.confirmNumbersBtn?.classList.add('is-hidden');
+        els.startDateSection?.classList.remove('is-hidden');
+      }
+    }
+
+    saveCheckout();
+  };
+
+  const removeCartItem = (index) => {
+    if (index < 0 || index >= cart.length) return;
+
+    cart.splice(index, 1);
+    syncStoredCart();
+    renderCartSummary();
+    refreshCheckoutAfterCartChange();
+  };
 
   const renderPhoneInputs = () => {
     if (!els.phoneInputsContainer || !els.confirmNumbersBtn) return;
@@ -481,6 +560,13 @@
   };
 
   const bindEvents = () => {
+    els.cartSummaryContainer?.addEventListener('click', (event) => {
+      const removeButton = event.target.closest('[data-remove-cart-item]');
+      if (!removeButton) return;
+
+      removeCartItem(Number(removeButton.dataset.removeCartItem));
+    });
+
     els.contactContinueBtn?.addEventListener('click', handleContactContinue);
     els.confirmNumbersBtn?.addEventListener('click', handleConfirmNumbers);
     els.goToSignBtn?.addEventListener('click', handleSignContinue);
@@ -495,6 +581,7 @@
 
   const init = () => {
     cart = loadCart();
+    window.DEALETT_updateCartCount?.();
     renderCartSummary();
     renderStartDates();
     bindEvents();

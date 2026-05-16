@@ -2331,6 +2331,11 @@ textarea {
   background: #fff;
 }
 
+.operator-continue-btn {
+  max-width: 260px;
+  margin: 18px auto 0;
+}
+
 .partner-logo {
   width: auto;
   max-width: 100px;

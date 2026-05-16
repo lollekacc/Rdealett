@@ -105,11 +105,30 @@
                     </div>
 
                     <div class="quiz-card-body mx-auto w-full max-w-5xl text-center">
-                      <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
+                      <p id="customer-status-question" class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
                         Har någon av er redan abonnemang idag?
                       </p>
 
-                      <div id="customer-operator-grid" class="customer-operator-grid">
+                      <div class="customer-status-grid">
+                        <button type="button" class="quiz-option customer-status-option" data-customer-status="none">
+                          Nej, alla blir nya kunder
+                        </button>
+                        <button type="button" class="quiz-option customer-status-option" data-customer-status="partial">
+                          Ja, vissa har redan abonnemang
+                        </button>
+                        <button type="button" class="quiz-option customer-status-option" data-customer-status="all">
+                          Ja, alla har redan abonnemang
+                        </button>
+                      </div>
+
+                      <div id="new-customers-field" class="new-customers-field hidden">
+                        <label for="new-customers-select">Hur många har abonnemang idag?</label>
+                        <select id="new-customers-select" class="new-customers-select">
+                          <option value="">Välj antal</option>
+                        </select>
+                      </div>
+
+                      <div id="customer-operator-grid" class="customer-operator-grid hidden">
                         <button type="button" class="quiz-option customer-operator-option" data-current-operator="Tele2">
                           <img src="images/tele2.png" class="partner-logo" alt="Tele2" />
                         </button>
@@ -130,28 +149,15 @@
                         </button>
                       </div>
 
-                      <p id="customer-status-question" class="customer-status-question">
-                        Har någon av er redan abonnemang hos vald operatör idag?
+                      <p id="customer-operator-question" class="customer-status-question hidden">
+                        Vilken operatör använder de idag?
                       </p>
 
-                      <div class="customer-status-grid">
-                        <button type="button" class="quiz-option customer-status-option" data-customer-status="none">
-                          Nej, alla blir nya kunder
-                        </button>
-                        <button type="button" class="quiz-option customer-status-option" data-customer-status="partial">
-                          Ja, vissa har redan abonnemang
-                        </button>
-                        <button type="button" class="quiz-option customer-status-option" data-customer-status="all">
-                          Ja, alla har redan abonnemang
-                        </button>
-                      </div>
+                      <div id="operator-per-person" class="operator-per-person hidden"></div>
 
-                      <div id="new-customers-field" class="new-customers-field hidden">
-                        <label for="new-customers-select">Hur många blir nya kunder?</label>
-                        <select id="new-customers-select" class="new-customers-select">
-                          <option value="">Välj antal</option>
-                        </select>
-                      </div>
+                      <button id="operator-continue-btn" class="quiz-option operator-continue-btn hidden" type="button" data-operator-continue disabled>
+                        Fortsätt
+                      </button>
                     </div>
                   </div>
                 </div>

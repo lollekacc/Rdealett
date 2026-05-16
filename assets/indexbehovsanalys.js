@@ -10,6 +10,7 @@ function createIndexQuiz() {
     operators: [],
     selectedOperator: null,
     customerStatus: null,
+    existingCustomers: null,
     newCustomers: null,
     data: null,
     price: null,
@@ -33,8 +34,10 @@ function createIndexQuiz() {
     personMoreToggle: document.getElementById("person-more-toggle"),
     customerOperatorGrid: document.getElementById("customer-operator-grid"),
     customerStatusQuestion: document.getElementById("customer-status-question"),
+    customerOperatorQuestion: document.getElementById("customer-operator-question"),
     newCustomersField: document.getElementById("new-customers-field"),
     newCustomersSelect: document.getElementById("new-customers-select"),
+    operatorContinueBtn: document.getElementById("operator-continue-btn"),
     offersContainer: document.getElementById("offers-container"),
     deploymentGrid: document.querySelector(".deployment-card-grid")
   };
@@ -91,6 +94,12 @@ function createIndexQuiz() {
       return;
     }
 
+    const operatorContinue = event.target.closest("[data-operator-continue]");
+    if (operatorContinue) {
+      finishOperatorQuestion();
+      return;
+    }
+
     const option = event.target.closest(".quiz-option");
     if (option) {
       handleOptionClick(option);
@@ -109,12 +118,12 @@ function createIndexQuiz() {
   function handleWrapperChange(event) {
     if (event.target !== dom.newCustomersSelect) return;
 
-    const newCustomers = Number(dom.newCustomersSelect.value);
-    if (!newCustomers) return;
+    const existingCustomers = Number(dom.newCustomersSelect.value);
+    if (!existingCustomers) return;
 
-    state.newCustomers = newCustomers;
-    applyCustomerState();
-    showStep(2);
+    state.existingCustomers = existingCustomers;
+    state.newCustomers = Math.max((state.persons || 1) - existingCustomers, 0);
+    prepareOperatorQuestion(existingCustomers);
   }
 
   function handleFamilyOfferClick(event) {
@@ -249,6 +258,7 @@ function createIndexQuiz() {
       wishes: [item.productType === "family" ? "Familjeabonnemang" : "Mobilabonnemang"],
       answers: {
         customerStatus: state.customerStatus,
+        existingCustomers: state.existingCustomers,
         newCustomers: state.newCustomers,
         currentOperator: state.selectedOperator,
         binding: state.binding
@@ -352,6 +362,7 @@ function createIndexQuiz() {
       rewards: { Presentkort: rewardTotal },
       answers: {
         customerStatus: state.customerStatus,
+        existingCustomers: state.existingCustomers,
         newCustomers: state.newCustomers,
         currentOperator: state.selectedOperator,
         binding: state.binding
@@ -414,6 +425,7 @@ function createIndexQuiz() {
     state.operators = Array.from({ length: persons }, () => null);
     state.selectedOperator = null;
     state.customerStatus = null;
+    state.existingCustomers = null;
     state.newCustomers = null;
 
     setSelected(step, "[data-persons]", option);
@@ -422,34 +434,38 @@ function createIndexQuiz() {
   }
 
   function handleOperatorStep(option) {
-    if (option.dataset.currentOperator) {
-      state.selectedOperator = option.dataset.currentOperator;
-      setSelected(steps[1], "[data-current-operator]", option);
-      updateCustomerStatusQuestion();
+    if (option.dataset.operator) {
+      handlePerPersonOperator(option);
       return;
     }
 
     if (!option.dataset.customerStatus) return;
 
-    if (!state.selectedOperator) {
-      dom.customerOperatorGrid?.classList.add("needs-choice");
-      window.setTimeout(() => dom.customerOperatorGrid?.classList.remove("needs-choice"), 420);
-      return;
-    }
-
     state.customerStatus = option.dataset.customerStatus;
     setSelected(steps[1], "[data-customer-status]", option);
+
+    if (state.customerStatus === "none") {
+      state.existingCustomers = 0;
+      state.newCustomers = state.persons || 1;
+      state.selectedOperator = null;
+      state.operators = Array.from({ length: state.persons || 1 }, () => null);
+      dom.newCustomersField?.classList.add("hidden");
+      hideOperatorQuestion();
+      showStep(2);
+      return;
+    }
 
     if (state.customerStatus === "partial") {
       renderNewCustomersSelect();
       dom.newCustomersField?.classList.remove("hidden");
+      hideOperatorQuestion();
       return;
     }
 
-    state.newCustomers = state.customerStatus === "none" ? state.persons : 0;
+    state.existingCustomers = state.persons || 1;
+    state.newCustomers = 0;
     dom.newCustomersField?.classList.add("hidden");
-    applyCustomerState();
-    showStep(2);
+    prepareOperatorQuestion(state.existingCustomers);
   }
 
   function toggleExtraPersonOptions() {
@@ -465,7 +481,7 @@ function createIndexQuiz() {
     const customerStep = steps[1];
     if (!customerStep) return;
 
-    customerStep.querySelectorAll("[data-current-operator], [data-customer-status]").forEach(button => {
+    customerStep.querySelectorAll("[data-current-operator], [data-customer-status], [data-operator]").forEach(button => {
       button.classList.remove("selected", "active");
       button.setAttribute("aria-pressed", "false");
     });
@@ -476,52 +492,92 @@ function createIndexQuiz() {
     }
 
     dom.newCustomersField?.classList.add("hidden");
+    dom.customerOperatorGrid?.classList.add("hidden");
     if (dom.newCustomersSelect) {
       dom.newCustomersSelect.innerHTML = '<option value="">Välj antal</option>';
     }
 
+    hideOperatorQuestion();
     updateCustomerStatusQuestion();
   }
 
   function updateCustomerStatusQuestion() {
     if (!dom.customerStatusQuestion) return;
 
-    const operator = state.selectedOperator && state.selectedOperator !== "Other"
-      ? state.selectedOperator
-      : "vald operatör";
-
-    dom.customerStatusQuestion.textContent = `Har någon av er redan abonnemang hos ${operator} idag?`;
+    dom.customerStatusQuestion.textContent = "Har någon av er redan abonnemang idag?";
   }
 
   function renderNewCustomersSelect() {
     if (!dom.newCustomersSelect) return;
 
     const persons = state.persons || 1;
-    const maxNewCustomers = Math.max(persons - 1, 1);
+    const maxExistingCustomers = Math.max(persons - 1, 1);
     const options = ['<option value="">Välj antal</option>'];
 
-    for (let index = 1; index <= maxNewCustomers; index += 1) {
+    for (let index = 1; index <= maxExistingCustomers; index += 1) {
       options.push(`<option value="${index}">${index}</option>`);
     }
 
     dom.newCustomersSelect.innerHTML = options.join("");
   }
 
-  function applyCustomerState() {
+  function prepareOperatorQuestion(existingCount) {
     const persons = state.persons || 1;
-    const operators = Array.from({ length: persons }, () => null);
+    const boundedExistingCount = Math.max(Math.min(existingCount, persons), 0);
 
-    if (state.selectedOperator && state.selectedOperator !== "Other" && state.customerStatus !== "none") {
-      const existingCustomers = state.customerStatus === "all"
-        ? persons
-        : Math.max(persons - (state.newCustomers || 0), 0);
+    state.existingCustomers = boundedExistingCount;
+    state.operators = Array.from({ length: persons }, (_, index) => (
+      index < boundedExistingCount ? state.operators[index] || null : null
+    ));
+    state.selectedOperator = state.operators.find(Boolean) || null;
 
-      for (let index = 0; index < existingCustomers; index += 1) {
-        operators[index] = state.selectedOperator;
-      }
+    dom.customerOperatorGrid?.classList.add("hidden");
+    renderOperatorChoices(boundedExistingCount);
+    updateOperatorContinueState();
+  }
+
+  function hideOperatorQuestion() {
+    dom.customerOperatorQuestion?.classList.add("hidden");
+    dom.operatorContainer?.classList.add("hidden");
+    dom.operatorContinueBtn?.classList.add("hidden");
+
+    if (dom.operatorContinueBtn) {
+      dom.operatorContinueBtn.disabled = true;
     }
 
-    state.operators = operators;
+    if (dom.operatorContainer) {
+      dom.operatorContainer.innerHTML = "";
+    }
+  }
+
+  function handlePerPersonOperator(option) {
+    const personIndex = Number(option.dataset.personIndex);
+    if (!Number.isInteger(personIndex)) return;
+
+    state.operators[personIndex] = option.dataset.operator || null;
+
+    const group = option.closest("[data-operator-group]");
+    setSelected(group || steps[1], "[data-operator]", option);
+
+    state.selectedOperator = state.operators.find(Boolean) || null;
+    updateOperatorContinueState();
+  }
+
+  function updateOperatorContinueState() {
+    const existingCount = state.existingCustomers || 0;
+    const selectedCount = state.operators.slice(0, existingCount).filter(Boolean).length;
+
+    if (dom.operatorContinueBtn) {
+      dom.operatorContinueBtn.disabled = selectedCount !== existingCount;
+    }
+  }
+
+  function finishOperatorQuestion() {
+    updateOperatorContinueState();
+
+    if (dom.operatorContinueBtn?.disabled) return;
+
+    showStep(2);
   }
 
   function handleSingleChoiceStep(step, selector, option, applyState) {
@@ -542,12 +598,15 @@ function createIndexQuiz() {
     activeOption.setAttribute("aria-pressed", "true");
   }
 
-  function renderOperatorChoices() {
+  function renderOperatorChoices(count = state.existingCustomers || 0) {
     if (!dom.operatorContainer || !dom.operatorTemplate || !state.persons) return;
 
     dom.operatorContainer.innerHTML = "";
+    dom.operatorContainer.classList.toggle("hidden", count <= 0);
+    dom.customerOperatorQuestion?.classList.toggle("hidden", count <= 0);
+    dom.operatorContinueBtn?.classList.toggle("hidden", count <= 0);
 
-    state.operators.forEach((selectedOperator, personIndex) => {
+    state.operators.slice(0, count).forEach((selectedOperator, personIndex) => {
       const fragment = dom.operatorTemplate.content.cloneNode(true);
       const card = fragment.firstElementChild;
 

@@ -96,6 +96,64 @@
   background: rgba(47, 125, 106, 0.08);
 }
 
+.family-person-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.family-person-grid button,
+.family-status-options button {
+  min-height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: var(--offer-accent, var(--family-green));
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.family-person-grid .family-more-toggle {
+  min-height: 34px;
+  background: rgba(47, 125, 106, 0.12);
+  color: var(--family-green);
+}
+
+.family-person-grid .family-more-toggle.is-active {
+  background: var(--family-green);
+  color: #fff;
+}
+
+.family-status-options,
+.family-new-customers {
+  display: grid;
+  gap: 10px;
+}
+
+.family-status-options button {
+  min-height: 44px;
+  padding: 0 12px;
+  text-align: left;
+}
+
+.family-new-customers label {
+  margin: 0;
+  font-weight: 700;
+}
+
+.family-new-customers select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(39, 36, 67, 0.16);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+}
+
 .family-page .primary-btn:hover:not(:disabled),
 .family-page .adeala-btn:hover {
   box-shadow: 0 16px 30px rgba(47, 125, 106, 0.22);

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dealett - Mina sidor</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="./assets/account.css" />
+</head>
+<body class="account-page">
+  <header class="site-header">
+    <div class="header-topbar" aria-label="Snabbl&auml;nkar">
+      <div class="header-topbar-inner">
+        <div class="header-topbar-group">
+          <a class="header-topbar-link is-active" href="index.html">Privat</a>
+          <a class="header-topbar-link" href="#">F&ouml;retag</a>
+        </div>
+        <div class="header-topbar-group header-topbar-group--right">
+          <a class="header-topbar-link" href="varukorg.html">Varukorg</a>
+          <a class="header-topbar-link is-active" href="account.html">Mina sidor</a>
+        </div>
+      </div>
+    </div>
+    <div class="header-inner">
+      <a href="index.html" class="brand">Dealett</a>
+      <nav class="site-nav" aria-label="Hemsida">
+        <ul class="nav-menu">
+          <li class="nav-item nav-item--start"><a class="nav-link" href="index.html">Start</a></li>
+          <li class="nav-item nav-item--dropdown">
+            <button class="nav-link nav-dropdown-toggle" type="button">Tj&auml;nster <span class="nav-arrow">&#9662;</span></button>
+            <ul class="dropdown-menu">
+              <li><a href="mobilabonnemang.html">Mobilabonnemang</a></li>
+              <li><a href="familjabonnemang.html">Familjabonnemang</a></li>
+              <li><a href="5g-bredband.html">5G-Bredband</a></li>
+            </ul>
+          </li>
+          <li class="nav-item nav-item--career"><a class="nav-link" href="jamfor-tackning.html">J&auml;mf&ouml;r t&auml;ckning</a></li>
+          <li class="nav-item nav-item--about"><a class="nav-link" href="om-oss.html">Om oss</a></li>
+          <li class="nav-item nav-item--contact"><a class="nav-link" href="kontakt.html">Kontakt</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="account-main">
+    <section class="account-hero">
+      <div class="account-shell">
+        <div class="account-hero-card">
+          <div class="account-hero-copy">
+            <span class="account-kicker">Mina sidor</span>
+            <h1>V&auml;lkommen tillbaka,<br><span id="userName">Kund</span></h1>
+            <p>Din samlade &ouml;versikt f&ouml;r abonnemang, presentkort och kontostatus.</p>
+            <div class="account-actions">
+              <a class="primary-btn" href="mobilabonnemang.html">Utforska abonnemang</a>
+              <button id="logoutBtn" class="account-ghost-btn" type="button">Logga ut</button>
+            </div>
+          </div>
+
+          <div class="account-status-grid" aria-label="Kontostatus">
+            <div>
+              <span>Status</span>
+              <strong>Aktivt</strong>
+            </div>
+            <div>
+              <span>Konto</span>
+              <strong>Privat</strong>
+            </div>
+            <div class="wide">
+              <span>Senast uppdaterad</span>
+              <strong id="lastUpdated">-</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="account-overview">
+      <div class="account-shell">
+        <div class="account-stat-row">
+          <article class="account-card">
+            <span class="account-stat-label">Abonnemang</span>
+            <strong id="activePlan">Inget</strong>
+            <p>Aktiv plan</p>
+          </article>
+          <article class="account-card">
+            <span class="account-stat-label">Pris</span>
+            <strong id="monthlyCost">0 kr</strong>
+            <p>Per m&aring;nad</p>
+          </article>
+          <article class="account-card">
+            <span class="account-stat-label">Bel&ouml;ning</span>
+            <strong id="rewardStatus">Ingen</strong>
+            <p>Aktuell f&ouml;rm&aring;n</p>
+          </article>
+          <article class="account-card">
+            <span class="account-stat-label">Profil</span>
+            <strong id="userInitials">DK</strong>
+            <p>Kontoprofil</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="account-content-section">
+      <div class="account-shell account-layout">
+        <div class="account-main-column">
+          <article class="account-card account-panel">
+            <div class="account-panel-head">
+              <span class="account-kicker">Mitt abonnemang</span>
+              <h2>Din aktiva plan</h2>
+              <p>Operat&ouml;r, surf, startdatum och m&aring;nadskostnad samlat p&aring; ett st&auml;lle.</p>
+            </div>
+
+            <div id="emptyPlanState" class="account-empty-state">
+              <div class="account-plus">+</div>
+              <h3>Inget abonnemang kopplat</h3>
+              <p>Du har &auml;nnu inte lagt till n&aring;gon plan. Hitta ett abonnemang och koppla det till ditt konto.</p>
+              <a class="primary-btn" href="mobilabonnemang.html">Hitta abonnemang</a>
+            </div>
+
+            <div id="planContent" class="account-plan-box hidden">
+              <div>
+                <span class="account-kicker">Aktiv plan</span>
+                <h3 id="planNameHeading">-</h3>
+                <p id="planOperatorLine">-</p>
+              </div>
+
+              <div class="account-plan-meta">
+                <div>
+                  <span>Surf</span>
+                  <strong id="planData">-</strong>
+                </div>
+                <div>
+                  <span>Startdatum</span>
+                  <strong id="planStartDate">-</strong>
+                </div>
+                <div>
+                  <span>M&aring;nadskostnad</span>
+                  <strong id="planPriceBig">0 kr</strong>
+                </div>
+              </div>
+
+              <div class="account-actions">
+                <a class="primary-btn" href="mobilabonnemang.html">Byt abonnemang</a>
+                <button id="cancelPlan" class="account-danger-btn" type="button">Avsluta abonnemang</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="account-card account-panel">
+            <div class="account-panel-head">
+              <span class="account-kicker">Bel&ouml;ning</span>
+              <h2>Din valda f&ouml;rm&aring;n</h2>
+              <p>Din bonus eller kampanj kopplad till kontot.</p>
+            </div>
+            <div class="account-reward-box">
+              <h3 id="rewardNameLarge">Ingen vald</h3>
+              <p id="rewardDescription">Ingen bel&ouml;ning &auml;r kopplad till ditt konto &auml;nnu.</p>
+            </div>
+          </article>
+        </div>
+
+        <aside class="account-sidebar">
+          <article class="account-card account-panel">
+            <span class="account-kicker">Snabbval</span>
+            <h2>Genv&auml;gar</h2>
+            <div class="account-link-list">
+              <a href="kontakt.html"><span>Support</span><i class="fa-solid fa-arrow-right"></i></a>
+              <a href="varukorg.html"><span>Varukorg</span><i class="fa-solid fa-arrow-right"></i></a>
+              <a href="mobilabonnemang.html"><span>Erbjudanden</span><i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+          </article>
+
+          <article class="account-card account-panel">
+            <span class="account-kicker">Kontostatus</span>
+            <h2>&Ouml;versikt</h2>
+            <div class="account-status-list">
+              <div><span>Inloggad som</span><strong id="sidebarUserName">Kund</strong></div>
+              <div><span>Aktivt abonnemang</span><strong id="sidebarPlanName">Inget</strong></div>
+              <div><span>Bel&ouml;ning</span><strong id="sidebarRewardName">Ingen</strong></div>
+              <div><span>Status</span><strong class="green">Aktivt</strong></div>
+            </div>
+          </article>
+
+          <article class="account-card account-panel account-profile-card">
+            <span class="account-kicker">Profil</span>
+            <div class="account-profile-row">
+              <div id="avatarCircle">DK</div>
+              <div>
+                <strong id="profileNameCard">Kund</strong>
+                <span>Dealett medlem</span>
+              </div>
+            </div>
+          </article>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="brand footer-brand-link">Dealett</a>
+        <p>TextTextTextTextText</p>
+      </div>
+      <div class="footer-contact">
+        <p class="footer-contact-title">Kontakt</p>
+        <a href="mailto:Info@minsida.com">Info@minsida.com</a>
+        <p>Tel: 08-123 45 67</p>
+        <p>Hamngatan 20</p>
+        <p>111 47 Stockholm</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="./assets/account.js"></script>
+</body>
+</html>

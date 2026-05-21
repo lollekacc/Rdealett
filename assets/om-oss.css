@@ -342,7 +342,7 @@
 .about-cta-section {
   padding: 70px 99px;
   background:
-    linear-gradient(135deg, rgba(218, 57, 43, 0.96), rgba(167, 42, 32, 0.96)),
+    linear-gradient(135deg, rgba(239, 130, 20, 0.96), rgba(239, 130, 20, 0.96)),
     var(--accent);
   color: #fff;
 }

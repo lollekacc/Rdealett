@@ -113,6 +113,7 @@ img {
 }
 
 .header-topbar-link {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -129,8 +130,35 @@ img {
 
 .header-topbar-link:hover,
 .header-topbar-link.is-active {
+  background: rgba(239, 130, 20, 0.14);
+  color: var(--accent);
+}
+
+.header-topbar-link::before,
+.header-topbar-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
   background: var(--accent);
-  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.header-topbar-link::before {
+  top: 0;
+}
+
+.header-topbar-link::after {
+  bottom: 0;
+}
+
+.header-topbar-link:hover::before,
+.header-topbar-link:hover::after,
+.header-topbar-link.is-active::before,
+.header-topbar-link.is-active::after {
+  opacity: 1;
 }
 
 .header-cart-link {

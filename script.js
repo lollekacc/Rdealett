@@ -5,7 +5,7 @@
   };
 
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  const supportedLanguages = ['en', 'ar', 'so', 'fa'];
+  const supportedLanguages = ['sv', 'en', 'ar', 'so', 'fa'];
   const rtlLanguages = new Set(['ar', 'fa']);
   const textNodeMemory = new WeakMap();
   const attrMemory = new WeakMap();

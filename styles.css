@@ -130,8 +130,8 @@ img {
 
 .header-topbar-link:hover,
 .header-topbar-link.is-active {
-  background: rgba(239, 130, 20, 0.14);
-  color: var(--accent);
+  background: rgba(239, 130, 20, 0.555);
+  color: #fff;
 }
 
 .header-topbar-link::before,

@@ -936,6 +936,25 @@
     }
   };
 
+  const initDealettChat = () => {
+    const chatScriptPath = 'assets/dealett-chat.js';
+
+    if (typeof window.initChat === 'function') {
+      window.initChat().catch?.((error) => console.error('Chat init failed:', error));
+      return;
+    }
+
+    if (document.querySelector(`script[src="${chatScriptPath}"]`)) {
+      return;
+    }
+
+    const chatScript = document.createElement('script');
+    chatScript.src = chatScriptPath;
+    chatScript.defer = true;
+    chatScript.dataset.dealettChatScript = 'true';
+    document.body.appendChild(chatScript);
+  };
+
   const initGlobalBehaviors = () => {
     setHeaderActiveState();
     updateCartCount();
@@ -943,6 +962,7 @@
     initHeaderMotion();
     initCoveragePreview();
     initTranslations();
+    initDealettChat();
   };
 
   window.addEventListener('storage', (event) => {

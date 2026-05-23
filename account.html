@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="./images/favicon.svg" type="image/svg+xml" />
   <title>Dealett - Mina sidor</title>
 
   <link rel="stylesheet" href="styles.css" />
@@ -29,11 +30,11 @@
           <div class="account-status-grid" aria-label="Kontostatus">
             <div>
               <span>Status</span>
-              <strong>Aktivt</strong>
+              <strong id="accountStatusLabel">Demo</strong>
             </div>
             <div>
               <span>Konto</span>
-              <strong>Privat</strong>
+              <strong id="accountTypeLabel">Testsida</strong>
             </div>
             <div class="wide">
               <span>Senast uppdaterad</span>
@@ -148,7 +149,7 @@
               <div><span>Inloggad som</span><strong id="sidebarUserName">Kund</strong></div>
               <div><span>Aktivt abonnemang</span><strong id="sidebarPlanName">Inget</strong></div>
               <div><span>Bel&ouml;ning</span><strong id="sidebarRewardName">Ingen</strong></div>
-              <div><span>Status</span><strong class="green">Aktivt</strong></div>
+              <div><span>Status</span><strong id="sidebarStatusLabel" class="green">Demo</strong></div>
             </div>
           </article>
 
@@ -158,7 +159,7 @@
               <div id="avatarCircle">DK</div>
               <div>
                 <strong id="profileNameCard">Kund</strong>
-                <span>Dealett medlem</span>
+                <span id="profileModeLabel">Demoprofil</span>
               </div>
             </div>
           </article>
@@ -169,6 +170,8 @@
 
   <div data-include="footer"></div>
 
+  <script src="./assets/cart-helpers.js"></script>
+  <script src="./assets/network-utils.js"></script>
   <script src="script.js"></script>
   <script src="./assets/account.js"></script>
 </body>

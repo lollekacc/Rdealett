@@ -12,6 +12,61 @@ const readStorage = (key, fallback = null) => {
   }
 };
 
+const readSessionStorage = (key, fallback = null) => {
+  try {
+    const value = sessionStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const writeSessionStorage = (key, value) => {
+  try {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Keep the account view usable even if session storage is unavailable.
+  }
+};
+
+const removeStoredUser = () => {
+  sessionStorage.removeItem('dealett_user');
+  localStorage.removeItem('dealett_user');
+};
+
+const getUserSession = () => {
+  const user = readSessionStorage('dealett_user');
+  if (user) return user;
+
+  const legacyUser = readStorage('dealett_user');
+  if (legacyUser) {
+    writeSessionStorage('dealett_user', legacyUser);
+    localStorage.removeItem('dealett_user');
+    return legacyUser;
+  }
+
+  return null;
+};
+
+const getCheckoutSession = () => {
+  const checkout = readSessionStorage('dealettCheckout');
+  if (checkout) return checkout;
+
+  const legacyCheckout = readStorage('dealettCheckout');
+  if (legacyCheckout) {
+    try {
+      sessionStorage.setItem('dealettCheckout', JSON.stringify(legacyCheckout));
+      localStorage.removeItem('dealettCheckout');
+    } catch {
+      // If migration fails, still allow this render to use the legacy value.
+    }
+
+    return legacyCheckout;
+  }
+
+  return {};
+};
+
 const setText = (id, value) => {
   const element = document.getElementById(id);
   if (element) {
@@ -20,10 +75,16 @@ const setText = (id, value) => {
 };
 
 const formatPrice = (value) => {
+  if (window.DealettCart?.formatCurrency) {
+    return `${window.DealettCart.formatCurrency(value)} kr`;
+  }
+
   const number = Number(value);
   if (!Number.isFinite(number) || number <= 0) return '0 kr';
   return `${number.toLocaleString('sv-SE')} kr`;
 };
+
+const getCart = () => window.DealettCart?.readCart() || readStorage('dealettCart', []);
 
 const getInitials = (name) => {
   if (!name || typeof name !== 'string') return 'DK';
@@ -52,8 +113,8 @@ const getActivePlan = () => {
   const savedPlan = readStorage('dealett_plan');
   if (savedPlan) return savedPlan;
 
-  const cart = readStorage('dealettCart', []);
-  const checkout = readStorage('dealettCheckout', {});
+  const cart = getCart();
+  const checkout = getCheckoutSession();
   const firstItem = Array.isArray(cart) ? cart[0] : null;
 
   if (!firstItem) return null;
@@ -72,7 +133,7 @@ const getReward = () => {
   const savedReward = readStorage('dealett_reward');
   if (savedReward) return savedReward;
 
-  const cart = readStorage('dealettCart', []);
+  const cart = getCart();
   const firstItem = Array.isArray(cart) ? cart[0] : null;
   const rewardDistribution = readStorage('rewardDistribution', firstItem?.rewards || {});
   const rewardTotal = Number(firstItem?.rewardTotal) || sumRewards(rewardDistribution);
@@ -139,7 +200,7 @@ const setupReward = (reward) => {
 };
 
 const initAccountPage = () => {
-  const user = readStorage('dealett_user');
+  const user = getUserSession();
 
   if (!user) {
     window.location.href = 'login.html';
@@ -154,12 +215,16 @@ const initAccountPage = () => {
   setText('profileNameCard', userName);
   setText('userInitials', initials);
   setText('avatarCircle', initials);
+  setText('accountStatusLabel', user.authMode === 'demo' ? 'Demo' : 'Aktivt');
+  setText('accountTypeLabel', user.authMode === 'demo' ? 'Testsida' : 'Privat');
+  setText('sidebarStatusLabel', user.authMode === 'demo' ? 'Demo' : 'Aktivt');
+  setText('profileModeLabel', user.authMode === 'demo' ? 'Demoprofil' : 'Dealett medlem');
 
   setupPlan(getActivePlan());
   setupReward(getReward());
 
   document.getElementById('logoutBtn')?.addEventListener('click', () => {
-    localStorage.removeItem('dealett_user');
+    removeStoredUser();
     window.location.href = 'index.html';
   });
 
@@ -168,9 +233,16 @@ const initAccountPage = () => {
     if (!confirmed) return;
 
     localStorage.removeItem('dealett_plan');
-    localStorage.removeItem('dealettCart');
-    localStorage.removeItem('selectedOffer');
-    localStorage.removeItem('rewardDistribution');
+    if (window.DealettCart?.clearCart) {
+      window.DealettCart.clearCart();
+    } else {
+      localStorage.removeItem('dealettCart');
+      localStorage.removeItem('selectedOffer');
+      localStorage.removeItem('rewardDistribution');
+      localStorage.removeItem('dealettState');
+      localStorage.removeItem('dealettCheckout');
+      sessionStorage.removeItem('dealettCheckout');
+    }
     window.location.reload();
   });
 };

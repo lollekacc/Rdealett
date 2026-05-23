@@ -78,91 +78,8 @@ const createElement = (tag, className, text) => {
   return element;
 };
 
-const escapeHtml = (value) => String(value ?? '')
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&#039;');
-
-const ensureCartDrawer = () => {
-  if (document.querySelector('#cartDrawer')) return;
-
-  const drawer = document.createElement('div');
-  drawer.id = 'cartDrawer';
-  drawer.className = 'cart-drawer hidden';
-  drawer.setAttribute('aria-hidden', 'true');
-  drawer.innerHTML = [
-    '<div id="cartOverlay" class="cart-drawer-overlay"></div>',
-    '<aside class="cart-drawer-panel" aria-label="Din varukorg">',
-    '  <div class="cart-drawer-head">',
-    '    <h2>Din varukorg</h2>',
-    '    <button id="closeCart" class="cart-drawer-close" type="button" aria-label="St&auml;ng varukorg">&times;</button>',
-    '  </div>',
-    '  <div id="cartItems" class="cart-drawer-items"></div>',
-    '  <div class="cart-drawer-footer">',
-    '    <div id="summaryArea" class="cart-drawer-summary"></div>',
-    '    <div class="cart-drawer-total-row">',
-    '      <span>Totalt</span>',
-    '      <strong id="totalPrice">0 kr/m&aring;n</strong>',
-    '    </div>',
-    '    <button id="cartBankIdButton" class="adeala-btn full-btn" type="button">Fortsätt till varukorg</button>',
-    '  </div>',
-    '</aside>',
-  ].join('');
-
-  document.body.append(drawer);
-};
-
-const getCartDrawerElements = () => ({
-  cartDrawer: document.querySelector('#cartDrawer'),
-  cartItems: document.querySelector('#cartItems'),
-  summaryArea: document.querySelector('#summaryArea'),
-  totalPrice: document.querySelector('#totalPrice'),
-  cartOverlay: document.querySelector('#cartOverlay'),
-  closeCart: document.querySelector('#closeCart'),
-  cartBankIdButton: document.querySelector('#cartBankIdButton'),
-});
-
-const closeCartDrawer = () => {
-  const { cartDrawer } = getCartDrawerElements();
-  cartDrawer?.classList.add('hidden');
-  cartDrawer?.setAttribute('aria-hidden', 'true');
-};
-
-const renderCartDrawer = (cart) => {
-  ensureCartDrawer();
-
-  const { cartItems, summaryArea, totalPrice } = getCartDrawerElements();
-  if (!cartItems || !summaryArea || !totalPrice) return;
-
-  window.DealettCart?.renderDrawer({ cartItems, summaryArea, totalPrice }, cart);
-};
-
 const openCartDrawer = (cart) => {
-  renderCartDrawer(cart);
-
-  const { cartDrawer, cartBankIdButton } = getCartDrawerElements();
-  cartDrawer?.classList.remove('hidden');
-  cartDrawer?.setAttribute('aria-hidden', 'false');
-  cartBankIdButton?.focus();
-};
-
-const bindCartDrawerEvents = () => {
-  ensureCartDrawer();
-
-  const { cartOverlay, closeCart, cartBankIdButton } = getCartDrawerElements();
-  cartOverlay?.addEventListener('click', closeCartDrawer);
-  closeCart?.addEventListener('click', closeCartDrawer);
-  cartBankIdButton?.addEventListener('click', () => {
-    window.location.href = 'varukorg.html';
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      closeCartDrawer();
-    }
-  });
+  window.DealettCart?.openDrawer(cart);
 };
 
 const getPlanDataLabel = (plan) => {
@@ -175,8 +92,15 @@ const getPlanDataLabel = (plan) => {
 const loadPlans = async () => {
   if (plansCache) return plansCache;
 
-  const response = await fetch('./data/plans.json');
-  plansCache = await response.json();
+  const data = await window.DealettNetwork.fetchJson('./data/plans.json', {
+    label: 'Familjabonnemang data',
+  });
+
+  if (!Array.isArray(data)) {
+    throw new Error('Familjabonnemang data must be an array.');
+  }
+
+  plansCache = data;
   return plansCache;
 };
 
@@ -526,6 +450,6 @@ rewardContinueBtn?.addEventListener('click', () => {
   openCartDrawer(cart);
 });
 
-bindCartDrawerEvents();
+window.DealettCart?.bindDrawerEvents();
 renderOffers();
 })();

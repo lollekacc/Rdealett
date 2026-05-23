@@ -169,23 +169,33 @@
       return;
     }
 
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
-    const data = await response.json();
+    try {
+      const data = await window.DealettNetwork.fetchJson(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`,
+        {
+          label: 'Täckningskarta adressökning',
+          timeoutMs: 6000,
+        }
+      );
 
-    if (!data.length) {
-      return;
+      if (!Array.isArray(data) || !data.length) {
+        setText(coordsLabel, 'Ingen adress hittades');
+        return;
+      }
+
+      const lat = Number(data[0].lat);
+      const lon = Number(data[0].lon);
+
+      map.setView([lat, lon], 14, { animate: true });
+
+      if (searchMarker) {
+        map.removeLayer(searchMarker);
+      }
+
+      searchMarker = L.marker([lat, lon]).addTo(map);
+    } catch {
+      setText(coordsLabel, 'Adressökning misslyckades');
     }
-
-    const lat = Number(data[0].lat);
-    const lon = Number(data[0].lon);
-
-    map.setView([lat, lon], 14, { animate: true });
-
-    if (searchMarker) {
-      map.removeLayer(searchMarker);
-    }
-
-    searchMarker = L.marker([lat, lon]).addTo(map);
   };
 
   operatorButtons.forEach((button) => {

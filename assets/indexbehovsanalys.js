@@ -144,22 +144,7 @@ function createIndexQuiz() {
     event.preventDefault();
 
     const item = buildFamilyCartItem(card);
-    const cart = readCart();
-    cart.push(item);
-
-    localStorage.setItem("dealettCart", JSON.stringify(cart));
-    localStorage.setItem("selectedOffer", JSON.stringify({
-      id: item.offerId,
-      operator: item.operator,
-      title: item.title,
-      logo: item.logo,
-      dataAmount: item.dataAmount,
-      finalPrice: item.price,
-      pricePerPerson: item.pricePerPerson,
-      rewardTotal: item.rewardTotal,
-      rewardMixLabel: item.rewardMixLabel
-    }));
-    localStorage.setItem("dealettState", JSON.stringify({
+    persistCartItem(item, {
       persons: 4,
       data: getDataTier(item.dataAmount),
       operator: item.operator,
@@ -169,11 +154,8 @@ function createIndexQuiz() {
       operatorsByPerson: Array.from({ length: 4 }, () => "Andra / Ingen"),
       bindingsByPerson: Array.from({ length: 4 }, () => null),
       bindingEndDatesByPerson: Array.from({ length: 4 }, () => null)
-    }));
-    localStorage.removeItem("rewardChoice");
-    localStorage.setItem("rewardDistribution", JSON.stringify(item.rewards));
+    });
 
-    window.DEALETT_updateCartCount?.();
     window.location.href = "varukorg.html";
   }
 
@@ -201,43 +183,18 @@ function createIndexQuiz() {
 
   function saveStaticOfferAndNavigate(card) {
     const item = buildStaticCartItem(card);
-    let savedOffer = false;
+    const savedOffer = persistCartItem(item, {
+      persons: item.persons,
+      data: "high",
+      operator: item.operator,
+      binding: null,
+      bindingEndDate: null,
+      wishes: ["Startsida"],
+      operatorsByPerson: Array.from({ length: item.persons }, () => "Andra / Ingen"),
+      bindingsByPerson: Array.from({ length: item.persons }, () => null),
+      bindingEndDatesByPerson: Array.from({ length: item.persons }, () => null)
+    });
 
-    try {
-      const cart = readCart();
-      cart.push(item);
-
-      localStorage.setItem("dealettCart", JSON.stringify(cart));
-      localStorage.setItem("selectedOffer", JSON.stringify({
-        id: item.offerId,
-        operator: item.operator,
-        title: item.title,
-        logo: item.logo,
-        dataAmount: item.dataAmount,
-        finalPrice: item.price,
-        pricePerPerson: item.pricePerPerson,
-        rewardTotal: item.rewardTotal,
-        rewardMixLabel: item.rewardMixLabel
-      }));
-      localStorage.setItem("dealettState", JSON.stringify({
-        persons: item.persons,
-        data: "high",
-        operator: item.operator,
-        binding: null,
-        bindingEndDate: null,
-        wishes: ["Startsida"],
-        operatorsByPerson: Array.from({ length: item.persons }, () => "Andra / Ingen"),
-        bindingsByPerson: Array.from({ length: item.persons }, () => null),
-        bindingEndDatesByPerson: Array.from({ length: item.persons }, () => null)
-      }));
-      localStorage.removeItem("rewardChoice");
-      localStorage.setItem("rewardDistribution", JSON.stringify(item.rewards));
-      savedOffer = true;
-    } catch {
-      // The query string fallback still lets the cart page render the selected offer.
-    }
-
-    window.DEALETT_updateCartCount?.();
     window.location.href = savedOffer
       ? "varukorg.html"
       : card.querySelector(".provider-button")?.getAttribute("href") || "varukorg.html";
@@ -245,22 +202,7 @@ function createIndexQuiz() {
 
   function saveRecommendationAndNavigate(plan) {
     const item = buildRecommendationCartItem(plan);
-    const cart = readCart();
-    cart.push(item);
-
-    localStorage.setItem("dealettCart", JSON.stringify(cart));
-    localStorage.setItem("selectedOffer", JSON.stringify({
-      id: item.offerId,
-      operator: item.operator,
-      title: item.title,
-      logo: item.logo,
-      dataAmount: item.dataAmount,
-      finalPrice: item.price,
-      pricePerPerson: item.pricePerPerson,
-      rewardTotal: item.rewardTotal,
-      rewardMixLabel: item.rewardMixLabel
-    }));
-    localStorage.setItem("dealettState", JSON.stringify({
+    persistCartItem(item, {
       persons: item.persons,
       data: state.data || getDataTier(item.dataAmount),
       operator: item.operator,
@@ -279,12 +221,40 @@ function createIndexQuiz() {
       operatorsByPerson: state.operators.length ? state.operators : Array.from({ length: item.persons }, () => "Andra / Ingen"),
       bindingsByPerson: Array.from({ length: item.persons }, () => state.binding || null),
       bindingEndDatesByPerson: state.operatorDates.length ? state.operatorDates : Array.from({ length: item.persons }, () => null)
-    }));
-    localStorage.removeItem("rewardChoice");
-    localStorage.setItem("rewardDistribution", JSON.stringify(item.rewards));
+    });
 
-    window.DEALETT_updateCartCount?.();
     window.location.href = "varukorg.html";
+  }
+
+  function persistCartItem(item, statePayload) {
+    try {
+      if (window.DealettCart?.appendItem) {
+        window.DealettCart.appendItem(item, { state: statePayload });
+        return true;
+      }
+
+      const cart = readCart();
+      cart.push(item);
+      localStorage.setItem("dealettCart", JSON.stringify(cart));
+      localStorage.setItem("selectedOffer", JSON.stringify({
+        id: item.offerId,
+        operator: item.operator,
+        title: item.title,
+        logo: item.logo,
+        dataAmount: item.dataAmount,
+        finalPrice: item.price,
+        pricePerPerson: item.pricePerPerson,
+        rewardTotal: item.rewardTotal,
+        rewardMixLabel: item.rewardMixLabel
+      }));
+      localStorage.setItem("dealettState", JSON.stringify(statePayload));
+      localStorage.removeItem("rewardChoice");
+      localStorage.setItem("rewardDistribution", JSON.stringify(item.rewards || {}));
+      window.DEALETT_updateCartCount?.();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   function buildStaticCartItem(card) {
@@ -829,10 +799,25 @@ function createIndexQuiz() {
       '</div>'
     ].join("");
 
-    const [recommendedPlans] = await Promise.all([
-      getRecommendedPlans(),
-      wait(850)
-    ]);
+    let recommendedPlans = [];
+
+    try {
+      [recommendedPlans] = await Promise.all([
+        getRecommendedPlans(),
+        wait(850)
+      ]);
+    } catch {
+      if (requestId !== recommendationsRequestId) return;
+
+      dom.offersContainer.innerHTML = [
+        '<article class="offer-card offer-card--empty">',
+        '<h4 class="offer-card__title">Kunde inte hämta erbjudanden</h4>',
+        '<p class="offer-card__empty-text">Försök igen om en stund eller välj ett paket direkt från startsidan.</p>',
+        "</article>"
+      ].join("");
+      syncStackHeight();
+      return;
+    }
 
     if (requestId !== recommendationsRequestId) return;
 
@@ -948,9 +933,27 @@ function createIndexQuiz() {
   async function loadPlans() {
     if (plans) return plans;
 
-    const response = await fetch("./data/plans.json");
-    plans = await response.json();
+    const data = await window.DealettNetwork.fetchJson("./data/plans.json", {
+      label: "Behovsanalys data",
+    });
+
+    if (!Array.isArray(data)) {
+      throw new Error("Behovsanalys data must be an array.");
+    }
+
+    plans = data;
     return plans;
+  }
+
+  function escapeHtml(value) {
+    if (window.DealettCart?.escapeHtml) return window.DealettCart.escapeHtml(value);
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   function buildRecommendationCard(plan, index) {
@@ -972,26 +975,26 @@ function createIndexQuiz() {
       '<div class="offer-card__accent"></div>',
       '<div class="offer-card__inner">',
       '  <div class="offer-card__top">',
-      `    <span class="offer-card__label">${topLabel}</span>`,
+      `    <span class="offer-card__label">${escapeHtml(topLabel)}</span>`,
       '  </div>',
       '  <div class="offer-card__head">',
-      `    <img src="${plan.logo}" alt="${plan.operator}" class="offer-card__logo ${providerClass ? `offer-card__logo--${providerClass}` : ""}" />`,
+      `    <img src="${escapeHtml(plan.logo)}" alt="${escapeHtml(plan.operator)}" class="offer-card__logo ${providerClass ? `offer-card__logo--${providerClass}` : ""}" />`,
       '  </div>',
-      plan.text ? `  <p class="offer-card__desc">${plan.text}</p>` : '',
+      plan.text ? `  <p class="offer-card__desc">${escapeHtml(plan.text)}</p>` : '',
       '  <div class="offer-card__stats">',
       '    <div class="offer-card__stat">',
       '      <span class="offer-card__stat-icon"><i class="fa-solid fa-signal"></i></span>',
       '      <div>',
       '        <p class="offer-card__stat-label">Surf</p>',
-      `        <p class="offer-card__stat-value">${dataText}</p>`,
+      `        <p class="offer-card__stat-value">${escapeHtml(dataText)}</p>`,
       '      </div>',
       '    </div>',
       '    <div class="offer-card__stat">',
       '      <span class="offer-card__stat-icon"><i class="fa-solid fa-tag"></i></span>',
       '      <div>',
       '        <p class="offer-card__stat-label">Pris</p>',
-      `        <p class="offer-card__stat-value">${priceMain}</p>`,
-      priceSub ? `        <p class="offer-card__stat-sub">${priceSub}</p>` : '',
+      `        <p class="offer-card__stat-value">${escapeHtml(priceMain)}</p>`,
+      priceSub ? `        <p class="offer-card__stat-sub">${escapeHtml(priceSub)}</p>` : '',
       '      </div>',
       '    </div>',
       '  </div>',

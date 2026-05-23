@@ -49,13 +49,6 @@ const els = {
   openCoverageModal: document.querySelector('#openCoverageModal'),
   closeCoverageModal: document.querySelector('#closeCoverageModal'),
   coverageOverlay: document.querySelector('#coverageOverlay'),
-  cartDrawer: document.querySelector('#cartDrawer'),
-  cartItems: document.querySelector('#cartItems'),
-  summaryArea: document.querySelector('#summaryArea'),
-  totalPrice: document.querySelector('#totalPrice'),
-  cartOverlay: document.querySelector('#cartOverlay'),
-  closeCart: document.querySelector('#closeCart'),
-  cartContinueBtn: document.querySelector('#cartContinueBtn'),
 };
 
 let bredbandPlans = [];
@@ -65,6 +58,17 @@ let coverageLayer = null;
 let searchMarker = null;
 
 const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
+
+const escapeHtml = (value) => {
+  if (window.DealettCart?.escapeHtml) return window.DealettCart.escapeHtml(value);
+
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
 
 const calculateReward = (price) => {
   if (price < 299) return 1000;
@@ -146,18 +150,18 @@ const renderOffers = () => {
     const features = (plan.features || ['Snabb installation', 'Stabil uppkoppling', 'Support ingår']).slice(0, 4);
 
     return `
-      <article class="bredband-offer-card ${isRecommended ? 'recommended' : ''}" data-id="${plan.id}" style="--provider-accent: ${accent}">
+      <article class="bredband-offer-card ${isRecommended ? 'recommended' : ''}" data-id="${escapeHtml(plan.id)}" style="--provider-accent: ${accent}">
         ${isRecommended ? '<div class="bredband-best-badge"><i class="fa-solid fa-star"></i> Bäst värde</div>' : ''}
         <div class="bredband-offer-selected"><i class="fa-solid fa-check"></i></div>
 
         <div class="bredband-offer-top">
           <div class="bredband-offer-brand">
             <div class="bredband-operator-logo-wrap">
-              <img src="${logo}" alt="${plan.operator}" loading="lazy" decoding="async" />
+              <img src="${escapeHtml(logo)}" alt="${escapeHtml(plan.operator)}" loading="lazy" decoding="async" />
             </div>
             <div>
-              <p class="bredband-operator-name">${plan.operator}</p>
-              <p class="bredband-operator-speed">${plan.speed}</p>
+              <p class="bredband-operator-name">${escapeHtml(plan.operator)}</p>
+              <p class="bredband-operator-speed">${escapeHtml(plan.speed)}</p>
             </div>
           </div>
 
@@ -170,19 +174,19 @@ const renderOffers = () => {
         <div class="bredband-price-row">
           <div>
             <p class="bredband-price">${formatCurrency(plan.price)} kr/mån</p>
-            <p class="bredband-binding">${formatBinding(plan)}</p>
+            <p class="bredband-binding">${escapeHtml(formatBinding(plan))}</p>
           </div>
           <div class="bredband-speed-chip">${formatCurrency(plan.speedMbps)} Mbit/s</div>
         </div>
 
         <ul class="bredband-feature-list">
-          ${features.map((feature) => `<li><i class="fa-solid fa-check"></i><span>${feature}</span></li>`).join('')}
+          ${features.map((feature) => `<li><i class="fa-solid fa-check"></i><span>${escapeHtml(feature)}</span></li>`).join('')}
         </ul>
 
         <div class="bredband-offer-footer">
           ${
             plan.tv
-              ? `<button class="bredband-tv-btn channels-btn" data-plan-id="${plan.id}" type="button"><i class="fa-solid fa-tv"></i> Se kanaler</button>`
+              ? `<button class="bredband-tv-btn channels-btn" data-plan-id="${escapeHtml(plan.id)}" type="button"><i class="fa-solid fa-tv"></i> Se kanaler</button>`
               : '<div class="bredband-footer-note">Bredband utan TV-paket</div>'
           }
           <button class="bredband-choose-btn" type="button">Välj bredband</button>
@@ -196,7 +200,8 @@ const renderOffers = () => {
 
 const selectPlanById = (planId) => {
   const plan = bredbandPlans.find((item) => String(item.id) === String(planId));
-  const card = document.querySelector(`.bredband-offer-card[data-id="${planId}"]`);
+  const card = Array.from(document.querySelectorAll('.bredband-offer-card'))
+    .find((item) => item.dataset.id === String(planId));
 
   if (!plan || !card) return;
 
@@ -232,12 +237,17 @@ const openChannelsModal = (planId) => {
   }
 
   els.channelsTitle.textContent = `${plan.title || plan.operator} - Ingående kanaler`;
-  els.channelsGrid.innerHTML = plan.tv.channels.map((channel) => `
-    <div class="bredband-channel-card">
-      <img src="${channelLogos[channel] || ''}" alt="${channel}" loading="lazy" decoding="async" />
-      <span>${channel}</span>
-    </div>
-  `).join('');
+  els.channelsGrid.innerHTML = plan.tv.channels.map((channel) => {
+    const logo = escapeHtml(channelLogos[channel] || '');
+    const name = escapeHtml(channel);
+
+    return `
+      <div class="bredband-channel-card">
+        <img src="${logo}" alt="${name}" loading="lazy" decoding="async" />
+        <span>${name}</span>
+      </div>
+    `;
+  }).join('');
 
   els.channelsModal.classList.remove('hidden');
   els.channelsModal.setAttribute('aria-hidden', 'false');
@@ -250,20 +260,18 @@ const closeChannelsModal = () => {
   document.body.style.overflow = '';
 };
 
-const openCart = () => {
-  els.cartDrawer?.classList.remove('hidden');
-  els.cartDrawer?.setAttribute('aria-hidden', 'false');
+const openCart = (cart) => {
+  window.DealettCart?.openDrawer(cart);
 };
 
 const closeBredbandCart = () => {
-  els.cartDrawer?.classList.add('hidden');
-  els.cartDrawer?.setAttribute('aria-hidden', 'true');
+  window.DealettCart?.closeDrawer();
 };
 
 window.openCart = openCart;
 
 const addSelectedPlanToCart = () => {
-  if (!selectedPlan || !els.cartItems || !els.summaryArea || !els.totalPrice) return;
+  if (!selectedPlan) return;
 
   const reward = calculateReward(selectedPlan.price);
   const logo = providerLogos[selectedPlan.operator] || '';
@@ -285,7 +293,7 @@ const addSelectedPlanToCart = () => {
     rewards: { Presentkort: reward },
     features: [
       formatBinding(selectedPlan),
-      `${selectedPlan.technology.toUpperCase()} · ${formatCurrency(selectedPlan.speedMbps)} Mbit/s`,
+      `${String(selectedPlan.technology || '').toUpperCase()} · ${formatCurrency(selectedPlan.speedMbps)} Mbit/s`,
       ...(selectedPlan.features || []),
     ].filter(Boolean),
   };
@@ -299,13 +307,7 @@ const addSelectedPlanToCart = () => {
     },
   });
 
-  window.DealettCart.renderDrawer({
-    cartItems: els.cartItems,
-    summaryArea: els.summaryArea,
-    totalPrice: els.totalPrice,
-  }, cart);
-
-  openCart();
+  openCart(cart);
 };
 
 const coverageStyles = {
@@ -387,21 +389,33 @@ const initCoverageMap = () => {
 const searchAddress = async (query) => {
   if (!query || !coverageMap || !window.L) return;
 
-  const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
-  const data = await response.json();
+  try {
+    const data = await window.DealettNetwork.fetchJson(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`,
+      {
+        label: 'Adressökning',
+        timeoutMs: 6000,
+      }
+    );
 
-  if (!data.length) return;
+    if (!Array.isArray(data) || !data.length) {
+      setSearchMessage('Vi hittade ingen träff för adressen.', 'error');
+      return;
+    }
 
-  const lat = Number(data[0].lat);
-  const lon = Number(data[0].lon);
+    const lat = Number(data[0].lat);
+    const lon = Number(data[0].lon);
 
-  coverageMap.setView([lat, lon], 14);
+    coverageMap.setView([lat, lon], 14);
 
-  if (searchMarker) {
-    coverageMap.removeLayer(searchMarker);
+    if (searchMarker) {
+      coverageMap.removeLayer(searchMarker);
+    }
+
+    searchMarker = L.marker([lat, lon]).addTo(coverageMap);
+  } catch {
+    setSearchMessage('Kunde inte söka adress just nu.', 'error');
   }
-
-  searchMarker = L.marker([lat, lon]).addTo(coverageMap);
 };
 
 const openCoverageModal = () => {
@@ -472,11 +486,7 @@ const bindEvents = () => {
 
   els.closeChannelsModal?.addEventListener('click', closeChannelsModal);
   els.continueBtn?.addEventListener('click', addSelectedPlanToCart);
-  els.cartOverlay?.addEventListener('click', closeBredbandCart);
-  els.closeCart?.addEventListener('click', closeBredbandCart);
-  els.cartContinueBtn?.addEventListener('click', () => {
-    window.location.href = 'varukorg.html';
-  });
+  window.DealettCart?.bindDrawerEvents();
 
   els.openCoverageModal?.addEventListener('click', openCoverageModal);
   els.closeCoverageModal?.addEventListener('click', closeCoverageModal);
@@ -517,13 +527,15 @@ const bindEvents = () => {
 
 const loadPlans = async () => {
   try {
-    const response = await fetch('./data/5Gbredband.json');
+    const data = await window.DealettNetwork.fetchJson('./data/5Gbredband.json', {
+      label: '5G-bredband data',
+    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    if (!Array.isArray(data)) {
+      throw new Error('5G-bredband data must be an array.');
     }
 
-    bredbandPlans = await response.json();
+    bredbandPlans = data;
     renderOffers();
   } catch (error) {
     console.error('Kunde inte ladda 5Gbredband.json', error);

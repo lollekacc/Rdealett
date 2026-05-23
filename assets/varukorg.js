@@ -73,9 +73,27 @@
     }
   };
 
+  const readSessionJson = (key, fallback) => {
+    try {
+      const raw = sessionStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
   const writeJson = (key, value) => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Ignore storage failures so the checkout UI remains usable.
+    }
+  };
+
+  const writeSessionJson = (key, value) => {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(value));
+      localStorage.removeItem(key);
     } catch {
       // Ignore storage failures so the checkout UI remains usable.
     }
@@ -89,6 +107,32 @@
     }
   };
 
+  const removeSessionStorage = (key) => {
+    try {
+      sessionStorage.removeItem(key);
+    } catch {
+      // Ignore storage failures so the checkout UI remains usable.
+    }
+  };
+
+  const removeCheckoutStorage = () => {
+    removeStorage('dealettCheckout');
+    removeSessionStorage('dealettCheckout');
+  };
+
+  const readCheckout = () => {
+    const checkout = readSessionJson('dealettCheckout', null);
+    if (checkout) return checkout;
+
+    const legacyCheckout = readJson('dealettCheckout', null);
+    if (legacyCheckout) {
+      removeStorage('dealettCheckout');
+      return legacyCheckout;
+    }
+
+    return {};
+  };
+
   const escapeHtml = (value) => String(value ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -96,7 +140,9 @@
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
-  const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
+  const formatCurrency = (value) => (
+    window.DealettCart?.formatCurrency(value) || currency.format(Math.max(Number(value) || 0, 0))
+  );
 
   const slugProvider = (operator) => String(operator || '')
     .toLowerCase()
@@ -106,7 +152,7 @@
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 
-  const getAccent = (operator) => providerAccents[slugProvider(operator)] || '#da392b';
+  const getAccent = (operator) => window.DealettCart?.getAccent(operator) || providerAccents[slugProvider(operator)] || '#da392b';
 
   const sumRewards = (rewards) => {
     if (!rewards || typeof rewards !== 'object') return 0;
@@ -152,41 +198,28 @@
     return titleMatch ? Number(titleMatch[0]) : 1;
   };
 
-  const normalizeItem = (item, state, rewardDistribution) => {
-    const rewards = item.rewards && typeof item.rewards === 'object'
-      ? item.rewards
-      : rewardDistribution;
-    const rewardTotal = Number(item.rewardTotal ?? item.reward) || sumRewards(rewards);
-    const title = item.title || item.members || 'Abonnemang';
-    const productType = item.productType || window.DealettCart?.getProductType(item) || 'mobile';
-    const persons = getPersons(item, state);
-    const phoneLines = Number.isFinite(Number(item.phoneLines))
-      ? Math.max(Number(item.phoneLines), 0)
-      : productType === 'broadband' ? 0 : persons;
-    const unitLabel = item.unitLabel || (productType === 'broadband' ? 'bredband' : 'abonnemang');
-
-    return {
+  const normalizeItem = (item, state, rewardDistribution) => (
+    window.DealettCart?.normalizeItem(item, { state, rewards: rewardDistribution }) || {
+      ...item,
       cartItemId: item.cartItemId || `${item.offerId || item.id || 'offer'}-${Date.now()}`,
       offerId: item.offerId || item.id || '',
       operator: item.operator || item.provider || 'Dealett',
-      title,
+      title: item.title || item.members || 'Abonnemang',
       logo: item.logo || '',
       data: getDataLabel(item),
       dataAmount: Number(item.dataAmount) || 0,
       price: Number(item.price ?? item.finalPrice) || 0,
       pricePerPerson: Number(item.pricePerPerson) || 0,
-      persons,
-      phoneLines,
-      productType,
-      unitLabel,
-      rewardTotal,
-      rewardMixLabel: item.rewardMixLabel || (rewardTotal ? `Presentkort ${formatCurrency(rewardTotal)} kr` : ''),
-      rewards: rewards || {},
-      features: Array.isArray(item.features) && item.features.length
-        ? item.features
-        : ['Fria samtal och sms', '5G & eSIM']
-    };
-  };
+      persons: getPersons(item, state),
+      phoneLines: item.productType === 'broadband' ? 0 : getPersons(item, state),
+      productType: item.productType || 'mobile',
+      unitLabel: item.unitLabel || 'abonnemang',
+      rewardTotal: Number(item.rewardTotal ?? item.reward) || sumRewards(rewardDistribution),
+      rewardMixLabel: item.rewardMixLabel || '',
+      rewards: item.rewards || rewardDistribution || {},
+      features: Array.isArray(item.features) && item.features.length ? item.features : ['Fria samtal och sms', '5G & eSIM']
+    }
+  );
 
   const toSelectedOffer = (item) => ({
     id: item.offerId,
@@ -207,26 +240,15 @@
 
     if (queryOffer) {
       const normalizedOffer = normalizeItem(queryOffer, state, queryOffer.rewards);
-      writeJson('dealettCart', [normalizedOffer]);
-      writeJson('selectedOffer', {
-        id: normalizedOffer.offerId,
-        operator: normalizedOffer.operator,
-        title: normalizedOffer.title,
-        logo: normalizedOffer.logo,
-        dataAmount: normalizedOffer.dataAmount,
-        finalPrice: normalizedOffer.price,
-        pricePerPerson: normalizedOffer.pricePerPerson,
-        rewardTotal: normalizedOffer.rewardTotal,
-        rewardMixLabel: normalizedOffer.rewardMixLabel
-      });
-      writeJson('rewardDistribution', normalizedOffer.rewards);
+      window.DealettCart?.setCart([normalizedOffer]) || writeJson('dealettCart', [normalizedOffer]);
       return [normalizedOffer];
     }
 
     const storedCart = readJson('dealettCart', []);
 
     if (Array.isArray(storedCart) && storedCart.length) {
-      return storedCart.map((item) => normalizeItem(item, state, rewardDistribution));
+      return window.DealettCart?.normalizeCart(storedCart, { state, rewards: rewardDistribution })
+        || storedCart.map((item) => normalizeItem(item, state, rewardDistribution));
     }
 
     const selectedOffer = readJson('selectedOffer', null);
@@ -306,6 +328,31 @@
     ].join('');
   };
 
+  const renderCheckoutTotals = () => {
+    const totals = window.DealettCart?.getTotals(cart) || {
+      price: cart.reduce((sum, item) => sum + Math.max(Number(item.price) || 0, 0), 0),
+      reward: cart.reduce((sum, item) => sum + Math.max(Number(item.rewardTotal) || 0, 0), 0),
+      phoneLines: getPhoneLineCount(),
+    };
+
+    return [
+      '<article class="cart-checkout-total-card">',
+      '  <div>',
+      '    <span>Total månadspris</span>',
+      `    <strong>${formatCurrency(totals.price)} kr/mån</strong>`,
+      '  </div>',
+      '  <div>',
+      '    <span>Presentkort totalt</span>',
+      `    <strong>${formatCurrency(totals.reward)} kr</strong>`,
+      '  </div>',
+      '  <div>',
+      '    <span>Telefonlinjer</span>',
+      `    <strong>${totals.phoneLines}</strong>`,
+      '  </div>',
+      '</article>'
+    ].join('');
+  };
+
   const renderCartSummary = () => {
     if (!els.cartSummaryContainer) return;
 
@@ -314,7 +361,10 @@
       return;
     }
 
-    els.cartSummaryContainer.innerHTML = cart.map(renderSummaryCard).join('');
+    els.cartSummaryContainer.innerHTML = [
+      ...cart.map(renderSummaryCard),
+      renderCheckoutTotals()
+    ].join('');
   };
 
   const isEmailValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -331,13 +381,18 @@
   const getPhoneLineCount = () => cart.reduce((sum, item) => sum + Math.max(Number(item.phoneLines) || 0, 0), 0);
 
   const syncStoredCart = () => {
+    if (window.DealettCart?.setCart) {
+      cart = window.DealettCart.setCart(cart);
+      return;
+    }
+
     writeJson('dealettCart', cart);
 
     if (!cart.length) {
       removeStorage('selectedOffer');
       removeStorage('rewardDistribution');
       removeStorage('dealettState');
-      removeStorage('dealettCheckout');
+      removeCheckoutStorage();
       window.DEALETT_updateCartCount?.();
       return;
     }
@@ -362,19 +417,14 @@
     }
 
     els.contactSection?.classList.remove('is-hidden');
+    els.numberSection?.classList.add('is-hidden');
+    els.startDateSection?.classList.add('is-hidden');
+    els.phoneInputsContainer?.replaceChildren();
+    els.confirmNumbersBtn?.classList.add('is-hidden');
+    showMessage(els.numberMessage, '');
+    showMessage(els.signMessage, '');
 
-    if (!els.numberSection?.classList.contains('is-hidden')) {
-      if (getPhoneLineCount() > 0) {
-        renderPhoneInputs();
-      } else {
-        els.numberSection.classList.add('is-hidden');
-        els.phoneInputsContainer?.replaceChildren();
-        els.confirmNumbersBtn?.classList.add('is-hidden');
-        els.startDateSection?.classList.remove('is-hidden');
-      }
-    }
-
-    saveCheckout();
+    removeCheckoutStorage();
   };
 
   const removeCartItem = (index) => {
@@ -488,8 +538,8 @@
   });
 
   const saveCheckout = (extra = {}) => {
-    const existing = readJson('dealettCheckout', {});
-    writeJson('dealettCheckout', {
+    const existing = readCheckout();
+    writeSessionJson('dealettCheckout', {
       ...existing,
       cart,
       contact: getContact(),

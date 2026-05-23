@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="./images/favicon.svg" type="image/svg+xml" />
   <title>Dealett - Logga in</title>
 
   <link rel="stylesheet" href="styles.css" />
@@ -15,9 +16,9 @@
   <main class="login-main">
     <section class="login-card account-card">
       <div class="login-head">
-        <span class="account-kicker">V&auml;lkommen tillbaka</span>
+        <span class="account-kicker">Demol&auml;ge</span>
         <h1>Logga in</h1>
-        <p>Anv&auml;nd din e-post f&ouml;r att komma till Mina sidor.</p>
+        <p>Skapa en lokal testsession f&ouml;r att se Mina sidor-fl&ouml;det.</p>
       </div>
 
       <form id="loginForm" class="login-form">
@@ -38,11 +39,16 @@
         Har du inget konto?
         <button id="registerDemoBtn" type="button">Registrera dig</button>
       </p>
+      <p class="login-demo-note">
+        Detta &auml;r inte riktig autentisering. En backend beh&ouml;vs innan konton, ordrar eller personuppgifter hanteras skarpt.
+      </p>
     </section>
   </main>
 
   <div data-include="footer"></div>
 
+  <script src="./assets/cart-helpers.js"></script>
+  <script src="./assets/network-utils.js"></script>
   <script src="script.js"></script>
   <script src="./assets/login.js"></script>
 </body>

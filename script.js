@@ -506,7 +506,7 @@
 
   const getSavedLanguage = () => {
     const saved = localStorage.getItem('dealettLanguage');
-    return supportedLanguages.includes(saved) ? saved : 'en';
+    return supportedLanguages.includes(saved) ? saved : 'sv';
   };
 
   const applyPatternTranslation = (text, language) => {
@@ -743,14 +743,11 @@
       }
 
       try {
-        const response = await fetch(partialPath);
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
         const template = document.createElement('template');
-        template.innerHTML = (await response.text()).trim();
+        const html = await window.DealettNetwork.fetchText(partialPath, {
+          label: `Partial ${includeName}`,
+        });
+        template.innerHTML = html.trim();
         target.replaceWith(template.content.cloneNode(true));
       } catch {
         target.hidden = true;
@@ -936,23 +933,159 @@
     }
   };
 
-  const initDealettChat = () => {
-    const chatScriptPath = 'assets/dealett-chat.js';
+  const CHAT_OPEN_KEY = 'dealett_ai_chat_open';
+  const CHAT_HISTORY_KEY = 'dealett_ai_chat_history';
+  const CHAT_SCRIPT_PATH = 'assets/dealett-chat.js';
+
+  const readBrowserStorage = (storage, key) => {
+    try {
+      return storage.getItem(key);
+    } catch {
+      return null;
+    }
+  };
+
+  const hasStoredChatState = () => (
+    readBrowserStorage(sessionStorage, CHAT_OPEN_KEY) === 'true' ||
+    readBrowserStorage(localStorage, CHAT_OPEN_KEY) === 'true' ||
+    Boolean(readBrowserStorage(sessionStorage, CHAT_HISTORY_KEY)) ||
+    Boolean(readBrowserStorage(localStorage, CHAT_HISTORY_KEY))
+  );
+
+  const markChatOpen = () => {
+    try {
+      sessionStorage.setItem(CHAT_OPEN_KEY, 'true');
+      localStorage.removeItem(CHAT_OPEN_KEY);
+    } catch {
+      // Chat still loads if storage is unavailable.
+    }
+  };
+
+  const ensureChatLauncherStyle = () => {
+    if (document.getElementById('dealett-chat-launcher-style')) return;
+
+    const style = document.createElement('style');
+    style.id = 'dealett-chat-launcher-style';
+    style.textContent = `
+      #dealett-chat-launcher {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 9998;
+      }
+
+      #dealett-chat-launcher button {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 48px;
+        padding: 0 18px;
+        border: none;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #fff;
+        font: 700 14px/1.2 'Roboto', sans-serif;
+        cursor: pointer;
+        box-shadow: 0 16px 34px rgba(37, 99, 235, 0.28);
+      }
+
+      #dealett-chat-launcher button:disabled {
+        cursor: progress;
+        opacity: 0.82;
+      }
+
+      #dealett-chat-launcher .dealett-chat-launcher-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.2);
+      }
+
+      @media (max-width: 520px) {
+        #dealett-chat-launcher {
+          right: 16px;
+          bottom: 16px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
+  const removeChatLauncher = () => {
+    document.getElementById('dealett-chat-launcher')?.remove();
+  };
+
+  const createChatLauncher = () => {
+    if (
+      document.getElementById('dealett-chat-launcher') ||
+      document.querySelector('[data-dealett-ai-chat-root]')
+    ) {
+      return;
+    }
+
+    ensureChatLauncherStyle();
+
+    const launcher = document.createElement('div');
+    launcher.id = 'dealett-chat-launcher';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.setAttribute('aria-label', 'Öppna Dealett-AI');
+
+    const dot = document.createElement('span');
+    dot.className = 'dealett-chat-launcher-dot';
+    dot.setAttribute('aria-hidden', 'true');
+
+    const label = document.createElement('span');
+    label.textContent = 'Dealett-AI';
+
+    button.append(dot, label);
+    button.addEventListener('click', () => {
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      loadDealettChat({ open: true });
+    });
+
+    launcher.appendChild(button);
+    document.body.appendChild(launcher);
+  };
+
+  const loadDealettChat = ({ open = false } = {}) => {
+    if (open) {
+      markChatOpen();
+    }
+
+    removeChatLauncher();
 
     if (typeof window.initChat === 'function') {
       window.initChat().catch?.((error) => console.error('Chat init failed:', error));
       return;
     }
 
-    if (document.querySelector(`script[src="${chatScriptPath}"]`)) {
+    const existingScript = document.querySelector(`script[src="${CHAT_SCRIPT_PATH}"]`);
+    if (existingScript) {
       return;
     }
 
     const chatScript = document.createElement('script');
-    chatScript.src = chatScriptPath;
+    chatScript.src = CHAT_SCRIPT_PATH;
     chatScript.defer = true;
     chatScript.dataset.dealettChatScript = 'true';
+    chatScript.addEventListener('error', () => {
+      console.error('Chat script failed to load.');
+      createChatLauncher();
+    }, { once: true });
     document.body.appendChild(chatScript);
+  };
+
+  const initDealettChat = () => {
+    if (hasStoredChatState()) {
+      loadDealettChat();
+      return;
+    }
+
+    createChatLauncher();
   };
 
   const initGlobalBehaviors = () => {
@@ -970,6 +1103,8 @@
       updateCartCount();
     }
   });
+
+  window.addEventListener('dealett:cart-updated', updateCartCount);
 
   window.DEALETT_includesReady = includePartials().finally(initGlobalBehaviors);
 })();

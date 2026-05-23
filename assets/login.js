@@ -10,10 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!email || !password) return;
 
-    localStorage.setItem('dealett_user', JSON.stringify({
+    sessionStorage.setItem('dealett_user', JSON.stringify({
+      authMode: 'demo',
       name: email.split('@')[0] || 'Kund',
       email,
     }));
+    localStorage.removeItem('dealett_user');
 
     window.location.href = 'account.html';
   };

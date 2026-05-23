@@ -24,7 +24,6 @@
     "B",
     "BLOCKQUOTE",
     "BR",
-    "BUTTON",
     "CODE",
     "DIV",
     "EM",
@@ -48,6 +47,47 @@
     "SVG",
     "TEXTAREA"
   ]);
+
+  function readEphemeralValue(key) {
+    try {
+      const value = sessionStorage.getItem(key);
+      const legacyValue = localStorage.getItem(key);
+
+      if (value !== null) {
+        if (legacyValue !== null) {
+          localStorage.removeItem(key);
+        }
+        return value;
+      }
+
+      if (legacyValue !== null) {
+        sessionStorage.setItem(key, legacyValue);
+        localStorage.removeItem(key);
+      }
+
+      return legacyValue;
+    } catch {
+      return null;
+    }
+  }
+
+  function writeEphemeralValue(key, value) {
+    try {
+      sessionStorage.setItem(key, String(value));
+      localStorage.removeItem(key);
+    } catch {
+      // Keep chat usable even if storage is unavailable.
+    }
+  }
+
+  function removeEphemeralValue(key) {
+    try {
+      sessionStorage.removeItem(key);
+      localStorage.removeItem(key);
+    } catch {
+      // Keep chat usable even if storage is unavailable.
+    }
+  }
 
   function readCartFallback() {
     try {
@@ -746,12 +786,9 @@
 
   async function loadJsonArray(url) {
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = await response.json();
+      const data = await window.DealettNetwork.fetchJson(url, {
+        label: `Chat catalog ${url}`,
+      });
       return Array.isArray(data) ? data : null;
     } catch {
       return null;
@@ -858,21 +895,13 @@
 
   function readHistory() {
     try {
-      const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+      const raw = readEphemeralValue(CHAT_HISTORY_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
       console.warn("Could not restore chat history:", error);
       return [];
     }
-  }
-
-  function detectReplyFormat(reply) {
-    if (typeof reply !== "string") {
-      return "text";
-    }
-
-    return /<\/?[a-z][\s\S]*>/i.test(reply) ? "html" : "text";
   }
 
   function sanitizeRichTextHref(value) {
@@ -896,10 +925,19 @@
 
     try {
       const url = new URL(trimmed, window.location.origin);
-      return ["http:", "https:"].includes(url.protocol) ? url.href : null;
+      return ["http:", "https:"].includes(url.protocol) && url.origin === window.location.origin
+        ? url.href
+        : null;
     } catch {
       return null;
     }
+  }
+
+  function sanitizePlainAttribute(value, maxLength = 240) {
+    return String(value || "")
+      .replace(/[\u0000-\u001F\u007F]/g, "")
+      .trim()
+      .slice(0, maxLength);
   }
 
   function sanitizeClassName(value) {
@@ -966,16 +1004,6 @@
           return;
         }
 
-        if (tagName === "BUTTON" && name === "type") {
-          node.setAttribute("type", "button");
-          return;
-        }
-
-        if (tagName === "BUTTON" && name === "data-chat-answer") {
-          node.setAttribute("data-chat-answer", String(attribute.value || "").trim());
-          return;
-        }
-
         if (tagName === "IMG" && name === "src") {
           const safeSrc = sanitizeRichTextSrc(attribute.value);
           if (safeSrc) {
@@ -986,8 +1014,28 @@
           return;
         }
 
-        if (tagName === "IMG" && ["alt", "loading", "decoding"].includes(name)) {
-          node.setAttribute(name, String(attribute.value || "").trim());
+        if (tagName === "IMG" && name === "alt") {
+          node.setAttribute("alt", sanitizePlainAttribute(attribute.value, 120));
+          return;
+        }
+
+        if (tagName === "IMG" && name === "loading") {
+          const value = sanitizePlainAttribute(attribute.value, 16);
+          if (["lazy", "eager"].includes(value)) {
+            node.setAttribute("loading", value);
+          } else {
+            node.removeAttribute(attribute.name);
+          }
+          return;
+        }
+
+        if (tagName === "IMG" && name === "decoding") {
+          const value = sanitizePlainAttribute(attribute.value, 16);
+          if (["async", "sync", "auto"].includes(value)) {
+            node.setAttribute("decoding", value);
+          } else {
+            node.removeAttribute(attribute.name);
+          }
           return;
         }
 
@@ -1042,6 +1090,20 @@
       return entry;
     }
 
+    if (entry.kind === "answer-question") {
+      const question = sanitizePlainAttribute(entry.question, 240);
+      const options = normalizeAnswerOptions(entry.options);
+
+      return question && options.length
+        ? {
+          kind: "answer-question",
+          question,
+          options,
+          type: "ai"
+        }
+        : null;
+    }
+
     if (typeof entry.text !== "string" || !entry.type) {
       return null;
     }
@@ -1050,8 +1112,24 @@
       kind: "message",
       text: entry.text,
       type: entry.type === "user" ? "user" : "ai",
-      format: entry.format || detectReplyFormat(entry.text)
+      format: entry.format === "html" ? "html" : "text"
     };
+  }
+
+  function normalizeAnswerOptions(options) {
+    if (!Array.isArray(options)) {
+      return [];
+    }
+
+    return options
+      .map((option) => {
+        const label = sanitizePlainAttribute(option?.label, 80);
+        const answer = sanitizePlainAttribute(option?.answer || option?.label, 120);
+
+        return label ? { label, answer: answer || label } : null;
+      })
+      .filter(Boolean)
+      .slice(0, 8);
   }
 
   function formatDataLabel(level) {
@@ -1225,10 +1303,13 @@ if (host.endsWith("github.io")) {
     const messages = root.querySelector("#dealett-ai-chat-messages");
     const resetBtn = root.querySelector("#dealett-ai-chat-reset");
     const suggestions = root.querySelector("#dealett-ai-chat-suggestions");
-    const catalogs = await loadCatalogs(plans);
+    let catalogLoadPromise = null;
 
     const state = {
-      catalogs,
+      catalogs: {
+        mobile: Array.isArray(plans) ? plans : [],
+        broadband: []
+      },
       quiz: createEmptyQuizState(),
       lastRecommendations: null
     };
@@ -1249,17 +1330,35 @@ if (host.endsWith("github.io")) {
     syncPanelAccessibility();
     return true;
 
+    async function ensureCatalogs() {
+      if (!catalogLoadPromise) {
+        catalogLoadPromise = loadCatalogs(plans).then((catalogs) => {
+          state.catalogs = {
+            mobile: Array.isArray(catalogs.mobile) ? catalogs.mobile : [],
+            broadband: Array.isArray(catalogs.broadband) ? catalogs.broadband : []
+          };
+
+          return state.catalogs;
+        });
+      }
+
+      return catalogLoadPromise;
+    }
+
     function ensureSession(options = {}) {
       if (options.forceNew) {
-        localStorage.setItem(CHAT_SESSION_KEY, createSessionId());
-        return localStorage.getItem(CHAT_SESSION_KEY);
+        const sessionId = createSessionId();
+        writeEphemeralValue(CHAT_SESSION_KEY, sessionId);
+        return sessionId;
       }
 
-      if (!localStorage.getItem(CHAT_SESSION_KEY)) {
-        localStorage.setItem(CHAT_SESSION_KEY, createSessionId());
+      let sessionId = readEphemeralValue(CHAT_SESSION_KEY);
+      if (!sessionId) {
+        sessionId = createSessionId();
+        writeEphemeralValue(CHAT_SESSION_KEY, sessionId);
       }
 
-      return localStorage.getItem(CHAT_SESSION_KEY);
+      return sessionId;
     }
 
     function syncPanelAccessibility() {
@@ -1288,22 +1387,49 @@ if (host.endsWith("github.io")) {
         .trim();
     }
 
-    function renderAnswerQuestion(question, options) {
+    function renderAnswerQuestion(question, options, settings = {}) {
+      const { persist = true } = settings;
+      const safeQuestion = sanitizePlainAttribute(question, 240);
+      const safeOptions = normalizeAnswerOptions(options);
+
+      if (!messages || !safeQuestion || !safeOptions.length) {
+        addMessage(safeQuestion || DEFAULT_GREETING, "ai");
+        return;
+      }
+
       deactivateAnswerGroups();
 
-      const buttons = options
-        .map(option => {
-          const label = escapeHtml(option.label);
-          const answer = escapeHtml(option.answer || option.label);
-          return `<button type="button" class="chat-answer-btn" data-chat-answer="${answer}">${label}</button>`;
-        })
-        .join("");
+      const wrapper = document.createElement("div");
+      wrapper.className = "chat-msg ai";
 
-      addMessage(
-        `<div class="chat-answer-options"><p>${escapeHtml(question)}</p>${buttons}</div>`,
-        "ai",
-        { format: "html" }
-      );
+      const group = document.createElement("div");
+      group.className = "chat-answer-options";
+
+      const prompt = document.createElement("p");
+      prompt.textContent = safeQuestion;
+      group.appendChild(prompt);
+
+      safeOptions.forEach((option) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chat-answer-btn";
+        button.dataset.chatAnswer = option.answer;
+        button.textContent = option.label;
+        group.appendChild(button);
+      });
+
+      wrapper.appendChild(group);
+      messages.appendChild(wrapper);
+      messages.scrollTop = messages.scrollHeight;
+
+      if (persist) {
+        saveHistory({
+          kind: "answer-question",
+          type: "ai",
+          question: safeQuestion,
+          options: safeOptions
+        });
+      }
     }
 
     function deactivateAnswerGroups(options = {}) {
@@ -1593,6 +1719,7 @@ if (host.endsWith("github.io")) {
     }
 
     async function finishMobileGuide() {
+      await ensureCatalogs();
       const payload = buildMobileGuidePayload();
       state.quiz = createEmptyQuizState();
 
@@ -1605,6 +1732,7 @@ if (host.endsWith("github.io")) {
     }
 
     async function finishBroadbandGuide() {
+      await ensureCatalogs();
       const payload = buildBroadbandGuidePayload();
       state.quiz = createEmptyQuizState();
 
@@ -1617,6 +1745,7 @@ if (host.endsWith("github.io")) {
     }
 
     async function handleRecommendationAdjustment(kind) {
+      await ensureCatalogs();
       const rememberedPayload = state.lastRecommendations;
       const catalogPayload = buildCatalogRecommendationPayload(kind);
       const payload = rememberedPayload || catalogPayload;
@@ -2116,6 +2245,11 @@ if (host.endsWith("github.io")) {
           continue;
         }
 
+        if (message.kind === "answer-question") {
+          renderAnswerQuestion(message.question, message.options, { persist: false });
+          continue;
+        }
+
         appendMessage(message.text, message.type, {
           format: message.format || "text"
         });
@@ -2126,7 +2260,7 @@ if (host.endsWith("github.io")) {
     }
 
     function restoreOpenState() {
-      const shouldBeOpen = localStorage.getItem(CHAT_OPEN_KEY) === "true";
+      const shouldBeOpen = readEphemeralValue(CHAT_OPEN_KEY) === "true";
       if (shouldBeOpen) {
         panel?.classList.remove("closed");
       }
@@ -2136,7 +2270,7 @@ if (host.endsWith("github.io")) {
       if (!panel) return;
 
       panel.classList.toggle("closed");
-      localStorage.setItem(
+      writeEphemeralValue(
         CHAT_OPEN_KEY,
         String(!panel.classList.contains("closed"))
       );
@@ -2147,7 +2281,7 @@ if (host.endsWith("github.io")) {
       if (!panel) return;
 
       panel.classList.remove("closed");
-      localStorage.setItem(CHAT_OPEN_KEY, "true");
+      writeEphemeralValue(CHAT_OPEN_KEY, "true");
       syncPanelAccessibility();
     }
 
@@ -2155,7 +2289,7 @@ if (host.endsWith("github.io")) {
       if (!panel) return;
 
       panel.classList.add("closed");
-      localStorage.setItem(CHAT_OPEN_KEY, "false");
+      writeEphemeralValue(CHAT_OPEN_KEY, "false");
       syncPanelAccessibility();
     }
 
@@ -2163,7 +2297,7 @@ if (host.endsWith("github.io")) {
       if (!messages) return;
 
       messages.innerHTML = "";
-      localStorage.removeItem(CHAT_HISTORY_KEY);
+      removeEphemeralValue(CHAT_HISTORY_KEY);
       ensureSession({ forceNew: true });
       state.quiz = createEmptyQuizState();
 
@@ -2185,10 +2319,12 @@ if (host.endsWith("github.io")) {
       try {
         for (const apiUrl of apiCandidates) {
           try {
-            const response = await fetch(apiUrl, {
+            const response = await window.DealettNetwork.fetchWithTimeout(apiUrl, {
               method: "POST",
               headers,
-              body: JSON.stringify({ message })
+              body: JSON.stringify({ message }),
+              label: `Chat endpoint ${apiUrl}`,
+              timeoutMs: 12000
             });
 
             if (!response.ok) {
@@ -2199,7 +2335,7 @@ if (host.endsWith("github.io")) {
 
             const data = await response.json();
             if (data?.sessionId) {
-              localStorage.setItem(CHAT_SESSION_KEY, data.sessionId);
+              writeEphemeralValue(CHAT_SESSION_KEY, data.sessionId);
             }
 
             return data;
@@ -2245,13 +2381,14 @@ if (host.endsWith("github.io")) {
 
       const reply = typeof data?.reply === "string" ? data.reply : "No response";
       addMessage(reply, "ai", {
-        format: data?.format || detectReplyFormat(reply)
+        format: data?.format === "html" ? "html" : "text"
       });
     }
 
     async function findPlan(planId) {
       if (!planId) return null;
 
+      await ensureCatalogs();
       const mobilePlans = state.catalogs.mobile || [];
       const broadbandPlans = state.catalogs.broadband || [];
 
@@ -2401,12 +2538,18 @@ if (host.endsWith("github.io")) {
     }
 
     function persistChatCartSelection(item) {
+      if (window.DealettCart?.buildSelectedOffer) {
+        return;
+      }
+
       localStorage.removeItem("rewardChoice");
       localStorage.setItem("rewardDistribution", JSON.stringify(item.rewards || {}));
       localStorage.removeItem("collectedNumbers");
       localStorage.removeItem("startDateChoice");
       localStorage.removeItem("contactEmail");
       localStorage.removeItem("contactPhone");
+      localStorage.removeItem("dealettCheckout");
+      sessionStorage.removeItem("dealettCheckout");
 
       localStorage.setItem(
         "selectedOffer",
@@ -3050,7 +3193,7 @@ if (host.endsWith("github.io")) {
         history.splice(0, history.length - 100);
       }
 
-      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history));
+      writeEphemeralValue(CHAT_HISTORY_KEY, JSON.stringify(history));
     }
   }
 

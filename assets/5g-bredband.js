@@ -1,5 +1,10 @@
 const currency = new Intl.NumberFormat('sv-SE');
 
+const apiFetchJson = async (resource, options = {}) => window.DealettNetwork.fetchJson(resource, {
+  timeoutMs: 7000,
+  ...options,
+});
+
 const providerLogos = {
   Telia: 'images/telia.png',
   Tele2: 'images/tele2.png',
@@ -143,7 +148,7 @@ const renderOffers = () => {
   setSearchMessage(address ? `Sökningen är klar för ${address}.` : 'Sökningen är klar.', 'success');
 
   els.offers.innerHTML = offers.map((plan) => {
-    const reward = calculateReward(plan.price);
+    const reward = Number(plan.rewardTotal) || calculateReward(plan.price);
     const isRecommended = recommended?.id === plan.id;
     const logo = providerLogos[plan.operator] || '';
     const accent = providerAccents[plan.operator] || 'var(--accent)';
@@ -270,10 +275,8 @@ const closeBredbandCart = () => {
 
 window.openCart = openCart;
 
-const addSelectedPlanToCart = () => {
-  if (!selectedPlan) return;
-
-  const reward = calculateReward(selectedPlan.price);
+const buildFallbackBroadbandCart = () => {
+  const reward = Number(selectedPlan.rewardTotal) || calculateReward(selectedPlan.price);
   const logo = providerLogos[selectedPlan.operator] || '';
   const cartItem = {
     cartItemId: `${selectedPlan.id}-${Date.now()}`,
@@ -298,13 +301,39 @@ const addSelectedPlanToCart = () => {
     ].filter(Boolean),
   };
 
-  const cart = window.DealettCart.appendItem(cartItem, {
+  return {
+    cartItem,
     state: {
       persons: 1,
       operator: cartItem.operator,
       wishes: ['5G-bredband'],
       answers: {},
     },
+  };
+};
+
+const createBroadbandCartItem = async () => {
+  try {
+    return await apiFetchJson('/api/broadband/cart-item', {
+      label: '5G-bredband varukorg',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ planId: selectedPlan.id }),
+    });
+  } catch {
+    return buildFallbackBroadbandCart();
+  }
+};
+
+const addSelectedPlanToCart = async () => {
+  if (!selectedPlan) return;
+
+  const result = await createBroadbandCartItem();
+
+  if (!result?.cartItem || !result?.state) return;
+
+  const cart = window.DealettCart.appendItem(result.cartItem, {
+    state: result.state,
   });
 
   openCart(cart);
@@ -527,7 +556,7 @@ const bindEvents = () => {
 
 const loadPlans = async () => {
   try {
-    const data = await window.DealettNetwork.fetchJson('./data/5Gbredband.json', {
+    const data = await apiFetchJson('/api/broadband/offers', {
       label: '5G-bredband data',
     });
 

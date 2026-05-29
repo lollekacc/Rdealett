@@ -92,7 +92,7 @@ const getPlanDataLabel = (plan) => {
 const loadPlans = async () => {
   if (plansCache) return plansCache;
 
-  const data = await window.DealettNetwork.fetchJson('./data/plans.json', {
+  const data = await window.DealettNetwork.fetchJson('/api/mobile/plans', {
     label: 'Familjabonnemang data',
   });
 

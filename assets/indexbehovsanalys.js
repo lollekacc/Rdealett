@@ -848,6 +848,19 @@ function createIndexQuiz() {
   }
 
   async function getRecommendedPlans() {
+    try {
+      const data = await window.DealettNetwork.fetchJson("/api/recommendations/mobile", {
+        label: "Behovsanalys rekommendationer",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ state }),
+      });
+
+      if (Array.isArray(data)) return data;
+    } catch {
+      // Fall back to the old in-browser scorer if the backend is unavailable.
+    }
+
     const allPlans = await loadPlans();
     const basePlans = allPlans.filter(plan => plan.category === "mobil" && !plan.isFamilyPlan);
     const currentOperators = new Set(
@@ -933,7 +946,7 @@ function createIndexQuiz() {
   async function loadPlans() {
     if (plans) return plans;
 
-    const data = await window.DealettNetwork.fetchJson("./data/plans.json", {
+    const data = await window.DealettNetwork.fetchJson("/api/mobile/plans", {
       label: "Behovsanalys data",
     });
 

@@ -49,6 +49,11 @@ let plansCache = null;
 
 const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
 
+const apiFetchJson = async (resource, options = {}) => window.DealettNetwork.fetchJson(resource, {
+  timeoutMs: 7000,
+  ...options,
+});
+
 const createElement = (tag, className, text) => {
   const element = document.createElement(tag);
 
@@ -79,7 +84,7 @@ const getPlanDataLabel = (plan) => {
 const loadPlans = async () => {
   if (plansCache) return plansCache;
 
-  const data = await window.DealettNetwork.fetchJson('./data/plans.json', {
+  const data = await apiFetchJson('/api/mobile/plans', {
     label: 'Mobilabonnemang data',
   });
 
@@ -91,10 +96,16 @@ const loadPlans = async () => {
   return plansCache;
 };
 
+const loadOperatorOffers = async (operator) => apiFetchJson(
+  `/api/mobile/operator-offers?operator=${encodeURIComponent(operator)}`,
+  { label: 'Mobilabonnemang erbjudanden' }
+);
+
 const buildSelectedPlanOffer = (plan, answers) => {
   const operatorOffer = getOperatorOffer(plan.operator);
 
   return {
+    planId: plan.id,
     provider: plan.operator,
     operator: plan.operator,
     title: plan.title,
@@ -176,6 +187,7 @@ const selectAddon = (addon, card) => {
   if (!selectedOffer) return;
 
   selectedOffer.addon = {
+    id: addon.id,
     title: addon.title,
     price: addon.price,
     addonPrice: addon.addonPrice,
@@ -204,16 +216,25 @@ const renderPlanOffers = async (offer, answers) => {
   offersContainer.innerHTML = '<div class="offers-loading">H\u00e4mtar abonnemang...</div>';
 
   try {
-    const plans = await loadPlans();
-    const operatorPlans = plans
-      .filter((plan) => plan.category === 'mobil' && !plan.isFamilyPlan && plan.operator === offer.provider)
-      .sort((left, right) => (left.dataAmount || 0) - (right.dataAmount || 0));
-    const addonPlan = plans.find((plan) =>
-      plan.category === 'mobil' &&
-      plan.isFamilyPlan &&
-      plan.familyPriceType === 'addon' &&
-      plan.operator === offer.provider
-    );
+    let operatorPlans = [];
+    let addonPlan = null;
+
+    try {
+      const data = await loadOperatorOffers(offer.provider);
+      operatorPlans = data.plans || [];
+      addonPlan = data.addonPlan || null;
+    } catch {
+      const plans = await loadPlans();
+      operatorPlans = plans
+        .filter((plan) => plan.category === 'mobil' && !plan.isFamilyPlan && plan.operator === offer.provider)
+        .sort((left, right) => (left.dataAmount || 0) - (right.dataAmount || 0));
+      addonPlan = plans.find((plan) =>
+        plan.category === 'mobil' &&
+        plan.isFamilyPlan &&
+        plan.familyPriceType === 'addon' &&
+        plan.operator === offer.provider
+      );
+    }
 
     const fragment = document.createDocumentFragment();
 
@@ -416,22 +437,10 @@ const renderOffers = () => {
   offersContainer.replaceChildren(fragment);
 };
 
-rewardContinueBtn?.addEventListener('click', () => {
+const buildFallbackMobileCart = (rewards) => {
   if (!selectedOffer || !rewardGrid) {
-    return;
+    return null;
   }
-
-  const allocations = [...rewardGrid.querySelectorAll('.reward-choice')]
-    .map((choice) => {
-      const name = choice.querySelector('strong')?.textContent || '';
-      const value = Math.max(Number(choice.querySelector('input')?.value) || 0, 0);
-      return { name, value };
-    })
-    .filter((item) => item.value > 0);
-  const rewards = allocations.reduce((result, item) => {
-    result[item.name] = item.value;
-    return result;
-  }, {});
 
   const addonPrice = Number(selectedOffer.addon?.addonPrice ?? selectedOffer.addon?.price) || 0;
   const persons = selectedOffer.addon ? 2 : 1;
@@ -461,13 +470,59 @@ rewardContinueBtn?.addEventListener('click', () => {
     ].filter(Boolean),
   };
 
-  const cart = window.DealettCart.appendItem(cartItem, {
+  return {
+    cartItem,
     state: {
       persons,
       operator: cartItem.operator,
       wishes: ['Mobilabonnemang'],
       answers: cartItem.answers,
     },
+  };
+};
+
+const createMobileCartItem = async (rewards) => {
+  try {
+    return await apiFetchJson('/api/mobile/cart-item', {
+      label: 'Mobilabonnemang varukorg',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        planId: selectedOffer.planId || selectedOffer.offerId || selectedOffer.title,
+        addonPlanId: selectedOffer.addon?.id || null,
+        rewards,
+        answers: selectedOffer.answers || {},
+      }),
+    });
+  } catch {
+    return buildFallbackMobileCart(rewards);
+  }
+};
+
+rewardContinueBtn?.addEventListener('click', async () => {
+  if (!selectedOffer || !rewardGrid) {
+    return;
+  }
+
+  const allocations = [...rewardGrid.querySelectorAll('.reward-choice')]
+    .map((choice) => {
+      const name = choice.querySelector('strong')?.textContent || '';
+      const value = Math.max(Number(choice.querySelector('input')?.value) || 0, 0);
+      return { name, value };
+    })
+    .filter((item) => item.value > 0);
+  const rewards = allocations.reduce((result, item) => {
+    result[item.name] = item.value;
+    return result;
+  }, {});
+  const result = await createMobileCartItem(rewards);
+
+  if (!result?.cartItem || !result?.state) {
+    return;
+  }
+
+  const cart = window.DealettCart.appendItem(result.cartItem, {
+    state: result.state,
   });
   openCartDrawer(cart);
 });

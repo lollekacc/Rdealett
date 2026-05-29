@@ -6,6 +6,7 @@ const net = require('node:net');
 const os = require('node:os');
 const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
+const { createServer } = require('../backend/server');
 
 const ROOT = path.resolve(__dirname, '..');
 const HOST = '127.0.0.1';
@@ -191,7 +192,7 @@ const startStaticServer = async () => {
   }
 
   const port = await getFreePort();
-  const server = http.createServer(sendStaticFile);
+  const server = createServer();
 
   await new Promise((resolve, reject) => {
     server.once('error', reject);

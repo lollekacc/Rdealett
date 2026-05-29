@@ -591,7 +591,9 @@
 
   const shouldSkipNode = (node) => {
     const parent = node.parentElement;
-    return !parent || ['SCRIPT', 'STYLE', 'NOSCRIPT', 'OPTION'].includes(parent.tagName);
+    return !parent ||
+      ['SCRIPT', 'STYLE', 'NOSCRIPT', 'OPTION'].includes(parent.tagName) ||
+      Boolean(parent.closest('[data-no-translate]'));
   };
 
   const translateAttributes = (root) => {
@@ -925,12 +927,229 @@
     }
   };
 
+  const initDealettChat = () => {
+    if (document.querySelector('#dealettChat')) return;
+
+    const copy = {
+      sv: {
+        open: 'Öppna Dealett assistant',
+        close: 'Stäng chatten',
+        title: 'Dealett assistant',
+        status: 'AI-rådgivare',
+        greeting: 'Hej! Jag kan hjälpa dig jämföra abonnemang, bredband, täckning, presentkort och din varukorg.',
+        placeholder: 'Skriv din fråga...',
+        send: 'Skicka',
+        typing: 'Dealett assistant skriver...',
+        error: 'Jag kunde inte svara just nu. Kontrollera att AI-tjänsten är konfigurerad och försök igen.',
+        suggestions: ['Hjälp mig välja mobilabonnemang', 'Vilket bredband passar mig?', 'Förklara presentkort', 'Vad finns i min varukorg?'],
+      },
+      en: {
+        open: 'Open Dealett assistant',
+        close: 'Close chat',
+        title: 'Dealett assistant',
+        status: 'AI advisor',
+        greeting: 'Hi! I can help you compare mobile plans, broadband, coverage, gift cards, and your cart.',
+        placeholder: 'Write your question...',
+        send: 'Send',
+        typing: 'Dealett assistant is typing...',
+        error: 'I could not answer right now. Check that the AI service is configured and try again.',
+        suggestions: ['Help me choose a mobile plan', 'Which broadband fits me?', 'Explain gift cards', 'What is in my cart?'],
+      },
+    };
+
+    const getChatLanguage = () => (window.DEALETT_I18N?.getLanguage?.() === 'en' ? 'en' : 'sv');
+    let chatLanguage = getChatLanguage();
+    let text = copy[chatLanguage];
+    const messages = [];
+    let isSending = false;
+
+    const root = document.createElement('section');
+    root.id = 'dealettChat';
+    root.className = 'dealett-chat';
+    root.dataset.noTranslate = 'true';
+    root.innerHTML = [
+      `<button class="dealett-chat-toggle" type="button" aria-label="${text.open}" aria-expanded="false">`,
+      '  <i class="fa-solid fa-comments"></i>',
+      '  <span>AI</span>',
+      '</button>',
+      '<div class="dealett-chat-panel" role="dialog" aria-modal="false" aria-labelledby="dealettChatTitle" hidden>',
+      '  <header class="dealett-chat-header">',
+      '    <div>',
+      `      <strong id="dealettChatTitle">${text.title}</strong>`,
+      `      <span data-chat-status>${text.status}</span>`,
+      '    </div>',
+      `    <button class="dealett-chat-close" type="button" aria-label="${text.close}"><i class="fa-solid fa-xmark"></i></button>`,
+      '  </header>',
+      '  <div class="dealett-chat-messages" role="log" aria-live="polite"></div>',
+      '  <div class="dealett-chat-suggestions"></div>',
+      '  <form class="dealett-chat-form">',
+      `    <input class="dealett-chat-input" type="text" autocomplete="off" placeholder="${text.placeholder}" />`,
+      `    <button class="dealett-chat-send" type="submit" aria-label="${text.send}"><i class="fa-solid fa-paper-plane"></i></button>`,
+      '  </form>',
+      '</div>',
+    ].join('');
+
+    document.body.append(root);
+
+    const toggle = root.querySelector('.dealett-chat-toggle');
+    const panel = root.querySelector('.dealett-chat-panel');
+    const closeButton = root.querySelector('.dealett-chat-close');
+    const messageList = root.querySelector('.dealett-chat-messages');
+    const suggestionArea = root.querySelector('.dealett-chat-suggestions');
+    const form = root.querySelector('.dealett-chat-form');
+    const input = root.querySelector('.dealett-chat-input');
+    const status = root.querySelector('[data-chat-status]');
+
+    const escapeChatText = (value) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+    const readCartContext = () => {
+      try {
+        return (window.DealettCart?.readCart?.() || JSON.parse(localStorage.getItem('dealettCart') || '[]'))
+          .slice(0, 4)
+          .map((item) => ({
+            operator: item.operator,
+            title: item.title,
+            data: item.data,
+            price: item.price,
+            persons: item.persons,
+            productType: item.productType,
+            rewardTotal: item.rewardTotal,
+          }));
+      } catch {
+        return [];
+      }
+    };
+
+    const syncLanguage = () => {
+      chatLanguage = getChatLanguage();
+      text = copy[chatLanguage];
+      status.textContent = text.status;
+      input.placeholder = text.placeholder;
+      toggle.setAttribute('aria-label', text.open);
+      closeButton.setAttribute('aria-label', text.close);
+      root.querySelector('.dealett-chat-send')?.setAttribute('aria-label', text.send);
+    };
+
+    const scrollMessages = () => {
+      messageList.scrollTop = messageList.scrollHeight;
+    };
+
+    const addMessage = (role, content) => {
+      const item = document.createElement('article');
+      item.className = `dealett-chat-message dealett-chat-message--${role}`;
+      item.innerHTML = `<p>${escapeChatText(content)}</p>`;
+      messageList.append(item);
+      messages.push({ role, content });
+      if (messages.length > 10) messages.splice(0, messages.length - 10);
+      scrollMessages();
+    };
+
+    const renderSuggestions = (suggestions) => {
+      suggestionArea.replaceChildren();
+      suggestions.slice(0, 4).forEach((label) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'dealett-chat-chip';
+        button.textContent = label;
+        button.addEventListener('click', () => sendMessage(label));
+        suggestionArea.append(button);
+      });
+    };
+
+    const setSending = (nextValue) => {
+      isSending = nextValue;
+      input.disabled = nextValue;
+      root.querySelector('.dealett-chat-send').disabled = nextValue;
+      status.textContent = nextValue ? text.typing : text.status;
+    };
+
+    const sendMessage = async (rawMessage) => {
+      const message = String(rawMessage || '').trim();
+      if (!message || isSending) return;
+
+      addMessage('user', message);
+      input.value = '';
+      setSending(true);
+
+      try {
+        const response = await window.DealettNetwork.fetchJson('/api/chat', {
+          label: 'Dealett assistant',
+          method: 'POST',
+          timeoutMs: 20000,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            language: chatLanguage,
+            messages: messages.slice(0, -1),
+            cart: readCartContext(),
+            page: {
+              title: document.title,
+              path: window.location.pathname.split('/').pop() || 'index.html',
+            },
+          }),
+        });
+
+        addMessage('assistant', response.reply);
+        renderSuggestions(response.suggestions || text.suggestions);
+      } catch {
+        addMessage('assistant', text.error);
+        renderSuggestions(text.suggestions);
+      } finally {
+        setSending(false);
+        input.focus();
+      }
+    };
+
+    const openPanel = () => {
+      syncLanguage();
+      panel.hidden = false;
+      root.classList.add('is-open');
+      toggle.setAttribute('aria-expanded', 'true');
+      if (!messages.length) {
+        addMessage('assistant', text.greeting);
+        renderSuggestions(text.suggestions);
+      }
+      window.setTimeout(() => input.focus(), 50);
+    };
+
+    const closePanel = () => {
+      panel.hidden = true;
+      root.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.focus();
+    };
+
+    toggle.addEventListener('click', () => {
+      if (panel.hidden) openPanel();
+      else closePanel();
+    });
+
+    closeButton.addEventListener('click', closePanel);
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      sendMessage(input.value);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !panel.hidden) {
+        closePanel();
+      }
+    });
+  };
+
   const initGlobalBehaviors = () => {
     setHeaderActiveState();
     updateCartCount();
     initDropdowns();
     initHeaderMotion();
     initCoveragePreview();
+    initDealettChat();
     initTranslations();
   };
 

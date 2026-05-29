@@ -381,45 +381,10 @@ const runSmokeTests = async ({ baseUrl, debugBase }) => {
   await index.waitFor(`document.documentElement.lang === 'sv'`);
   await index.waitFor(`!!window.DealettNetwork`);
   await index.waitFor(`!!document.querySelector('link[rel="icon"][href="./images/favicon.svg"]')`);
-  await index.waitFor(`!!document.querySelector('#dealett-chat-launcher button')`, 10000);
-  const chatBeforeClick = await index.evaluate(`({
-    hasLauncher: !!document.querySelector('#dealett-chat-launcher'),
-    hasChatRoot: !!document.querySelector('[data-dealett-ai-chat-root]'),
-    hasChatScript: !!document.querySelector('script[data-dealett-chat-script]')
-  })`);
-
-  if (!chatBeforeClick.hasLauncher || chatBeforeClick.hasChatRoot || chatBeforeClick.hasChatScript) {
-    throw new Error(`Unexpected lazy chat state before open: ${JSON.stringify(chatBeforeClick)}`);
-  }
-
-  await index.evaluate(`document.querySelector('#dealett-chat-launcher button').click()`);
-  await index.waitFor(`document.querySelector('[data-dealett-ai-chat-root]')?.dataset.chatInitialized === 'true'`, 10000);
-  await index.evaluate(`
-    localStorage.setItem('dealett_ai_chat_open', 'true');
-    localStorage.setItem('dealett_ai_chat_history', JSON.stringify([{ text: 'Hej', type: 'user' }]));
-    location.reload();
-  `);
-  await index.waitForEvent('Page.loadEventFired', 10000).catch(() => {});
-  await index.waitFor(`document.querySelector('[data-dealett-ai-chat-root]')?.dataset.chatInitialized === 'true'`, 10000);
-  const chatStorage = await index.evaluate(`({
-    sessionOpen: sessionStorage.getItem('dealett_ai_chat_open'),
-    localOpen: localStorage.getItem('dealett_ai_chat_open'),
-    sessionHistory: sessionStorage.getItem('dealett_ai_chat_history'),
-    localHistory: localStorage.getItem('dealett_ai_chat_history')
-  })`);
-
-  if (
-    chatStorage.sessionOpen !== 'true' ||
-    chatStorage.localOpen !== null ||
-    !chatStorage.sessionHistory ||
-    chatStorage.localHistory !== null
-  ) {
-    throw new Error(`Unexpected chat storage migration: ${JSON.stringify(chatStorage)}`);
-  }
 
   assertNoExceptions(index, 'index');
   index.close();
-  results.push('default language, favicon, network utility, lazy chat, and chat session storage');
+  results.push('default language, favicon, and network utility');
 
   const login = await newPage(debugBase, `${baseUrl}/login.html`);
   await login.evaluate(`localStorage.removeItem('dealett_user'); sessionStorage.removeItem('dealett_user')`);

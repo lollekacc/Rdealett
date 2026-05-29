@@ -81,8 +81,6 @@
       'Presentkort': 'Gift card',
       'Visa paketet': 'View package',
       'Vår smarta guide hjälper dig hitta rätt snabbare': 'Our smart guide helps you find the right plan faster',
-      'Låt Dealett-AI analysera dina behov och guida dig till rätt abonnemang utan onödigt krångel.': 'Let Dealett AI analyze your needs and guide you to the right subscription without unnecessary hassle.',
-      'Chatta med Dealett-AI': 'Chat with Dealett AI',
       'Rekommenderas': 'Recommended',
       'Vi ger presentkort på varje köp': 'We give a gift card with every purchase',
       'Välj bland populära varumärken och få ett presentkort när du hittar rätt abonnemang via Dealett.': 'Choose from popular brands and receive a gift card when you find the right subscription through Dealett.',
@@ -202,8 +200,6 @@
       'Presentkort': 'بطاقة هدية',
       'Visa paketet': 'عرض الباقة',
       'Vår smarta guide hjälper dig hitta rätt snabbare': 'دليلنا الذكي يساعدك في العثور على الخيار المناسب أسرع',
-      'Låt Dealett-AI analysera dina behov och guida dig till rätt abonnemang utan onödigt krångel.': 'دع Dealett AI يحلل احتياجاتك ويرشدك إلى الاشتراك المناسب بدون تعقيد غير ضروري.',
-      'Chatta med Dealett-AI': 'دردش مع Dealett AI',
       'Rekommenderas': 'موصى به',
       'Vi ger presentkort på varje köp': 'نقدم بطاقة هدية مع كل عملية شراء',
       'Välj bland populära varumärken och få ett presentkort när du hittar rätt abonnemang via Dealett.': 'اختر من علامات تجارية مشهورة واحصل على بطاقة هدية عند العثور على الاشتراك المناسب عبر Dealett.',
@@ -323,8 +319,6 @@
       'Presentkort': 'Kaarka hadiyadda',
       'Visa paketet': 'Eeg xirmada',
       'Vår smarta guide hjälper dig hitta rätt snabbare': 'Hagahayaga caqliga leh wuxuu kaa caawinayaa inaad si dhakhso ah u hesho midka saxda ah',
-      'Låt Dealett-AI analysera dina behov och guida dig till rätt abonnemang utan onödigt krångel.': 'U oggolow Dealett AI inuu falanqeeyo baahiyahaaga oo kugu hago rukunka saxda ah si dhib yar.',
-      'Chatta med Dealett-AI': 'La sheekayso Dealett AI',
       'Rekommenderas': 'Lagu taliyay',
       'Vi ger presentkort på varje köp': 'Waxaan bixinaa kaar hadiyad iib kasta',
       'Välj bland populära varumärken och få ett presentkort när du hittar rätt abonnemang via Dealett.': 'Ka dooro sumado caan ah oo hel kaar hadiyad markaad Dealett ka hesho rukunka saxda ah.',
@@ -444,8 +438,6 @@
       'Presentkort': 'کارت هدیه',
       'Visa paketet': 'مشاهده بسته',
       'Vår smarta guide hjälper dig hitta rätt snabbare': 'راهنمای هوشمند ما کمک می‌کند سریع‌تر گزینه مناسب را پیدا کنید',
-      'Låt Dealett-AI analysera dina behov och guida dig till rätt abonnemang utan onödigt krångel.': 'اجازه دهید Dealett AI نیازهای شما را تحلیل کند و بدون دردسر اضافی شما را به اشتراک مناسب برساند.',
-      'Chatta med Dealett-AI': 'گفتگو با Dealett AI',
       'Rekommenderas': 'پیشنهاد شده',
       'Vi ger presentkort på varje köp': 'با هر خرید کارت هدیه می‌دهیم',
       'Välj bland populära varumärken och få ett presentkort när du hittar rätt abonnemang via Dealett.': 'از میان برندهای محبوب انتخاب کنید و وقتی از طریق Dealett اشتراک مناسب را پیدا کردید، کارت هدیه بگیرید.',
@@ -933,161 +925,6 @@
     }
   };
 
-  const CHAT_OPEN_KEY = 'dealett_ai_chat_open';
-  const CHAT_HISTORY_KEY = 'dealett_ai_chat_history';
-  const CHAT_SCRIPT_PATH = 'assets/dealett-chat.js';
-
-  const readBrowserStorage = (storage, key) => {
-    try {
-      return storage.getItem(key);
-    } catch {
-      return null;
-    }
-  };
-
-  const hasStoredChatState = () => (
-    readBrowserStorage(sessionStorage, CHAT_OPEN_KEY) === 'true' ||
-    readBrowserStorage(localStorage, CHAT_OPEN_KEY) === 'true' ||
-    Boolean(readBrowserStorage(sessionStorage, CHAT_HISTORY_KEY)) ||
-    Boolean(readBrowserStorage(localStorage, CHAT_HISTORY_KEY))
-  );
-
-  const markChatOpen = () => {
-    try {
-      sessionStorage.setItem(CHAT_OPEN_KEY, 'true');
-      localStorage.removeItem(CHAT_OPEN_KEY);
-    } catch {
-      // Chat still loads if storage is unavailable.
-    }
-  };
-
-  const ensureChatLauncherStyle = () => {
-    if (document.getElementById('dealett-chat-launcher-style')) return;
-
-    const style = document.createElement('style');
-    style.id = 'dealett-chat-launcher-style';
-    style.textContent = `
-      #dealett-chat-launcher {
-        position: fixed;
-        right: 24px;
-        bottom: 24px;
-        z-index: 9998;
-      }
-
-      #dealett-chat-launcher button {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        min-height: 48px;
-        padding: 0 18px;
-        border: none;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        color: #fff;
-        font: 700 14px/1.2 'Roboto', sans-serif;
-        cursor: pointer;
-        box-shadow: 0 16px 34px rgba(37, 99, 235, 0.28);
-      }
-
-      #dealett-chat-launcher button:disabled {
-        cursor: progress;
-        opacity: 0.82;
-      }
-
-      #dealett-chat-launcher .dealett-chat-launcher-dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: #22c55e;
-        box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.2);
-      }
-
-      @media (max-width: 520px) {
-        #dealett-chat-launcher {
-          right: 16px;
-          bottom: 16px;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  };
-
-  const removeChatLauncher = () => {
-    document.getElementById('dealett-chat-launcher')?.remove();
-  };
-
-  const createChatLauncher = () => {
-    if (
-      document.getElementById('dealett-chat-launcher') ||
-      document.querySelector('[data-dealett-ai-chat-root]')
-    ) {
-      return;
-    }
-
-    ensureChatLauncherStyle();
-
-    const launcher = document.createElement('div');
-    launcher.id = 'dealett-chat-launcher';
-
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.setAttribute('aria-label', 'Öppna Dealett-AI');
-
-    const dot = document.createElement('span');
-    dot.className = 'dealett-chat-launcher-dot';
-    dot.setAttribute('aria-hidden', 'true');
-
-    const label = document.createElement('span');
-    label.textContent = 'Dealett-AI';
-
-    button.append(dot, label);
-    button.addEventListener('click', () => {
-      button.disabled = true;
-      button.setAttribute('aria-busy', 'true');
-      loadDealettChat({ open: true });
-    });
-
-    launcher.appendChild(button);
-    document.body.appendChild(launcher);
-  };
-
-  const loadDealettChat = ({ open = false } = {}) => {
-    if (open) {
-      markChatOpen();
-    }
-
-    removeChatLauncher();
-
-    if (typeof window.initChat === 'function') {
-      window.initChat().catch?.((error) => console.error('Chat init failed:', error));
-      return;
-    }
-
-    const existingScript = document.querySelector(`script[src="${CHAT_SCRIPT_PATH}"]`);
-    if (existingScript) {
-      return;
-    }
-
-    const chatScript = document.createElement('script');
-    chatScript.src = CHAT_SCRIPT_PATH;
-    chatScript.defer = true;
-    chatScript.dataset.dealettChatScript = 'true';
-    chatScript.addEventListener('error', () => {
-      console.error('Chat script failed to load.');
-      createChatLauncher();
-    }, { once: true });
-    document.body.appendChild(chatScript);
-  };
-
-  const initDealettChat = () => {
-    if (hasStoredChatState()) {
-      loadDealettChat();
-      return;
-    }
-
-    createChatLauncher();
-  };
-
   const initGlobalBehaviors = () => {
     setHeaderActiveState();
     updateCartCount();
@@ -1095,7 +932,6 @@
     initHeaderMotion();
     initCoveragePreview();
     initTranslations();
-    initDealettChat();
   };
 
   window.addEventListener('storage', (event) => {

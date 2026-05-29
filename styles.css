@@ -515,91 +515,6 @@ img {
   margin: 0 auto;
 }
 
-.section-promo-ai {
-  background: linear-gradient(180deg, rgba(246, 244, 240, 0) 0%, rgba(255, 255, 255, 0.72) 100%);
-}
-
-.ai-promo-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
-  align-items: center;
-  gap: 44px;
-}
-
-.ai-promo-copy h3 {
-  margin: 0;
-  max-width: 620px;
-  font-family: 'Suez One', serif;
-  font-size: 42px;
-  line-height: 1.16;
-  color: var(--text);
-}
-
-.ai-promo-copy p {
-  margin: 24px 0 0;
-  max-width: 560px;
-  font-size: 18px;
-  line-height: 1.6;
-  color: rgba(39, 36, 67, 0.82);
-}
-
-.ai-promo-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 32px;
-}
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 54px;
-  border: none;
-  border-radius: 10px;
-  padding: 0 28px;
-  background: var(--accent);
-  color: #fff;
-  font-family: 'din-next-w01-light', sans-serif;
-  font-size: 16px;
-  cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 30px rgba(218, 57, 43, 0.24);
-}
-
-.ai-promo-image-wrap {
-  position: relative;
-  overflow: hidden;
-  min-height: 360px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(218, 57, 43, 0.14), rgba(252, 255, 114, 0.12)), #f6f4f0;
-}
-
-.ai-promo-ribbon {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  z-index: 2;
-  border-radius: 999px;
-  padding: 9px 14px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 12px 24px rgba(218, 57, 43, 0.22);
-}
-
-.ai-promo-video {
-  width: 100%;
-  height: 100%;
-  min-height: 360px;
-  object-fit: cover;
-}
-
 .gift-card-section {
   position: relative;
   padding-top: 30px;
@@ -1749,15 +1664,6 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .ai-promo-card {
-    grid-template-columns: 1fr;
-  }
-
-  .ai-promo-image-wrap,
-  .ai-promo-video {
-    min-height: 320px;
-  }
-
   .coverage-grid {
     grid-template-columns: 1fr;
   }
@@ -1860,28 +1766,6 @@ textarea {
 
   .section-space {
     padding: 56px 24px;
-  }
-
-  .ai-promo-card {
-    gap: 28px;
-  }
-
-  .ai-promo-copy h3 {
-    font-size: 32px;
-  }
-
-  .ai-promo-copy p {
-    font-size: 16px;
-  }
-
-  .ai-promo-actions,
-  .btn-primary {
-    width: 100%;
-  }
-
-  .ai-promo-image-wrap,
-  .ai-promo-video {
-    min-height: 260px;
   }
 
   .section-head h2 {

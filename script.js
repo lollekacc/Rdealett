@@ -1082,7 +1082,21 @@
     };
 
     const inferSuggestion = (suggestion) => {
-      if (suggestion && typeof suggestion === 'object') return suggestion;
+      const getActionFromLabel = (label, action) => {
+        if (action) return action;
+        if (/öppna täckningskarta|coverage map/i.test(label)) return 'openCoverageMap';
+        if (/öppna 5g|5g-bredband|broadband/i.test(label)) return 'openBroadbandPage';
+        return null;
+      };
+
+      if (suggestion && typeof suggestion === 'object') {
+        const label = String(suggestion.label || '').trim();
+        return {
+          ...suggestion,
+          label,
+          action: getActionFromLabel(label, suggestion.action),
+        };
+      }
 
       const label = String(suggestion || '').trim();
       const normalized = label.toLowerCase();
@@ -1165,7 +1179,7 @@
 
     const renderSuggestions = (suggestions) => {
       suggestionArea.replaceChildren();
-      suggestions.slice(0, 4).map(inferSuggestion).forEach((suggestion) => {
+      suggestions.slice(0, 5).map(inferSuggestion).forEach((suggestion) => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'dealett-chat-chip';

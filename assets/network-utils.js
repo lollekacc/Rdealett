@@ -2,6 +2,17 @@
   if (window.DealettNetwork) return;
 
   const DEFAULT_TIMEOUT_MS = 8000;
+  const LOCAL_STATIC_PORTS = new Set(['5500', '5501', '5173', '8080']);
+  const API_BASE = window.DEALETT_API_BASE ||
+    (LOCAL_STATIC_PORTS.has(window.location.port) ? 'http://127.0.0.1:3000' : '');
+
+  const resolveResource = (resource) => {
+    if (typeof resource === 'string' && resource.startsWith('/api/') && API_BASE) {
+      return `${API_BASE}${resource}`;
+    }
+
+    return resource;
+  };
 
   const createFetchError = (label, response) => {
     const error = new Error(`${label} failed with HTTP ${response.status}`);
@@ -18,7 +29,7 @@
     } = options;
 
     if (typeof AbortController === 'undefined') {
-      const response = await fetch(resource, fetchOptions);
+      const response = await fetch(resolveResource(resource), fetchOptions);
       if (!response.ok) throw createFetchError(label, response);
       return response;
     }
@@ -41,7 +52,7 @@
     }
 
     try {
-      const response = await fetch(resource, {
+      const response = await fetch(resolveResource(resource), {
         ...fetchOptions,
         signal: controller.signal,
       });

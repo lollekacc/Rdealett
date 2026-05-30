@@ -1084,6 +1084,7 @@
     const inferSuggestion = (suggestion) => {
       const getActionFromLabel = (label, action) => {
         if (action) return action;
+        if (/skriv adress|ange adress|sök adress|enter address|search address/i.test(label)) return 'openBroadbandAddress';
         if (/öppna täckningskarta|coverage map/i.test(label)) return 'openCoverageMap';
         if (/öppna 5g|5g-bredband|broadband/i.test(label)) return 'openBroadbandPage';
         return null;
@@ -1203,6 +1204,22 @@
             return;
           }
 
+          if (suggestion.action === 'openBroadbandAddress') {
+            if (window.location.pathname.endsWith('/5g-bredband.html')) {
+              window.DealettBroadband?.focusAddressSearch?.();
+              document.querySelector('#addressSearchForm')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              document.querySelector('#addressInput')?.focus();
+            } else {
+              try {
+                sessionStorage.setItem('dealettFocusBroadbandAddress', 'true');
+              } catch {
+                // Keep navigation usable if session storage is unavailable.
+              }
+              window.location.href = '5g-bredband.html#addressSearchForm';
+            }
+            return;
+          }
+
           if (suggestion.action === 'openCart') {
             const cart = window.DealettCart?.readCart?.() || [];
             if (window.DealettCart?.openDrawer) {
@@ -1242,6 +1259,12 @@
         state: response.state,
       });
       window.DealettCart.openDrawer(cart);
+      addMessage(
+        'assistant',
+        `${response.cartItem.operator} ${response.cartItem.title} är lagt i varukorgen. Fortsätt i varukorgen för nummerflytt, startdatum, kontaktuppgifter och signering.`
+      );
+      renderSuggestions([{ label: 'Öppna varukorg', action: 'openCart' }]);
+      return response;
     };
 
     const renderOfferCards = (offerCalculation) => {
@@ -1279,7 +1302,14 @@
       wrap.addEventListener('click', (event) => {
         const button = event.target.closest('[data-chat-add-plan]');
         if (!button) return;
-        addCalculatedOfferToCart(button.dataset.chatAddPlan).catch(() => {
+        button.disabled = true;
+        const previousLabel = button.innerHTML;
+        button.innerHTML = 'Lägger till... <i class="fa-solid fa-spinner fa-spin"></i>';
+        addCalculatedOfferToCart(button.dataset.chatAddPlan).then(() => {
+          button.innerHTML = 'Tillagd i varukorg <i class="fa-solid fa-check"></i>';
+        }).catch(() => {
+          button.disabled = false;
+          button.innerHTML = previousLabel;
           addMessage('assistant', text.error);
         });
       });

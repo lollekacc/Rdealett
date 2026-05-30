@@ -61,6 +61,7 @@ let selectedPlan = null;
 let coverageMap = null;
 let coverageLayer = null;
 let searchMarker = null;
+let hasRunAddressSearch = false;
 
 const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
 
@@ -95,6 +96,14 @@ const setSearchMessage = (message, state = '') => {
   if (!els.searchMsg) return;
   els.searchMsg.textContent = message;
   els.searchMsg.className = `bredband-search-msg ${state}`.trim();
+};
+
+const getSearchedAddress = () => els.addressInput?.value.trim() || '';
+
+const focusAddressSearch = () => {
+  document.querySelector('#addressSearchForm')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setSearchMessage('Skriv adress eller stad för en preliminär kontroll. Exakt tillgänglighet bekräftas i varukorgen.', '');
+  window.setTimeout(() => els.addressInput?.focus(), 80);
 };
 
 const getFilteredOffers = () => {
@@ -144,8 +153,12 @@ const renderOffers = () => {
     return;
   }
 
-  const address = els.addressInput?.value.trim();
-  setSearchMessage(address ? `Sökningen är klar för ${address}.` : 'Sökningen är klar.', 'success');
+  const address = getSearchedAddress();
+  if (address) {
+    setSearchMessage(`Preliminär kontroll klar för ${address}. Kontrollera täckning på kartan vid behov.`, 'success');
+  } else if (!hasRunAddressSearch) {
+    setSearchMessage('Skriv adress eller stad för en preliminär kontroll, eller öppna täckningskartan.', '');
+  }
 
   els.offers.innerHTML = offers.map((plan) => {
     const reward = Number(plan.rewardTotal) || calculateReward(plan.price);
@@ -278,6 +291,7 @@ window.openCart = openCart;
 const buildFallbackBroadbandCart = () => {
   const reward = Number(selectedPlan.rewardTotal) || calculateReward(selectedPlan.price);
   const logo = providerLogos[selectedPlan.operator] || '';
+  const address = getSearchedAddress();
   const cartItem = {
     cartItemId: `${selectedPlan.id}-${Date.now()}`,
     offerId: selectedPlan.id,
@@ -295,10 +309,14 @@ const buildFallbackBroadbandCart = () => {
     rewardMixLabel: `Presentkort ${formatCurrency(reward)} kr`,
     rewards: { Presentkort: reward },
     features: [
+      address ? `Adress/plats: ${address}` : '',
       formatBinding(selectedPlan),
       `${String(selectedPlan.technology || '').toUpperCase()} · ${formatCurrency(selectedPlan.speedMbps)} Mbit/s`,
       ...(selectedPlan.features || []),
     ].filter(Boolean),
+    answers: {
+      broadbandAddress: address || null,
+    },
   };
 
   return {
@@ -307,7 +325,9 @@ const buildFallbackBroadbandCart = () => {
       persons: 1,
       operator: cartItem.operator,
       wishes: ['5G-bredband'],
-      answers: {},
+      answers: {
+        broadbandAddress: address || null,
+      },
     },
   };
 };
@@ -318,7 +338,10 @@ const createBroadbandCartItem = async () => {
       label: '5G-bredband varukorg',
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ planId: selectedPlan.id }),
+      body: JSON.stringify({
+        planId: selectedPlan.id,
+        address: getSearchedAddress(),
+      }),
     });
   } catch {
     return buildFallbackBroadbandCart();
@@ -467,6 +490,20 @@ const closeCoverageModal = () => {
 const bindEvents = () => {
   els.addressSearchForm?.addEventListener('submit', (event) => {
     event.preventDefault();
+    const address = getSearchedAddress();
+    if (!address) {
+      setSearchMessage('Skriv en adress eller stad först, eller öppna täckningskartan.', 'error');
+      els.addressInput?.focus();
+      return;
+    }
+
+    hasRunAddressSearch = true;
+    try {
+      sessionStorage.setItem('dealettBroadbandAddress', address);
+    } catch {
+      // Keep search usable if session storage is unavailable.
+    }
+
     renderOffers();
     document.querySelector('#offersSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
@@ -565,12 +602,29 @@ const loadPlans = async () => {
     }
 
     bredbandPlans = data;
+    const savedAddress = sessionStorage.getItem('dealettBroadbandAddress');
+    if (savedAddress && els.addressInput && !els.addressInput.value) {
+      els.addressInput.value = savedAddress;
+      hasRunAddressSearch = true;
+    }
     renderOffers();
+
+    const shouldFocusAddress = window.location.hash === '#addressSearchForm' ||
+      sessionStorage.getItem('dealettFocusBroadbandAddress') === 'true';
+    if (shouldFocusAddress) {
+      sessionStorage.removeItem('dealettFocusBroadbandAddress');
+      focusAddressSearch();
+    }
   } catch (error) {
     console.error('Kunde inte ladda 5Gbredband.json', error);
     setSearchMessage('Kunde inte ladda bredbandsdata.', 'error');
     els.offers.innerHTML = '<div class="bredband-empty-state">Kunde inte ladda bredbandsdata.</div>';
   }
+};
+
+window.DealettBroadband = {
+  focusAddressSearch,
+  openCoverageModal,
 };
 
 bindEvents();

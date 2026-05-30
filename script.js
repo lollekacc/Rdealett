@@ -1203,6 +1203,16 @@
             return;
           }
 
+          if (suggestion.action === 'openCart') {
+            const cart = window.DealettCart?.readCart?.() || [];
+            if (window.DealettCart?.openDrawer) {
+              window.DealettCart.openDrawer(cart);
+            } else {
+              window.location.href = 'varukorg.html';
+            }
+            return;
+          }
+
           sendMessage(suggestion.label);
         });
         suggestionArea.append(button);

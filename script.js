@@ -961,6 +961,8 @@
     let chatLanguage = getChatLanguage();
     let text = copy[chatLanguage];
     const messages = [];
+    const qualificationKey = 'dealettChatQualification';
+    const offerCalculationKey = 'dealettChatOfferCalculation';
     let isSending = false;
 
     const root = document.createElement('section');
@@ -978,6 +980,7 @@
       `      <strong id="dealettChatTitle">${text.title}</strong>`,
       `      <span data-chat-status>${text.status}</span>`,
       '    </div>',
+      '    <button class="dealett-chat-reset" type="button" aria-label="Starta om chatten"><i class="fa-solid fa-rotate-left"></i></button>',
       `    <button class="dealett-chat-close" type="button" aria-label="${text.close}"><i class="fa-solid fa-xmark"></i></button>`,
       '  </header>',
       '  <div class="dealett-chat-messages" role="log" aria-live="polite"></div>',
@@ -993,6 +996,7 @@
 
     const toggle = root.querySelector('.dealett-chat-toggle');
     const panel = root.querySelector('.dealett-chat-panel');
+    const resetButton = root.querySelector('.dealett-chat-reset');
     const closeButton = root.querySelector('.dealett-chat-close');
     const messageList = root.querySelector('.dealett-chat-messages');
     const suggestionArea = root.querySelector('.dealett-chat-suggestions');
@@ -1025,6 +1029,116 @@
       }
     };
 
+    const createEmptyQualification = () => ({
+      peopleCount: null,
+      operators: [],
+      bindingEnds: [],
+      mobileUsage: null,
+      priceRange: null,
+      exactMonthlyPrice: null,
+      exactMonthlyPrices: [],
+      readyForOffer: false,
+      missingFields: ['peopleCount', 'operators', 'bindingEnds', 'mobileUsage', 'priceRange'],
+    });
+
+    const readQualification = () => {
+      try {
+        const raw = sessionStorage.getItem(qualificationKey);
+        return raw ? { ...createEmptyQualification(), ...JSON.parse(raw) } : createEmptyQualification();
+      } catch {
+        return createEmptyQualification();
+      }
+    };
+
+    const writeQualification = (qualification) => {
+      if (!qualification || typeof qualification !== 'object') return;
+
+      try {
+        sessionStorage.setItem(qualificationKey, JSON.stringify({
+          ...createEmptyQualification(),
+          ...qualification,
+        }));
+      } catch {
+        // Keep chat usable if session storage is unavailable.
+      }
+    };
+
+    const writeOfferCalculation = (offerCalculation) => {
+      if (!offerCalculation || typeof offerCalculation !== 'object') return;
+
+      try {
+        sessionStorage.setItem(offerCalculationKey, JSON.stringify(offerCalculation));
+      } catch {
+        // Keep chat usable if session storage is unavailable.
+      }
+    };
+
+    const mergeQualification = (patch) => {
+      if (!patch || typeof patch !== 'object') return;
+      writeQualification({
+        ...readQualification(),
+        ...patch,
+      });
+    };
+
+    const inferSuggestion = (suggestion) => {
+      if (suggestion && typeof suggestion === 'object') return suggestion;
+
+      const label = String(suggestion || '').trim();
+      const normalized = label.toLowerCase();
+      const patchMap = [
+        { test: /^1$/, patch: { peopleCount: 1 } },
+        { test: /^2$/, patch: { peopleCount: 2 } },
+        { test: /^3$/, patch: { peopleCount: 3 } },
+        { test: /^4$/, patch: { peopleCount: 4 } },
+        { test: /5\+/, patch: { peopleCount: 5 } },
+        { test: /lite surf|wifi|social/i, patch: { mobileUsage: 'low' } },
+        { test: /streaming|video/i, patch: { mobileUsage: 'medium' } },
+        { test: /max surf|obegränsad|unlimited/i, patch: { mobileUsage: 'high' } },
+        { test: /under 300/i, patch: { priceRange: 'under300' } },
+        { test: /300.?400/i, patch: { priceRange: '300-400' } },
+        { test: /400.?500/i, patch: { priceRange: '400-500' } },
+      ];
+      const operator = ['Telia', 'Tele2', 'Telenor', 'Tre', 'Halebop']
+        .find((item) => item.toLowerCase() === normalized);
+
+      if (operator) {
+        return {
+          label,
+          qualificationPatch: {
+            operators: [...readQualification().operators, operator],
+          },
+        };
+      }
+
+      const mapped = patchMap.find((item) => item.test.test(label));
+      if (mapped) return { label, qualificationPatch: mapped.patch };
+      if (/ingen bindningstid/i.test(label)) {
+        return {
+          label,
+          qualificationPatch: {
+            bindingEnds: [...readQualification().bindingEnds, 'Ingen bindningstid'],
+          },
+        };
+      }
+      if (/vet inte/i.test(label)) {
+        return {
+          label,
+          qualificationPatch: {
+            bindingEnds: [...readQualification().bindingEnds, 'Vet inte'],
+          },
+        };
+      }
+      if (/öppna täckningskarta|coverage map/i.test(label)) {
+        return { label, action: 'openCoverageMap' };
+      }
+      if (/öppna 5g|broadband/i.test(label)) {
+        return { label, action: 'openBroadbandPage' };
+      }
+
+      return { label };
+    };
+
     const syncLanguage = () => {
       chatLanguage = getChatLanguage();
       text = copy[chatLanguage];
@@ -1051,14 +1165,103 @@
 
     const renderSuggestions = (suggestions) => {
       suggestionArea.replaceChildren();
-      suggestions.slice(0, 4).forEach((label) => {
+      suggestions.slice(0, 4).map(inferSuggestion).forEach((suggestion) => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'dealett-chat-chip';
-        button.textContent = label;
-        button.addEventListener('click', () => sendMessage(label));
+        button.textContent = suggestion.label;
+        button.addEventListener('click', () => {
+          if (suggestion.qualificationPatch) {
+            mergeQualification(suggestion.qualificationPatch);
+          }
+
+          if (suggestion.action === 'openCoverageMap') {
+            if (window.location.pathname.endsWith('/5g-bredband.html')) {
+              document.querySelector('#openCoverageModal')?.click();
+            } else {
+              window.location.href = '5g-bredband.html';
+            }
+            return;
+          }
+
+          if (suggestion.action === 'openBroadbandPage') {
+            window.location.href = '5g-bredband.html#offersSection';
+            return;
+          }
+
+          sendMessage(suggestion.label);
+        });
         suggestionArea.append(button);
       });
+    };
+
+    const getProviderClass = (operator) => String(operator || '')
+      .toLowerCase()
+      .replace('å', 'a')
+      .replace('ä', 'a')
+      .replace('ö', 'o')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    const addCalculatedOfferToCart = async (planId) => {
+      const response = await window.DealettNetwork.fetchJson('/api/offers/cart-item', {
+        label: 'Dealett erbjudande till varukorg',
+        method: 'POST',
+        timeoutMs: 10000,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId,
+          qualification: readQualification(),
+        }),
+      });
+      const cart = window.DealettCart.appendItem(response.cartItem, {
+        state: response.state,
+      });
+      window.DealettCart.openDrawer(cart);
+    };
+
+    const renderOfferCards = (offerCalculation) => {
+      if (!offerCalculation?.readyForOffer || !offerCalculation.options?.length) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'dealett-chat-offers';
+      offerCalculation.options.forEach((option, index) => {
+        const providerClass = getProviderClass(option.operator);
+        const article = document.createElement('article');
+        article.className = [
+          'offer-card',
+          'dealett-chat-offer-card',
+          index === 0 ? 'offer-card--top' : '',
+          providerClass ? `provider-card--${providerClass}` : '',
+        ].filter(Boolean).join(' ');
+        article.innerHTML = [
+          '<div class="offer-card__accent"></div>',
+          '<div class="offer-card__inner">',
+          `  <span class="offer-card__label">${index === 0 ? 'Bäst match' : `Alternativ ${index + 1}`}</span>`,
+          `  <h4 class="dealett-chat-offer-title">${escapeChatText(option.operator)} ${escapeChatText(option.title)}</h4>`,
+          '  <div class="offer-card__stats">',
+          `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-tag"></i></span><div><p class="offer-card__stat-label">Pris</p><p class="offer-card__stat-value">${option.monthlyPrice.toLocaleString('sv-SE')} kr/mån</p></div></div>`,
+          `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-user-group"></i></span><div><p class="offer-card__stat-label">Per person</p><p class="offer-card__stat-value">${option.pricePerPerson.toLocaleString('sv-SE')} kr</p></div></div>`,
+          `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-gift"></i></span><div><p class="offer-card__stat-label">Presentkort</p><p class="offer-card__stat-value">${option.rewardTotal.toLocaleString('sv-SE')} kr</p></div></div>`,
+          `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-calculator"></i></span><div><p class="offer-card__stat-label">Est. vinst</p><p class="offer-card__stat-value">${option.savingsVsStaying.toLocaleString('sv-SE')} kr</p></div></div>`,
+          '  </div>',
+          option.currentMonthlyPriceIsEstimate ? '  <p class="dealett-chat-offer-note">Uppskattat från prisintervall. För exakt beräkning behövs exakt nuvarande pris och bindningsdatum.</p>' : '',
+          `  <button class="offer-card__cta dealett-chat-offer-cta" type="button" data-chat-add-plan="${escapeChatText(option.planId)}">Lägg i varukorg <i class="fa-solid fa-cart-shopping"></i></button>`,
+          '</div>',
+        ].join('');
+        wrap.append(article);
+      });
+
+      wrap.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-chat-add-plan]');
+        if (!button) return;
+        addCalculatedOfferToCart(button.dataset.chatAddPlan).catch(() => {
+          addMessage('assistant', text.error);
+        });
+      });
+
+      messageList.append(wrap);
+      scrollMessages();
     };
 
     const setSending = (nextValue) => {
@@ -1086,6 +1289,7 @@
             message,
             language: chatLanguage,
             messages: messages.slice(0, -1),
+            qualification: readQualification(),
             cart: readCartContext(),
             page: {
               title: document.title,
@@ -1095,6 +1299,9 @@
         });
 
         addMessage('assistant', response.reply);
+        writeQualification(response.qualification);
+        writeOfferCalculation(response.offerCalculation);
+        renderOfferCards(response.offerCalculation);
         renderSuggestions(response.suggestions || text.suggestions);
       } catch {
         addMessage('assistant', text.error);
@@ -1130,6 +1337,16 @@
     });
 
     closeButton.addEventListener('click', closePanel);
+
+    resetButton.addEventListener('click', () => {
+      sessionStorage.removeItem(qualificationKey);
+      sessionStorage.removeItem(offerCalculationKey);
+      messages.splice(0, messages.length);
+      messageList.replaceChildren();
+      addMessage('assistant', text.greeting);
+      renderSuggestions(text.suggestions);
+      input.focus();
+    });
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();

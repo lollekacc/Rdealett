@@ -981,6 +981,7 @@
     let isSending = false;
     let lastAssistantResponse = null;
     let offerClickedInSession = false;
+    let hasUserStartedChat = false;
 
     const root = document.createElement('section');
     root.id = 'dealettChat';
@@ -1271,6 +1272,12 @@
       }).catch(() => null);
     };
 
+    const getSafeChatUrl = (value) => {
+      const url = String(value || '').trim();
+      if (!url || /^javascript:/i.test(url)) return '';
+      return url;
+    };
+
     const renderFeedbackPrompt = (messageItem, response) => {
       if (!messageItem || !response?.reply) return;
 
@@ -1364,6 +1371,141 @@
       skipButton.addEventListener('click', () => submitFeedback(false));
     };
 
+    const renderQuickReplies = (messageItem, quickReplies) => {
+      if (!messageItem || !Array.isArray(quickReplies) || !quickReplies.length) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'dealett-chat-quick-replies';
+
+      quickReplies.slice(0, 4).forEach((reply) => {
+        const label = String(reply?.label || reply || '').trim();
+        if (!label) return;
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'dealett-chat-quick-reply';
+        button.textContent = label;
+        button.addEventListener('click', () => {
+          if (isSending) return;
+          wrap.querySelectorAll('button').forEach((item) => {
+            item.disabled = true;
+          });
+          input.value = label;
+          sendMessage(label);
+        });
+        wrap.append(button);
+      });
+
+      if (wrap.children.length) {
+        messageItem.append(wrap);
+        scrollMessages();
+      }
+    };
+
+    const renderCoverageSelector = (messageItem, widget) => {
+      if (!messageItem || widget?.type !== 'coverage_selector') return;
+
+      const card = document.createElement('div');
+      card.className = 'dealett-chat-embedded-widget dealett-chat-coverage-selector';
+      card.innerHTML = [
+        `<strong class="dealett-chat-widget-title">${escapeChatText(widget.title || 'Kontrollera täckning')}</strong>`,
+        widget.description ? `<p class="dealett-chat-widget-description">${escapeChatText(widget.description)}</p>` : '',
+        '<div class="dealett-chat-widget-actions"></div>',
+        '<div class="dealett-chat-address-row" hidden>',
+        '  <input class="dealett-chat-address-input" type="text" autocomplete="street-address" placeholder="Skriv adress" />',
+        '  <button class="dealett-chat-widget-button dealett-chat-widget-button--primary" type="button">Skicka</button>',
+        '</div>',
+        '<p class="dealett-chat-widget-status" hidden></p>',
+      ].join('');
+
+      const actions = card.querySelector('.dealett-chat-widget-actions');
+      const addressRow = card.querySelector('.dealett-chat-address-row');
+      const addressInput = card.querySelector('.dealett-chat-address-input');
+      const addressSubmit = addressRow.querySelector('button');
+      const statusText = card.querySelector('.dealett-chat-widget-status');
+
+      const showStatus = (message) => {
+        statusText.textContent = message;
+        statusText.hidden = false;
+        scrollMessages();
+      };
+
+      const sendAddress = () => {
+        const address = String(addressInput.value || '').trim();
+        if (!address) {
+          addressInput.focus();
+          return;
+        }
+        sendMessage(`Kontrollera täckning för: ${address}`);
+      };
+
+      const handleAction = (actionId, button) => {
+        if (actionId === 'use_location') {
+          if (!navigator.geolocation) {
+            showStatus('Skriv adressen istället.');
+            addressRow.hidden = false;
+            addressInput.focus();
+            return;
+          }
+
+          button.disabled = true;
+          button.textContent = 'Hämtar position...';
+          navigator.geolocation.getCurrentPosition(
+            () => {
+              sendMessage('Använd min position för täckning');
+            },
+            () => {
+              button.disabled = false;
+              button.textContent = widget.actions.find((action) => action.id === 'use_location')?.label || 'Använd min position';
+              showStatus('Skriv adressen istället.');
+              addressRow.hidden = false;
+              addressInput.focus();
+            },
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+          );
+          return;
+        }
+
+        if (actionId === 'enter_address') {
+          addressRow.hidden = false;
+          statusText.hidden = true;
+          addressInput.focus();
+          scrollMessages();
+          return;
+        }
+
+        if (actionId === 'compare_operators') {
+          sendMessage('Jämför täckning mellan operatörer');
+        }
+      };
+
+      (widget.actions || []).slice(0, 3).forEach((action) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'dealett-chat-widget-button';
+        button.textContent = action.label;
+        button.addEventListener('click', () => handleAction(action.id, button));
+        actions.append(button);
+      });
+
+      addressSubmit.addEventListener('click', sendAddress);
+      addressInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          sendAddress();
+        }
+      });
+
+      messageItem.append(card);
+      scrollMessages();
+    };
+
+    const renderEmbeddedWidget = (messageItem, embeddedWidget) => {
+      if (embeddedWidget?.type === 'coverage_selector') {
+        renderCoverageSelector(messageItem, embeddedWidget);
+      }
+    };
+
     const addMessage = (role, content) => {
       const item = document.createElement('article');
       item.className = `dealett-chat-message dealett-chat-message--${role}`;
@@ -1377,6 +1519,8 @@
 
     const renderSuggestions = (suggestions) => {
       suggestionArea.replaceChildren();
+      if (hasUserStartedChat) return;
+
       suggestions.slice(0, 5).map(inferSuggestion).forEach((suggestion) => {
         const button = document.createElement('button');
         button.type = 'button';
@@ -1451,7 +1595,8 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
 
-    const addCalculatedOfferToCart = async (planId) => {
+    const addCalculatedOfferToCart = async (planId, options = {}) => {
+      const { announce = true, openDrawer = true } = options;
       const response = await window.DealettNetwork.fetchJson('/api/offers/cart-item', {
         label: 'Dealett erbjudande till varukorg',
         method: 'POST',
@@ -1465,22 +1610,27 @@
       const cart = window.DealettCart.appendItem(response.cartItem, {
         state: response.state,
       });
-      window.DealettCart.openDrawer(cart);
-      addMessage(
-        'assistant',
-        `${response.cartItem.operator} ${response.cartItem.title} är lagt i varukorgen. Fortsätt i varukorgen för nummerflytt, startdatum, kontaktuppgifter och signering.`
-      );
-      renderSuggestions([{ label: 'Öppna varukorg', action: 'openCart' }]);
+      if (openDrawer) {
+        window.DealettCart.openDrawer(cart);
+      }
+      if (announce) {
+        addMessage(
+          'assistant',
+          `${response.cartItem.operator} ${response.cartItem.title} är lagt i varukorgen. Fortsätt i varukorgen för nummerflytt, startdatum, kontaktuppgifter och signering.`
+        );
+        renderSuggestions([{ label: 'Öppna varukorg', action: 'openCart' }]);
+      }
       return response;
     };
 
-    const renderOfferCards = (offerCalculation) => {
-      if (!offerCalculation?.readyForOffer || !offerCalculation.options?.length) return;
+    const renderChatOfferCards = (messageItem, offerCards) => {
+      if (!messageItem || !Array.isArray(offerCards) || !offerCards.length) return;
 
       const wrap = document.createElement('div');
       wrap.className = 'dealett-chat-offers';
-      offerCalculation.options.forEach((option, index) => {
-        const providerClass = getProviderClass(option.operator);
+      offerCards.slice(0, 3).forEach((card, index) => {
+        const providerClass = getProviderClass(card.operator);
+        const safeCtaUrl = getSafeChatUrl(card.ctaUrl);
         const article = document.createElement('article');
         article.className = [
           'offer-card',
@@ -1492,33 +1642,57 @@
           '<div class="offer-card__accent"></div>',
           '<div class="offer-card__inner">',
           `  <span class="offer-card__label">${index === 0 ? 'Bäst match' : `Alternativ ${index + 1}`}</span>`,
-          `  <h4 class="dealett-chat-offer-title">${escapeChatText(option.operator)} ${escapeChatText(option.title)}</h4>`,
+          `  <h4 class="dealett-chat-offer-title">${escapeChatText(card.operator)} ${escapeChatText(card.planName)}</h4>`,
           '  <div class="offer-card__stats">',
-          `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-tag"></i></span><div><p class="offer-card__stat-label">Pris</p><p class="offer-card__stat-value">${option.monthlyPrice.toLocaleString('sv-SE')} kr/mån</p></div></div>`,
-          `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-user-group"></i></span><div><p class="offer-card__stat-label">Per person</p><p class="offer-card__stat-value">${option.pricePerPerson.toLocaleString('sv-SE')} kr</p></div></div>`,
-          `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-gift"></i></span><div><p class="offer-card__stat-label">Presentkort</p><p class="offer-card__stat-value">${option.rewardTotal.toLocaleString('sv-SE')} kr</p></div></div>`,
-          `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-calculator"></i></span><div><p class="offer-card__stat-label">Est. vinst</p><p class="offer-card__stat-value">${option.savingsVsStaying.toLocaleString('sv-SE')} kr</p></div></div>`,
+          card.dataLabel ? `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-wifi"></i></span><div><p class="offer-card__stat-label">Surf</p><p class="offer-card__stat-value">${escapeChatText(card.dataLabel)}</p></div></div>` : '',
+          card.monthlyPriceLabel ? `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-tag"></i></span><div><p class="offer-card__stat-label">Pris</p><p class="offer-card__stat-value">${escapeChatText(card.monthlyPriceLabel)}</p></div></div>` : '',
+          card.rewardLabel ? `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-gift"></i></span><div><p class="offer-card__stat-label">Belöning</p><p class="offer-card__stat-value">${escapeChatText(card.rewardLabel)}</p></div></div>` : '',
+          card.bindingLabel ? `    <div class="offer-card__stat"><span class="offer-card__stat-icon"><i class="fa-solid fa-file-signature"></i></span><div><p class="offer-card__stat-label">Bindning</p><p class="offer-card__stat-value">${escapeChatText(card.bindingLabel)}</p></div></div>` : '',
           '  </div>',
-          option.currentMonthlyPriceIsEstimate ? '  <p class="dealett-chat-offer-note">Uppskattat från prisintervall. För exakt beräkning behövs exakt nuvarande pris och bindningsdatum.</p>' : '',
-          `  <button class="offer-card__cta dealett-chat-offer-cta" type="button" data-chat-add-plan="${escapeChatText(option.planId)}">Lägg i varukorg <i class="fa-solid fa-cart-shopping"></i></button>`,
+          card.reason ? `  <p class="dealett-chat-offer-note">${escapeChatText(card.reason)}</p>` : '',
+          safeCtaUrl || card.planId ? `  <button class="offer-card__cta dealett-chat-offer-cta" type="button" data-chat-offer-card="${escapeChatText(card.id)}" data-chat-offer-plan="${escapeChatText(card.planId || '')}" data-chat-offer-url="${escapeChatText(safeCtaUrl)}">${escapeChatText(card.ctaLabel || 'Välj erbjudande')} <i class="fa-solid fa-cart-shopping"></i></button>` : '',
           '</div>',
         ].join('');
         wrap.append(article);
       });
 
       wrap.addEventListener('click', (event) => {
-        const button = event.target.closest('[data-chat-add-plan]');
+        const button = event.target.closest('[data-chat-offer-card]');
         if (!button) return;
         button.disabled = true;
         offerClickedInSession = true;
-        sendChatFeedback(buildFeedbackPayload({
+        const clickTracking = sendChatFeedback(buildFeedbackPayload({
           response: lastAssistantResponse,
           eventType: 'offer_click',
-          clickedOfferId: button.dataset.chatAddPlan,
+          clickedOfferId: button.dataset.chatOfferCard || button.dataset.chatOfferPlan,
         }));
         const previousLabel = button.innerHTML;
+        const planId = button.dataset.chatOfferPlan;
+        const ctaUrl = getSafeChatUrl(button.dataset.chatOfferUrl);
+
+        if (!planId && ctaUrl) {
+          button.innerHTML = 'Öppnar... <i class="fa-solid fa-spinner fa-spin"></i>';
+          clickTracking.finally(() => {
+            window.location.href = ctaUrl;
+          });
+          return;
+        }
+
+        if (!planId) {
+          button.disabled = false;
+          button.innerHTML = previousLabel;
+          return;
+        }
+
         button.innerHTML = 'Lägger till... <i class="fa-solid fa-spinner fa-spin"></i>';
-        addCalculatedOfferToCart(button.dataset.chatAddPlan).then(() => {
+        addCalculatedOfferToCart(planId, {
+          announce: !ctaUrl,
+          openDrawer: !ctaUrl,
+        }).then(() => {
+          if (ctaUrl) {
+            window.location.href = ctaUrl;
+            return;
+          }
           button.innerHTML = 'Tillagd i varukorg <i class="fa-solid fa-check"></i>';
         }).catch(() => {
           button.disabled = false;
@@ -1527,7 +1701,7 @@
         });
       });
 
-      messageList.append(wrap);
+      messageItem.append(wrap);
       scrollMessages();
     };
 
@@ -1542,6 +1716,8 @@
       const message = String(rawMessage || '').trim();
       if (!message || isSending) return;
 
+      hasUserStartedChat = true;
+      suggestionArea.replaceChildren();
       addMessage('user', message);
       input.value = '';
       setSending(true);
@@ -1566,16 +1742,20 @@
           }),
         });
 
-        lastAssistantResponse = response;
-        const assistantItem = addMessage('assistant', response.reply);
-        renderFeedbackPrompt(assistantItem, response);
+        const assistantText = response.reply || response.message || '';
+        lastAssistantResponse = {
+          ...response,
+          reply: assistantText,
+        };
+        const assistantItem = addMessage('assistant', assistantText);
+        renderQuickReplies(assistantItem, response.quickReplies);
+        renderChatOfferCards(assistantItem, response.offerCards);
+        renderEmbeddedWidget(assistantItem, response.embeddedWidget);
+        renderFeedbackPrompt(assistantItem, lastAssistantResponse);
         writeQualification(response.qualification);
         writeOfferCalculation(response.offerCalculation);
-        renderOfferCards(response.offerCalculation);
-        renderSuggestions(response.suggestions || text.suggestions);
       } catch {
         addMessage('assistant', text.error);
-        renderSuggestions(text.suggestions);
       } finally {
         setSending(false);
         input.focus();
@@ -1614,6 +1794,7 @@
       chatSessionId = persistChatSessionId(createChatSessionId());
       lastAssistantResponse = null;
       offerClickedInSession = false;
+      hasUserStartedChat = false;
       messages.splice(0, messages.length);
       messageList.replaceChildren();
       addMessage('assistant', text.greeting);

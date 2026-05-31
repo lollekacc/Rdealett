@@ -942,6 +942,13 @@
         typing: 'Dealett assistant skriver...',
         error: 'Jag kunde inte svara just nu. Kontrollera att AI-tjänsten är konfigurerad och försök igen.',
         suggestions: ['Hjälp mig välja mobilabonnemang', 'Vilket bredband passar mig?', 'Förklara presentkort', 'Vad finns i min varukorg?'],
+        feedbackQuestion: 'Var svaret hjälpsamt?',
+        feedbackYes: 'Ja',
+        feedbackNo: 'Nej',
+        feedbackWhy: 'Vill du berätta varför?',
+        feedbackSend: 'Skicka feedback',
+        feedbackSkip: 'Hoppa över',
+        feedbackThanks: 'Tack för feedbacken.',
       },
       en: {
         open: 'Open Dealett assistant',
@@ -954,6 +961,13 @@
         typing: 'Dealett assistant is typing...',
         error: 'I could not answer right now. Check that the AI service is configured and try again.',
         suggestions: ['Help me choose a mobile plan', 'Which broadband fits me?', 'Explain gift cards', 'What is in my cart?'],
+        feedbackQuestion: 'Was this helpful?',
+        feedbackYes: 'Yes',
+        feedbackNo: 'No',
+        feedbackWhy: 'Want to tell us why?',
+        feedbackSend: 'Send feedback',
+        feedbackSkip: 'Skip',
+        feedbackThanks: 'Thanks for the feedback.',
       },
     };
 
@@ -963,7 +977,10 @@
     const messages = [];
     const qualificationKey = 'dealettChatQualification';
     const offerCalculationKey = 'dealettChatOfferCalculation';
+    const chatSessionKey = 'dealettChatSessionId';
     let isSending = false;
+    let lastAssistantResponse = null;
+    let offerClickedInSession = false;
 
     const root = document.createElement('section');
     root.id = 'dealettChat';
@@ -1010,6 +1027,33 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+
+    const createChatSessionId = () => [
+      'dealett-chat',
+      Date.now().toString(36),
+      Math.random().toString(36).slice(2, 10),
+    ].join('-');
+
+    const persistChatSessionId = (sessionId) => {
+      try {
+        sessionStorage.setItem(chatSessionKey, sessionId);
+      } catch {
+        // Feedback still works for this page view if session storage is unavailable.
+      }
+      return sessionId;
+    };
+
+    const readChatSessionId = () => {
+      try {
+        const stored = sessionStorage.getItem(chatSessionKey);
+        if (stored) return stored;
+      } catch {
+        // Fall back to an in-memory id.
+      }
+      return persistChatSessionId(createChatSessionId());
+    };
+
+    let chatSessionId = readChatSessionId();
 
     const readCartContext = () => {
       try {
@@ -1171,6 +1215,155 @@
       messageList.scrollTop = messageList.scrollHeight;
     };
 
+    const hasOfferOptions = (offerCalculation) => Boolean(
+      offerCalculation?.readyForOffer &&
+      Array.isArray(offerCalculation.options) &&
+      offerCalculation.options.length
+    );
+
+    const getFinalBotRecommendation = (response) => {
+      const option = response?.offerCalculation?.options?.[0];
+      if (!option) return String(response?.reply || '').slice(0, 1400);
+
+      const price = Number.isFinite(Number(option.monthlyPrice))
+        ? `${Number(option.monthlyPrice).toLocaleString('sv-SE')} kr/mån`
+        : null;
+      return [
+        option.operator,
+        option.title,
+        price,
+      ].filter(Boolean).join(' ').slice(0, 1400);
+    };
+
+    const buildFeedbackPayload = ({
+      response,
+      thumb = null,
+      feedbackText = '',
+      eventType = 'feedback',
+      clickedOfferId = null,
+    }) => ({
+      eventType,
+      sessionId: chatSessionId,
+      transcriptId: chatSessionId,
+      thumb,
+      feedbackText,
+      lastDetectedIntent: response?.intent || null,
+      lastDetectedStyle: response?.conversationStyle?.style || null,
+      offerShown: hasOfferOptions(response?.offerCalculation),
+      offerClicked: offerClickedInSession || eventType === 'offer_click',
+      finalBotRecommendation: getFinalBotRecommendation(response),
+      clickedOfferId,
+      page: {
+        title: document.title,
+        path: window.location.pathname.split('/').pop() || 'index.html',
+      },
+    });
+
+    const sendChatFeedback = (payload) => {
+      if (!window.DealettNetwork?.fetchJson) return Promise.resolve(null);
+
+      return window.DealettNetwork.fetchJson('/api/chat-feedback', {
+        label: 'Dealett chat feedback',
+        method: 'POST',
+        timeoutMs: 8000,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch(() => null);
+    };
+
+    const renderFeedbackPrompt = (messageItem, response) => {
+      if (!messageItem || !response?.reply) return;
+
+      const feedback = document.createElement('div');
+      feedback.className = 'dealett-chat-feedback';
+
+      const question = document.createElement('span');
+      question.className = 'dealett-chat-feedback__question';
+      question.textContent = text.feedbackQuestion;
+
+      const actions = document.createElement('div');
+      actions.className = 'dealett-chat-feedback__actions';
+
+      const yesButton = document.createElement('button');
+      yesButton.type = 'button';
+      yesButton.className = 'dealett-chat-feedback__button';
+      yesButton.textContent = text.feedbackYes;
+
+      const noButton = document.createElement('button');
+      noButton.type = 'button';
+      noButton.className = 'dealett-chat-feedback__button';
+      noButton.textContent = text.feedbackNo;
+
+      actions.append(yesButton, noButton);
+
+      const details = document.createElement('div');
+      details.className = 'dealett-chat-feedback__details';
+      details.hidden = true;
+
+      const textarea = document.createElement('textarea');
+      textarea.className = 'dealett-chat-feedback__text';
+      textarea.rows = 2;
+      textarea.maxLength = 1000;
+      textarea.placeholder = text.feedbackWhy;
+
+      const detailActions = document.createElement('div');
+      detailActions.className = 'dealett-chat-feedback__actions';
+
+      const sendButton = document.createElement('button');
+      sendButton.type = 'button';
+      sendButton.className = 'dealett-chat-feedback__button dealett-chat-feedback__button--primary';
+      sendButton.textContent = text.feedbackSend;
+
+      const skipButton = document.createElement('button');
+      skipButton.type = 'button';
+      skipButton.className = 'dealett-chat-feedback__button';
+      skipButton.textContent = text.feedbackSkip;
+
+      detailActions.append(sendButton, skipButton);
+      details.append(textarea, detailActions);
+      feedback.append(question, actions, details);
+      messageItem.append(feedback);
+
+      let selectedThumb = null;
+      const setSubmitted = () => {
+        feedback.replaceChildren();
+        const thanks = document.createElement('span');
+        thanks.className = 'dealett-chat-feedback__thanks';
+        thanks.textContent = text.feedbackThanks;
+        feedback.append(thanks);
+        scrollMessages();
+      };
+
+      const submitFeedback = async (includeText) => {
+        if (!selectedThumb || feedback.dataset.submitted === 'true') return;
+        feedback.dataset.submitted = 'true';
+        yesButton.disabled = true;
+        noButton.disabled = true;
+        sendButton.disabled = true;
+        skipButton.disabled = true;
+        await sendChatFeedback(buildFeedbackPayload({
+          response,
+          thumb: selectedThumb,
+          feedbackText: includeText ? textarea.value : '',
+        }));
+        setSubmitted();
+      };
+
+      const chooseThumb = (thumb) => {
+        selectedThumb = thumb;
+        yesButton.classList.toggle('is-selected', thumb === 'up');
+        noButton.classList.toggle('is-selected', thumb === 'down');
+        details.hidden = false;
+        scrollMessages();
+        textarea.focus();
+      };
+
+      yesButton.addEventListener('click', () => chooseThumb('up'));
+      noButton.addEventListener('click', () => chooseThumb('down'));
+      sendButton.addEventListener('click', () => submitFeedback(true));
+      skipButton.addEventListener('click', () => submitFeedback(false));
+    };
+
     const addMessage = (role, content) => {
       const item = document.createElement('article');
       item.className = `dealett-chat-message dealett-chat-message--${role}`;
@@ -1179,6 +1372,7 @@
       messages.push({ role, content });
       if (messages.length > 10) messages.splice(0, messages.length - 10);
       scrollMessages();
+      return item;
     };
 
     const renderSuggestions = (suggestions) => {
@@ -1316,6 +1510,12 @@
         const button = event.target.closest('[data-chat-add-plan]');
         if (!button) return;
         button.disabled = true;
+        offerClickedInSession = true;
+        sendChatFeedback(buildFeedbackPayload({
+          response: lastAssistantResponse,
+          eventType: 'offer_click',
+          clickedOfferId: button.dataset.chatAddPlan,
+        }));
         const previousLabel = button.innerHTML;
         button.innerHTML = 'Lägger till... <i class="fa-solid fa-spinner fa-spin"></i>';
         addCalculatedOfferToCart(button.dataset.chatAddPlan).then(() => {
@@ -1353,6 +1553,7 @@
           timeoutMs: 20000,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            sessionId: chatSessionId,
             message,
             language: chatLanguage,
             messages: messages.slice(0, -1),
@@ -1365,7 +1566,9 @@
           }),
         });
 
-        addMessage('assistant', response.reply);
+        lastAssistantResponse = response;
+        const assistantItem = addMessage('assistant', response.reply);
+        renderFeedbackPrompt(assistantItem, response);
         writeQualification(response.qualification);
         writeOfferCalculation(response.offerCalculation);
         renderOfferCards(response.offerCalculation);
@@ -1408,6 +1611,9 @@
     resetButton.addEventListener('click', () => {
       sessionStorage.removeItem(qualificationKey);
       sessionStorage.removeItem(offerCalculationKey);
+      chatSessionId = persistChatSessionId(createChatSessionId());
+      lastAssistantResponse = null;
+      offerClickedInSession = false;
       messages.splice(0, messages.length);
       messageList.replaceChildren();
       addMessage('assistant', text.greeting);

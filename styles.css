@@ -206,6 +206,81 @@ img {
   color: #fff;
 }
 
+.dealett-chat-feedback {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(39, 36, 67, 0.08);
+  display: grid;
+  gap: 8px;
+  color: rgba(39, 36, 67, 0.72);
+  font-size: 12px;
+}
+
+.dealett-chat-feedback__question,
+.dealett-chat-feedback__thanks {
+  display: block;
+}
+
+.dealett-chat-feedback__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.dealett-chat-feedback__button {
+  min-height: 30px;
+  border: 1px solid rgba(39, 36, 67, 0.14);
+  border-radius: 999px;
+  background: #fff;
+  color: #272443;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dealett-chat-feedback__button:hover,
+.dealett-chat-feedback__button.is-selected {
+  border-color: rgba(218, 57, 43, 0.48);
+  background: rgba(218, 57, 43, 0.07);
+}
+
+.dealett-chat-feedback__button--primary {
+  border-color: #272443;
+  background: #272443;
+  color: #fff;
+}
+
+.dealett-chat-feedback__button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.dealett-chat-feedback__details {
+  display: grid;
+  gap: 7px;
+}
+
+.dealett-chat-feedback__details[hidden] {
+  display: none;
+}
+
+.dealett-chat-feedback__text {
+  width: 100%;
+  min-height: 54px;
+  resize: vertical;
+  border: 1px solid rgba(39, 36, 67, 0.14);
+  border-radius: 8px;
+  padding: 8px;
+  color: #272443;
+  font: inherit;
+  font-size: 12px;
+}
+
+.dealett-chat-feedback__text:focus {
+  outline: 3px solid rgba(218, 57, 43, 0.14);
+  border-color: #da392b;
+}
+
 .dealett-chat-offers {
   display: grid;
   gap: 12px;

@@ -48,6 +48,7 @@ function createIndexQuiz() {
   const sectionWrapperAnchor = document.createComment("quiz section mount");
   let plans = null;
   let recommendationsRequestId = 0;
+  let lastOfferCalculation = null;
 
   function init() {
     if (!dom.wrapper || !dom.stack || !steps.length) return;
@@ -150,13 +151,13 @@ function createIndexQuiz() {
       operator: item.operator,
       binding: null,
       bindingEndDate: null,
-      wishes: ["Familjeabonnemang"],
+      wishes: ["Familjabonnemang"],
       operatorsByPerson: Array.from({ length: 4 }, () => "Andra / Ingen"),
       bindingsByPerson: Array.from({ length: 4 }, () => null),
       bindingEndDatesByPerson: Array.from({ length: 4 }, () => null)
     });
 
-    window.location.href = "varukorg.html";
+    openUnifiedCart();
   }
 
   function bindStaticOfferCards() {
@@ -195,9 +196,11 @@ function createIndexQuiz() {
       bindingEndDatesByPerson: Array.from({ length: item.persons }, () => null)
     });
 
-    window.location.href = savedOffer
-      ? "varukorg.html"
-      : card.querySelector(".provider-button")?.getAttribute("href") || "varukorg.html";
+    if (savedOffer) {
+      openUnifiedCart();
+    } else {
+      window.location.href = card.querySelector(".provider-button")?.getAttribute("href") || "varukorg.html";
+    }
   }
 
   function saveRecommendationAndNavigate(plan) {
@@ -208,8 +211,10 @@ function createIndexQuiz() {
       operator: item.operator,
       binding: state.binding,
       bindingEndDate: null,
-      wishes: [item.productType === "family" ? "Familjeabonnemang" : "Mobilabonnemang"],
+      wishes: [item.productType === "family" ? "Familjabonnemang" : "Mobilabonnemang"],
       answers: {
+        qualification: item.qualification || null,
+        offerCalculation: item.offerCalculation || null,
         customerStatus: state.customerStatus,
         existingCustomers: state.existingCustomers,
         newCustomers: state.newCustomers,
@@ -223,7 +228,7 @@ function createIndexQuiz() {
       bindingEndDatesByPerson: state.operatorDates.length ? state.operatorDates : Array.from({ length: item.persons }, () => null)
     });
 
-    window.location.href = "varukorg.html";
+    openUnifiedCart();
   }
 
   function persistCartItem(item, statePayload) {
@@ -255,6 +260,16 @@ function createIndexQuiz() {
     } catch {
       return false;
     }
+  }
+
+  function openUnifiedCart() {
+    const cart = window.DealettCart?.readCart?.() || readCart();
+    if (window.DealettCart?.openDrawer) {
+      window.DealettCart.openDrawer(cart);
+      return;
+    }
+
+    window.location.href = "varukorg.html";
   }
 
   function buildStaticCartItem(card) {
@@ -343,7 +358,11 @@ function createIndexQuiz() {
       rewardTotal,
       rewardMixLabel: `Presentkort ${new Intl.NumberFormat("sv-SE").format(rewardTotal)} kr`,
       rewards: { Presentkort: rewardTotal },
+      qualification: plan.qualification || null,
+      offerCalculation: plan.offerCalculation || null,
       answers: {
+        qualification: plan.qualification || null,
+        offerCalculation: plan.offerCalculation || null,
         customerStatus: state.customerStatus,
         existingCustomers: state.existingCustomers,
         newCustomers: state.newCustomers,
@@ -354,6 +373,9 @@ function createIndexQuiz() {
       },
       features: [
         persons > 1 ? `${persons} abonnemang` : "1 abonnemang",
+        plan.offerCalculation ? `${plan.offerCalculation.contractMonths} mån bindningstid` : "",
+        plan.offerCalculation?.overlapCostKnown > 0 ? `Dubbelkostnad ca ${new Intl.NumberFormat("sv-SE").format(plan.offerCalculation.overlapCostKnown)} kr` : "",
+        plan.offerCalculation ? `Uppskattad vinst ${new Intl.NumberFormat("sv-SE").format(plan.offerCalculation.savingsVsStaying)} kr` : "",
         "Fria samtal och sms",
         "5G & eSIM",
         plan.text || "",
@@ -824,10 +846,12 @@ function createIndexQuiz() {
     dom.offersContainer.innerHTML = "";
 
     if (!recommendedPlans.length) {
+      const noOfferText = lastOfferCalculation?.noOfferReason ||
+        "Testa att gå tillbaka och justera prisnivå eller surfbehov så visar vi fler relevanta alternativ.";
       dom.offersContainer.innerHTML = [
         '<article class="offer-card offer-card--empty">',
         '<h4 class="offer-card__title">Inga träffar just nu</h4>',
-        '<p class="offer-card__empty-text">Testa att gå tillbaka och justera prisnivå eller surfbehov så visar vi fler relevanta alternativ.</p>',
+        `<p class="offer-card__empty-text">${escapeHtml(noOfferText)}</p>`,
         "</article>"
       ].join("");
       syncStackHeight();
@@ -848,6 +872,14 @@ function createIndexQuiz() {
   }
 
   async function getRecommendedPlans() {
+    try {
+      const strictPlans = await getStrictCalculatedPlans();
+      if (strictPlans) return strictPlans;
+    } catch {
+      lastOfferCalculation = null;
+      // Fall back to the softer recommender if the strict calculator is unavailable.
+    }
+
     try {
       const data = await window.DealettNetwork.fetchJson("/api/recommendations/mobile", {
         label: "Behovsanalys rekommendationer",
@@ -884,6 +916,83 @@ function createIndexQuiz() {
       });
 
     return candidates.slice(0, 3);
+  }
+
+  async function getStrictCalculatedPlans() {
+    const qualification = buildQualificationFromState();
+    if (!qualification.readyForOffer) {
+      lastOfferCalculation = null;
+      return null;
+    }
+
+    const [allPlans, calculation] = await Promise.all([
+      loadPlans(),
+      window.DealettNetwork.fetchJson("/api/offers/calculate", {
+        label: "Behovsanalys kalkyl",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qualification }),
+      })
+    ]);
+    lastOfferCalculation = calculation;
+
+    if (!calculation.validOfferAvailable) {
+      return [];
+    }
+
+    return (calculation.options || []).map(option => {
+      const sourcePlan = allPlans.find(plan => String(plan.id) === String(option.planId)) || {};
+
+      return {
+        ...sourcePlan,
+        ...option,
+        id: option.planId,
+        logo: sourcePlan.logo,
+        finalPrice: option.monthlyPrice,
+        pricePerPerson: option.pricePerPerson,
+        rewardTotal: option.rewardTotal,
+        offerCalculation: option,
+        qualification,
+        source: "homepage-quiz-calculator",
+      };
+    });
+  }
+
+  function buildQualificationFromState() {
+    const peopleCount = Number(state.persons) || null;
+    const operators = Array.from({ length: peopleCount || 0 }, (_, index) => {
+      if (state.customerStatus === "none" || index >= Number(state.existingCustomers || 0)) {
+        return "Annan / ingen";
+      }
+
+      return state.operators[index] || "Annan / ingen";
+    });
+    const bindingEnds = Array.from({ length: peopleCount || 0 }, (_, index) => {
+      if (state.customerStatus === "none" || index >= Number(state.existingCustomers || 0)) {
+        return "Ingen bindningstid";
+      }
+
+      if (state.operatorNoBinding[index]) return "Ingen bindningstid";
+      return state.operatorDates[index] || "Vet inte";
+    });
+    const missingFields = [];
+    if (!peopleCount) missingFields.push("peopleCount");
+    if (!peopleCount || operators.length < peopleCount) missingFields.push("operators");
+    if (!peopleCount || bindingEnds.length < peopleCount) missingFields.push("bindingEnds");
+    if (!state.data) missingFields.push("mobileUsage");
+    if (!state.price) missingFields.push("priceRange");
+
+    return {
+      peopleCount,
+      operators,
+      bindingEnds,
+      mobileUsage: state.data || null,
+      priceRange: state.price || null,
+      exactMonthlyPrice: null,
+      exactMonthlyPrices: [],
+      readyForOffer: missingFields.length === 0,
+      missingFields,
+    };
   }
 
   function enrichPlan(plan, allPlans) {

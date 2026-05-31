@@ -1087,6 +1087,8 @@
         if (/skriv adress|ange adress|sök adress|enter address|search address/i.test(label)) return 'openBroadbandAddress';
         if (/öppna täckningskarta|coverage map/i.test(label)) return 'openCoverageMap';
         if (/öppna 5g|5g-bredband|broadband/i.test(label)) return 'openBroadbandPage';
+        if (/mina sidor|konto|account/i.test(label)) return 'openAccount';
+        if (/kontakt|support|kundservice|contact/i.test(label)) return 'openContact';
         return null;
       };
 
@@ -1227,6 +1229,16 @@
             } else {
               window.location.href = 'varukorg.html';
             }
+            return;
+          }
+
+          if (suggestion.action === 'openAccount') {
+            window.location.href = 'account.html';
+            return;
+          }
+
+          if (suggestion.action === 'openContact') {
+            window.location.href = 'kontakt.html';
             return;
           }
 

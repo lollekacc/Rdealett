@@ -1623,6 +1623,67 @@
       return response;
     };
 
+    const renderAssistantResponse = (response, options = {}) => {
+      const { showFeedback = true } = options;
+      const assistantText = response.reply || response.message || '';
+      lastAssistantResponse = {
+        ...response,
+        reply: assistantText,
+      };
+      const assistantItem = addMessage('assistant', assistantText);
+      renderQuickReplies(assistantItem, response.quickReplies);
+      renderChatOfferCards(assistantItem, response.offerCards);
+      renderEmbeddedWidget(assistantItem, response.embeddedWidget);
+      if (showFeedback) {
+        renderFeedbackPrompt(assistantItem, lastAssistantResponse);
+      }
+      writeQualification(response.qualification);
+      writeOfferCalculation(response.offerCalculation);
+      return assistantItem;
+    };
+
+    const loadInitialGreeting = async () => {
+      if (messages.length || isSending) return;
+
+      suggestionArea.replaceChildren();
+      setSending(true);
+
+      try {
+        const response = await window.DealettNetwork.fetchJson('/api/chat', {
+          label: 'Dealett assistant',
+          method: 'POST',
+          timeoutMs: 20000,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: chatSessionId,
+            message: chatLanguage === 'en' ? 'hello' : 'hej',
+            language: chatLanguage,
+            messages: [],
+            qualification: createEmptyQualification(),
+            cart: readCartContext(),
+            page: {
+              title: document.title,
+              path: window.location.pathname.split('/').pop() || 'index.html',
+            },
+            context: {
+              initialGreeting: true,
+            },
+          }),
+        });
+
+        renderAssistantResponse(response, { showFeedback: false });
+        if (!Array.isArray(response.quickReplies) || !response.quickReplies.length) {
+          renderSuggestions(text.suggestions);
+        }
+      } catch {
+        addMessage('assistant', text.greeting);
+        renderSuggestions(text.suggestions);
+      } finally {
+        setSending(false);
+        input.focus();
+      }
+    };
+
     const renderChatOfferCards = (messageItem, offerCards) => {
       if (!messageItem || !Array.isArray(offerCards) || !offerCards.length) return;
 
@@ -1742,18 +1803,7 @@
           }),
         });
 
-        const assistantText = response.reply || response.message || '';
-        lastAssistantResponse = {
-          ...response,
-          reply: assistantText,
-        };
-        const assistantItem = addMessage('assistant', assistantText);
-        renderQuickReplies(assistantItem, response.quickReplies);
-        renderChatOfferCards(assistantItem, response.offerCards);
-        renderEmbeddedWidget(assistantItem, response.embeddedWidget);
-        renderFeedbackPrompt(assistantItem, lastAssistantResponse);
-        writeQualification(response.qualification);
-        writeOfferCalculation(response.offerCalculation);
+        renderAssistantResponse(response);
       } catch {
         addMessage('assistant', text.error);
       } finally {
@@ -1768,8 +1818,7 @@
       root.classList.add('is-open');
       toggle.setAttribute('aria-expanded', 'true');
       if (!messages.length) {
-        addMessage('assistant', text.greeting);
-        renderSuggestions(text.suggestions);
+        loadInitialGreeting();
       }
       window.setTimeout(() => input.focus(), 50);
     };
@@ -1797,9 +1846,7 @@
       hasUserStartedChat = false;
       messages.splice(0, messages.length);
       messageList.replaceChildren();
-      addMessage('assistant', text.greeting);
-      renderSuggestions(text.suggestions);
-      input.focus();
+      loadInitialGreeting();
     });
 
     form.addEventListener('submit', (event) => {

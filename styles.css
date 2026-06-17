@@ -1537,9 +1537,7 @@ img {
 }
 
 .coverage-main[data-coverage-map="real"]::before {
-  background:
-    linear-gradient(180deg, rgba(250, 248, 245, 1) 0%, rgba(250, 248, 245, 0.96) 18%, rgba(250, 248, 245, 0.62) 32%, rgba(250, 248, 245, 0.08) 48%, rgba(3, 9, 18, 0.12) 100%),
-    radial-gradient(circle at 54% 58%, rgba(239, 130, 20, 0.2), transparent 28%);
+  background: linear-gradient(180deg, rgba(250, 248, 245, 0.76) 0, rgba(250, 248, 245, 0.26) 54px, rgba(250, 248, 245, 0) 1180px);
 }
 
 .coverage-main[data-coverage-map="real"]::after {

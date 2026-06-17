@@ -2551,14 +2551,14 @@ body.cart-drawer-open {
 
 .hero.quiz-in-hero {
   --quiz-card-height: 510px;
+  align-items: start;
   overflow: hidden;
   padding-bottom: 12px;
 }
 
 .hero.quiz-in-hero .hero-content {
   max-width: none;
-  padding: 0;
-  transform: translateY(-34px);
+  padding: 70px 0 0;
 }
 
 .hero.quiz-in-hero .hero-quiz-mount {

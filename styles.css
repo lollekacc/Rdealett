@@ -840,26 +840,26 @@ img {
 
 .hero {
   --hero-shift: 0px;
-  --hero-scale: 1.06;
+  --hero-scale: 1;
   --hero-position-x: 50%;
   --hero-position-y: 0%;
   --quiz-card-height: 620px;
   --quiz-offset-y: -18px;
   position: relative;
   display: grid;
-  grid-template-columns: minmax(360px, 0.82fr) minmax(500px, 1fr);
+  grid-template-columns: minmax(450px, 0.72fr) minmax(520px, 1fr);
   align-items: center;
   gap: clamp(28px, 4vw, 64px);
   overflow: hidden;
-  min-height: 800px;
-  padding: 118px 99px 80px;
+  min-height: 650px;
+  padding: 128px clamp(72px, 7.6vw, 122px) 74px;
   background: var(--bg);
 }
 
 .hero::before {
   content: '';
   position: absolute;
-  inset: -4%;
+  inset: 0;
   background: url('./images/hero-wide.png') no-repeat var(--hero-position-x) var(--hero-position-y) / cover;
   transform: translateX(var(--hero-shift)) scale(var(--hero-scale));
   transform-origin: var(--hero-position-x) var(--hero-position-y);
@@ -869,14 +869,14 @@ img {
 .hero-content {
   position: relative;
   z-index: 1;
-  max-width: none;
+  max-width: 600px;
   padding: 0;
 }
 
 .hero h1 {
   font-family: 'Suez One', serif;
-  font-size: 60px;
-  line-height: 1.2;
+  font-size: clamp(43px, 3.35vw, 53px);
+  line-height: 1.14;
   color: var(--text);
   margin: 0;
 }
@@ -886,9 +886,9 @@ img {
 }
 
 .hero p {
-  margin: 26px 0 0;
+  margin: 22px 0 0;
   font-family: 'roboto-thin', 'Roboto', sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   line-height: normal;
   color: var(--text);
@@ -897,7 +897,7 @@ img {
 .hero-actions {
   display: flex;
   gap: 19px;
-  margin-top: 40px;
+  margin-top: 30px;
 }
 
 .hero-actions a {
@@ -945,58 +945,90 @@ img {
 
 .gift-card-section {
   position: relative;
-  padding-top: 30px;
-  background:
-    linear-gradient(180deg, rgba(246, 244, 240, 0.35), rgba(246, 244, 240, 0.78)),
-    url('./images/presentkort.png') center / cover no-repeat;
+  padding-top: 39px;
+  padding-right: clamp(40px, 4.25vw, 68px);
+  padding-bottom: 52px;
+  padding-left: clamp(40px, 4.25vw, 68px);
+  background: #fff;
 }
 
 .gift-card-section .page-shell {
   position: relative;
   z-index: 1;
+  max-width: 1464px;
+  display: grid;
+  grid-template-columns: minmax(360px, 545px) minmax(520px, 1fr);
+  align-items: center;
+  gap: clamp(36px, 3vw, 48px);
+}
+
+.gift-card-image {
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(39, 36, 67, 0.12);
+}
+
+.gift-card-image img {
+  width: 100%;
+  aspect-ratio: 545 / 313;
+  object-fit: cover;
+}
+
+.gift-card-content {
+  min-width: 0;
+  width: 100%;
+  max-width: 710px;
 }
 
 .gift-card-copy {
-  max-width: 760px;
-  margin: 0 auto 34px;
-  text-align: center;
+  max-width: 680px;
+  margin: 0 0 25px;
+  text-align: left;
+}
+
+.gift-card-copy .section-label {
+  margin: 0 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.38em;
 }
 
 .gift-card-copy h2 {
   margin: 0;
   font-family: 'Suez One', serif;
-  font-size: 46px;
+  font-size: 34px;
   line-height: 1.16;
   color: var(--text);
 }
 
 .gift-card-copy p:last-child {
-  margin: 18px auto 0;
-  max-width: 660px;
-  font-size: 18px;
-  line-height: 1.6;
+  margin: 17px 0 0;
+  max-width: 520px;
+  font-size: 16px;
+  line-height: 1.55;
   color: rgba(39, 36, 67, 0.78);
 }
 
 .gift-logo-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(150px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, minmax(132px, 1fr));
+  gap: 16px 18px;
 }
 
 .gift-logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 94px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
+  min-height: 64px;
+  border: 1px solid rgba(39, 36, 67, 0.08);
+  border-radius: 8px;
+  background: #fff;
   color: var(--text);
   font-family: 'Roboto', sans-serif;
-  font-size: 25px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: 0;
-  box-shadow: 0 16px 34px rgba(39, 36, 67, 0.08);
+  box-shadow: 0 9px 18px rgba(39, 36, 67, 0.1);
 }
 
 .gift-logo--apollo {
@@ -2054,6 +2086,7 @@ textarea {
 
   .hero-content {
     padding: 108px 40px 40px;
+    max-width: 560px;
   }
 
   .hero {
@@ -2111,6 +2144,19 @@ textarea {
   .gift-logo-grid {
     grid-template-columns: repeat(2, minmax(150px, 1fr));
   }
+
+  .gift-card-section .page-shell {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .gift-card-image {
+    max-width: 620px;
+  }
+
+  .gift-card-copy {
+    max-width: 640px;
+  }
 }
 
 @media (max-width: 680px) {
@@ -2158,7 +2204,7 @@ textarea {
 
   .hero-content {
     padding: 92px 24px 32px;
-    text-align: center;
+    text-align: left;
   }
 
   .hero {
@@ -2168,7 +2214,7 @@ textarea {
   }
 
   .hero h1 {
-    font-size: 56px;
+    font-size: 38px;
   }
 
   .hero-actions {
@@ -2201,7 +2247,7 @@ textarea {
   }
 
   .gift-card-copy h2 {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   .section-head p,
@@ -2211,6 +2257,7 @@ textarea {
 
   .gift-logo-grid {
     gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .gift-logo {
@@ -2512,6 +2559,7 @@ body.cart-drawer-open {
 }
 
 .hero.quiz-in-hero .hero-quiz-mount {
+  display: flex;
   width: 100%;
   margin: 0;
 }
@@ -2536,10 +2584,10 @@ body.cart-drawer-open {
 .hero-quiz-mount {
   position: relative;
   z-index: 2;
-  display: flex;
+  display: none;
   align-items: stretch;
   width: 100%;
-  min-height: var(--quiz-card-height, 620px);
+  min-height: 0;
   margin: 0;
   transform: translateY(var(--quiz-offset-y, 0));
 }

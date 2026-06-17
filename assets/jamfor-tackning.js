@@ -56,7 +56,27 @@
     maxBounds: activeBounds,
     maxBoundsViscosity: 1.0,
     minZoom: 4,
+    scrollWheelZoom: false,
   }).setView(defaultView.center, defaultView.zoom);
+
+  mapElement.addEventListener(
+    'wheel',
+    (event) => {
+      if (!event.ctrlKey) {
+        map.scrollWheelZoom.disable();
+        return;
+      }
+
+      event.preventDefault();
+      map.scrollWheelZoom.enable();
+
+      window.clearTimeout(mapElement._dealettWheelZoomTimer);
+      mapElement._dealettWheelZoomTimer = window.setTimeout(() => {
+        map.scrollWheelZoom.disable();
+      }, 180);
+    },
+    { passive: false, capture: true }
+  );
 
   const baseLayer = L.tileLayer(
     usesBackdropMap

@@ -1299,6 +1299,28 @@ img {
   filter: blur(10px);
 }
 
+.coverage-map.leaflet-container {
+  width: 100%;
+  height: 100%;
+  min-height: 620px;
+  background: #e7efe9;
+  font-family: 'din-next-w01-light', sans-serif;
+}
+
+.coverage-map.leaflet-container::before,
+.coverage-map.leaflet-container::after {
+  content: none;
+}
+
+.map-bottom-pill.is-active {
+  background: var(--coverage-accent, var(--accent));
+  color: #fff;
+}
+
+.map-bottom-pill.is-muted {
+  opacity: 0.58;
+}
+
 .map-ui {
   position: absolute;
   top: 22px;

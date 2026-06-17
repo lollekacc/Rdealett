@@ -868,8 +868,9 @@
   const initCoveragePreview = () => {
     const coverageApp = document.querySelector('#coverageApp');
     const hasDedicatedCoverageController = document.body.classList.contains('jamfor-page');
+    const hasRealCoverageMap = coverageApp?.dataset.coverageMap === 'real';
 
-    if (!coverageApp || hasDedicatedCoverageController) {
+    if (!coverageApp || hasDedicatedCoverageController || hasRealCoverageMap) {
       return;
     }
 

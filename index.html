@@ -6,6 +6,7 @@
     <link rel="icon" href="./images/favicon.svg" type="image/svg+xml" />
     <title>Bättre deals, helt enkelt.</title>
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@maplibre/maplibre-gl-geocoder@1.5.0/dist/maplibre-gl-geocoder.css" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   </head>
@@ -362,42 +363,46 @@
             <p>Se t&auml;ckning, j&auml;mf&ouml;r n&auml;t och s&ouml;k direkt p&aring; adress eller stad f&ouml;r att f&aring; en tydligare bild av l&auml;get d&auml;r du bor.</p>
           </div>
 
-          <form class="coverage-maplibre-search" role="search">
-            <button class="coverage-maplibre-search__icon" type="submit" aria-label="S&ouml;k">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-            </button>
-            <input id="coverageMapSearch" type="search" autocomplete="off" placeholder="S&ouml;k adress eller plats" />
-          </form>
+          <div class="coverage-maplibre-search" id="coverageGeocoder" role="search" aria-label="S&ouml;k adress eller plats"></div>
+          <p class="coverage-maplibre-place" id="coverageSelectedPlace" aria-live="polite">Ingen plats vald</p>
 
-          <button class="coverage-maplibre-demo" data-map-action="stockholm" type="button">
-            Stockholm demo
-          </button>
+          <div class="coverage-maplibre-actions" aria-label="Kartgenv&auml;gar">
+            <button class="coverage-maplibre-action" data-map-action="stockholm" type="button">
+              Stockholm demo
+            </button>
+            <button class="coverage-maplibre-action" data-map-action="reset" type="button">
+              Sverige
+            </button>
+            <button class="coverage-maplibre-action" data-map-action="locate" type="button">
+              Hitta mig
+            </button>
+          </div>
 
           <div class="coverage-maplibre-operators" aria-label="V&auml;lj operat&ouml;r">
-            <button class="coverage-maplibre-operator is-active" data-operator="telia" type="button">
+            <button class="coverage-maplibre-operator is-active" data-operator="telia" type="button" aria-pressed="true">
               <span>Telia</span>
             </button>
-            <button class="coverage-maplibre-operator" data-operator="tele2" type="button">
+            <button class="coverage-maplibre-operator" data-operator="tele2" type="button" aria-pressed="false">
               <span>Tele2</span>
             </button>
-            <button class="coverage-maplibre-operator" data-operator="telenor" type="button">
+            <button class="coverage-maplibre-operator" data-operator="telenor" type="button" aria-pressed="false">
               <span>Telenor</span>
             </button>
-            <button class="coverage-maplibre-operator" data-operator="tre" type="button">
+            <button class="coverage-maplibre-operator" data-operator="tre" type="button" aria-pressed="false">
               <span>Tre</span>
             </button>
-            <button class="coverage-maplibre-operator" data-operator="halebop" type="button">
+            <button class="coverage-maplibre-operator" data-operator="halebop" type="button" aria-pressed="false">
               <span>Halebop</span>
             </button>
           </div>
 
           <div class="coverage-maplibre-networks" aria-label="V&auml;lj n&auml;t">
-            <button class="coverage-maplibre-network is-active" type="button">2G</button>
-            <button class="coverage-maplibre-network" type="button">3G</button>
-            <button class="coverage-maplibre-network" type="button">4G</button>
-            <button class="coverage-maplibre-network" type="button">4G+</button>
-            <button class="coverage-maplibre-network" type="button">5G</button>
-            <button class="coverage-maplibre-network" type="button">5G+</button>
+            <button class="coverage-maplibre-network is-active" data-network="2G" type="button" aria-pressed="true">2G</button>
+            <button class="coverage-maplibre-network" data-network="3G" type="button" aria-pressed="false">3G</button>
+            <button class="coverage-maplibre-network is-active" data-network="4G" type="button" aria-pressed="true">4G</button>
+            <button class="coverage-maplibre-network" data-network="4G+" type="button" aria-pressed="false">4G+</button>
+            <button class="coverage-maplibre-network is-active" data-network="5G" type="button" aria-pressed="true">5G</button>
+            <button class="coverage-maplibre-network" data-network="5G+" type="button" aria-pressed="false">5G+</button>
           </div>
 
           <div class="coverage-maplibre-zoom" aria-label="Kartzoom">
@@ -407,7 +412,7 @@
 
           <div class="coverage-maplibre-note">
             <span class="coverage-maplibre-note__icon">i</span>
-            <p>T&auml;ckningsinformationen &auml;r en uppskattning och inte ett l&ouml;fte. <a href="jamfor-tackning.html">L&auml;s mer &rarr;</a></p>
+            <p id="coverageLayerStatus">Visar markerade mocklager f&ouml;r Telia: 2G, 4G och 5G. Detta &auml;r inte verklig operat&ouml;rst&auml;ckning. <a href="jamfor-tackning.html">L&auml;s mer &rarr;</a></p>
           </div>
         </div>
       </section>
@@ -416,6 +421,7 @@
     <div data-include="footer"></div>
 
     <script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/@maplibre/maplibre-gl-geocoder@1.5.0/dist/maplibre-gl-geocoder.min.js"></script>
     <script src="./assets/cart-helpers.js"></script>
     <script src="./assets/network-utils.js"></script>
     <script src="script.js"></script>

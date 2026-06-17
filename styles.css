@@ -1691,45 +1691,75 @@ img {
 
 .coverage-main[data-coverage-map="real"] .coverage-sidebar {
   position: absolute;
-  left: clamp(28px, 6vw, 100px);
-  top: 204px;
+  left: clamp(28px, 2.6vw, 44px);
+  top: 212px;
   z-index: 3;
-  width: min(280px, calc(100vw - 56px));
-  gap: 14px;
+  width: min(430px, calc(100vw - 56px));
+  gap: 0;
 }
 
 .coverage-main[data-coverage-map="real"] .coverage-card {
-  border: 1px solid rgba(255, 255, 255, 0.68);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 24px 54px rgba(3, 9, 18, 0.18);
-  backdrop-filter: blur(16px);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .coverage-main[data-coverage-map="real"] .coverage-card--sidebar {
-  padding: 18px;
+  padding: 0;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-card--sidebar:first-child {
+  margin-bottom: 72px;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-card--sidebar:nth-child(2) {
+  margin-bottom: 28px;
 }
 
 .coverage-main[data-coverage-map="real"] .coverage-card__head {
-  margin-bottom: 14px;
-  padding-bottom: 12px;
+  display: none;
+  margin: 0;
+  padding: 0;
 }
 
 .coverage-main[data-coverage-map="real"] .operator-list {
-  gap: 8px;
+  width: 240px;
+  gap: 10px;
 }
 
 .coverage-main[data-coverage-map="real"] .operator-card {
   position: relative;
-  min-height: 50px;
-  background: rgba(255, 255, 255, 0.66);
-  border-color: rgba(39, 36, 67, 0.08);
+  min-height: 60px;
+  padding: 0 28px;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(7, 19, 29, 0.46);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
 }
 
 .coverage-main[data-coverage-map="real"] .operator-card.is-active {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(7, 19, 29, 0.58);
   border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px rgba(239, 130, 20, 0.36);
+  box-shadow:
+    inset 0 0 0 1px rgba(239, 130, 20, 0.18),
+    0 0 22px rgba(239, 130, 20, 0.18);
+}
+
+.coverage-main[data-coverage-map="real"] .operator-card:hover {
+  transform: none;
+  background: rgba(7, 19, 29, 0.56);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.coverage-main[data-coverage-map="real"] .operator-card.is-active:hover {
+  border-color: var(--accent);
+  box-shadow:
+    inset 0 0 0 1px rgba(239, 130, 20, 0.18),
+    0 0 22px rgba(239, 130, 20, 0.18);
 }
 
 .coverage-main[data-coverage-map="real"] .operator-card.is-active::after {
@@ -1751,17 +1781,53 @@ img {
   transform: translateY(-50%);
 }
 
+.coverage-main[data-coverage-map="real"] .operator-card__logo {
+  justify-content: flex-start;
+  height: 46px;
+}
+
+.coverage-main[data-coverage-map="real"] .operator-card__logo img {
+  max-width: 132px;
+  max-height: 34px;
+}
+
+.coverage-main[data-coverage-map="real"] .operator-card[data-operator="tele2"] img {
+  filter: invert(1) brightness(2.2) contrast(1.12);
+}
+
 .coverage-main[data-coverage-map="real"] .coverage-filter-grid {
+  display: flex;
   gap: 8px;
+  width: 420px;
 }
 
 .coverage-main[data-coverage-map="real"] .coverage-filter {
-  min-height: 30px;
-  background: rgba(255, 255, 255, 0.68);
-  border-color: rgba(39, 36, 67, 0.12);
+  flex: 0 0 60px;
+  min-height: 50px;
+  padding: 0 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(7, 19, 29, 0.46);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
 }
 
 .coverage-main[data-coverage-map="real"] .coverage-filter.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 22px rgba(239, 130, 20, 0.34);
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-filter:hover {
+  background: rgba(7, 19, 29, 0.56);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-filter.is-active:hover {
   background: var(--accent);
   border-color: var(--accent);
 }

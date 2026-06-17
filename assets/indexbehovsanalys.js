@@ -37,7 +37,6 @@ function createIndexQuiz() {
     customerOperatorQuestion: document.getElementById("customer-operator-question"),
     newCustomersField: document.getElementById("new-customers-field"),
     newCustomersSelect: document.getElementById("new-customers-select"),
-    operatorContinueBtn: document.getElementById("operator-continue-btn"),
     offersContainer: document.getElementById("offers-container"),
     deploymentGrid: document.querySelector(".deployment-card-grid")
   };
@@ -92,12 +91,6 @@ function createIndexQuiz() {
     const personToggle = event.target.closest("[data-person-toggle]");
     if (personToggle) {
       toggleExtraPersonOptions();
-      return;
-    }
-
-    const operatorContinue = event.target.closest("[data-operator-continue]");
-    if (operatorContinue) {
-      finishOperatorQuestion();
       return;
     }
 
@@ -554,11 +547,6 @@ function createIndexQuiz() {
     dom.customerOperatorQuestion?.classList.add("hidden");
     dom.operatorContainer?.classList.add("hidden");
     dom.operatorContainer?.closest(".quiz-card-body")?.classList.remove("quiz-card-body--operator-active");
-    dom.operatorContinueBtn?.classList.add("hidden");
-
-    if (dom.operatorContinueBtn) {
-      dom.operatorContinueBtn.disabled = true;
-    }
 
     if (dom.operatorContainer) {
       dom.operatorContainer.innerHTML = "";
@@ -575,7 +563,7 @@ function createIndexQuiz() {
     setSelected(group || steps[1], "[data-operator]", option);
 
     state.selectedOperator = state.operators.find(Boolean) || null;
-    updateOperatorContinueState();
+    maybeAdvanceFromOperatorQuestion();
   }
 
   function handleOperatorDateChange(input) {
@@ -590,7 +578,7 @@ function createIndexQuiz() {
       group?.querySelector("[data-no-binding]")?.setAttribute("aria-pressed", "false");
     }
 
-    updateOperatorContinueState();
+    maybeAdvanceFromOperatorQuestion();
   }
 
   function handleOperatorNoBinding(option) {
@@ -608,7 +596,7 @@ function createIndexQuiz() {
 
     option.classList.add("selected", "active");
     option.setAttribute("aria-pressed", "true");
-    updateOperatorContinueState();
+    maybeAdvanceFromOperatorQuestion();
   }
 
   function updateOperatorContinueState() {
@@ -618,16 +606,13 @@ function createIndexQuiz() {
       .slice(0, existingCount)
       .filter((date, index) => date || state.operatorNoBinding[index])
       .length;
+    const isComplete = selectedCount === existingCount && bindingChoiceCount === existingCount;
 
-    if (dom.operatorContinueBtn) {
-      dom.operatorContinueBtn.disabled = selectedCount !== existingCount || bindingChoiceCount !== existingCount;
-    }
+    return isComplete;
   }
 
-  function finishOperatorQuestion() {
-    updateOperatorContinueState();
-
-    if (dom.operatorContinueBtn?.disabled) return;
+  function maybeAdvanceFromOperatorQuestion() {
+    if (!updateOperatorContinueState() || state.currentStep !== 1) return;
 
     showStep(2);
   }
@@ -658,7 +643,6 @@ function createIndexQuiz() {
     dom.operatorContainer.closest(".quiz-card-body")?.classList.toggle("quiz-card-body--operator-active", count > 0);
     updateOperatorQuestionTitle(count);
     dom.customerOperatorQuestion?.classList.toggle("hidden", count <= 0);
-    dom.operatorContinueBtn?.classList.toggle("hidden", count <= 0);
 
     state.operators.slice(0, count).forEach((selectedOperator, personIndex) => {
       const fragment = dom.operatorTemplate.content.cloneNode(true);

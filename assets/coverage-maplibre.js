@@ -17,45 +17,18 @@
   };
 
   const swedenBounds = [10.4, 55.0, 24.5, 69.3];
-  const swedenPolygon = {
-    type: 'Feature',
-    properties: { name: 'Sweden' },
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[
-        [10.7, 55.3],
-        [12.7, 55.0],
-        [14.7, 55.4],
-        [18.7, 57.0],
-        [19.5, 59.1],
-        [18.7, 61.0],
-        [21.2, 64.4],
-        [24.1, 66.2],
-        [23.7, 68.4],
-        [21.4, 69.2],
-        [18.1, 68.6],
-        [16.6, 66.4],
-        [14.2, 64.2],
-        [12.2, 62.2],
-        [11.1, 59.8],
-        [11.4, 57.6],
-        [10.7, 55.3],
-      ]],
-    },
-  };
-
   const initialCamera = {
     center: [16.6, 62.2],
-    zoom: 4.15,
-    pitch: 34,
-    bearing: -8,
+    zoom: 4.35,
+    pitch: 14,
+    bearing: -2,
   };
 
   const stockholmCamera = {
     center: [18.0686, 59.3293],
-    zoom: 13.35,
-    pitch: 42,
-    bearing: -14,
+    zoom: 12.5,
+    pitch: 34,
+    bearing: -18,
   };
 
   const state = {
@@ -68,8 +41,6 @@
   const selectedPlace = app.querySelector('#coverageSelectedPlace');
   const layerStatus = app.querySelector('#coverageLayerStatus');
 
-  const firstSymbolLayerId = (map) => map.getStyle().layers.find((layer) => layer.type === 'symbol')?.id;
-
   const safeSetPaint = (map, id, property, value) => {
     if (map.getLayer(id)) {
       map.setPaintProperty(id, property, value);
@@ -77,122 +48,48 @@
   };
 
   const tuneBaseStyle = (map) => {
-    safeSetPaint(map, 'background', 'background-color', '#101c27');
-    safeSetPaint(map, 'water', 'fill-color', '#0b1722');
-    safeSetPaint(map, 'water', 'fill-opacity', 0.92);
-    safeSetPaint(map, 'landcover_wood', 'fill-color', '#1b2c32');
-    safeSetPaint(map, 'landuse_park', 'fill-color', '#1b2f32');
-    safeSetPaint(map, 'landuse_residential', 'fill-color', '#1a2830');
-    safeSetPaint(map, 'landcover_glacier', 'fill-color', '#34434a');
-    safeSetPaint(map, 'landcover_ice_shelf', 'fill-color', '#2d3d45');
-    safeSetPaint(map, 'building', 'fill-color', '#24333b');
+    safeSetPaint(map, 'background', 'background-color', '#242b31');
+    safeSetPaint(map, 'water', 'fill-color', '#121a22');
+    safeSetPaint(map, 'water', 'fill-opacity', 0.96);
+    safeSetPaint(map, 'landcover_wood', 'fill-color', '#263139');
+    safeSetPaint(map, 'landuse_park', 'fill-color', '#27363a');
+    safeSetPaint(map, 'landuse_residential', 'fill-color', '#2a3036');
+    safeSetPaint(map, 'landcover_glacier', 'fill-color', '#455059');
+    safeSetPaint(map, 'landcover_ice_shelf', 'fill-color', '#3d4952');
+    safeSetPaint(map, 'building', 'fill-color', '#252d34');
     safeSetPaint(map, 'building', 'fill-opacity', 0.2);
 
     map.getStyle().layers.forEach((layer) => {
       if (layer.type === 'line' && /road|highway|bridge|tunnel/i.test(layer.id)) {
-        safeSetPaint(map, layer.id, 'line-color', '#9aa4aa');
-        safeSetPaint(map, layer.id, 'line-opacity', ['interpolate', ['linear'], ['zoom'], 4, 0.12, 9, 0.2, 14, 0.3]);
+        safeSetPaint(map, layer.id, 'line-color', '#75818a');
+        safeSetPaint(map, layer.id, 'line-opacity', ['interpolate', ['linear'], ['zoom'], 4, 0.1, 9, 0.2, 14, 0.32]);
+        safeSetPaint(map, layer.id, 'line-width', ['interpolate', ['linear'], ['zoom'], 4, 0.25, 10, 0.62, 14, 1.1]);
       }
 
-      if (layer.type === 'symbol' && /road|place|water/i.test(layer.id)) {
-        safeSetPaint(map, layer.id, 'text-color', '#aab4bb');
-        safeSetPaint(map, layer.id, 'text-halo-color', '#101c27');
+      if (layer.type === 'symbol' && /road/i.test(layer.id)) {
+        safeSetPaint(map, layer.id, 'text-color', '#8d989f');
+        safeSetPaint(map, layer.id, 'text-opacity', ['interpolate', ['linear'], ['zoom'], 4, 0.05, 10, 0.14, 14, 0.22]);
+        safeSetPaint(map, layer.id, 'text-halo-color', '#242b31');
+        safeSetPaint(map, layer.id, 'text-halo-width', 1);
+      }
+
+      if (layer.type === 'symbol' && /place|water/i.test(layer.id)) {
+        safeSetPaint(map, layer.id, 'text-color', '#c4ccd1');
+        safeSetPaint(map, layer.id, 'text-opacity', ['interpolate', ['linear'], ['zoom'], 3, 0.54, 9, 0.68, 14, 0.78]);
+        safeSetPaint(map, layer.id, 'text-halo-color', '#242b31');
         safeSetPaint(map, layer.id, 'text-halo-width', 1);
       }
     });
-  };
 
-  const createCirclePolygon = (center, radiusKm, points = 72) => {
-    const [longitude, latitude] = center;
-    const coordinates = [];
-    const latRadians = latitude * Math.PI / 180;
-    const latStep = radiusKm / 111.32;
-    const lngStep = radiusKm / (111.32 * Math.cos(latRadians));
-
-    for (let index = 0; index <= points; index += 1) {
-      const angle = (index / points) * Math.PI * 2;
-      coordinates.push([
-        longitude + Math.cos(angle) * lngStep,
-        latitude + Math.sin(angle) * latStep,
-      ]);
-    }
-
-    return {
-      type: 'Polygon',
-      coordinates: [coordinates],
-    };
-  };
-
-  const buildMockCoverageData = () => {
-    const cities = [
-      { name: 'Stockholm', center: [18.0686, 59.3293], weight: 1 },
-      { name: 'Goteborg', center: [11.9746, 57.7089], weight: 0.86 },
-      { name: 'Malmo', center: [13.0038, 55.6049], weight: 0.78 },
-      { name: 'Uppsala', center: [17.6389, 59.8586], weight: 0.68 },
-      { name: 'Umea', center: [20.263, 63.8258], weight: 0.58 },
-      { name: 'Lulea', center: [22.1547, 65.5848], weight: 0.48 },
-    ];
-
-    const networkRadius = {
-      '2G': 82,
-      '3G': 68,
-      '4G': 54,
-      '4G+': 44,
-      '5G': 30,
-      '5G+': 18,
-    };
-
-    const operatorOffset = {
-      telia: [0, 0],
-      tele2: [0.1, -0.05],
-      telenor: [-0.08, 0.04],
-      tre: [0.05, 0.08],
-      halebop: [-0.04, -0.08],
-    };
-
-    const features = [];
-
-    operators.forEach((operator) => {
-      networks.forEach((network) => {
-        cities.forEach((city) => {
-          const offset = operatorOffset[operator];
-          const radius = networkRadius[network] * city.weight;
-          const center = [city.center[0] + offset[0], city.center[1] + offset[1]];
-
-          features.push({
-            type: 'Feature',
-            properties: {
-              operator,
-              operatorLabel: operatorLabels[operator],
-              network,
-              city: city.name,
-              label: `${operatorLabels[operator]} ${network} mock`,
-              isMockCoverage: true,
-            },
-            geometry: createCirclePolygon(center, radius),
-          });
-        });
-      });
+    ['place_city', 'place_city_large', 'place_country_major'].forEach((layerId) => {
+      safeSetPaint(map, layerId, 'text-color', '#e1e6e9');
+      safeSetPaint(map, layerId, 'text-opacity', ['interpolate', ['linear'], ['zoom'], 3, 0.72, 9, 0.84, 14, 0.9]);
     });
 
-    return {
-      type: 'FeatureCollection',
-      features,
-    };
-  };
-
-  const buildCoverageFilter = () => {
-    const selectedNetworks = Array.from(state.activeNetworks);
-
-    if (!selectedNetworks.length) {
-      return ['==', ['get', 'operator'], '__none__'];
-    }
-
-    return [
-      'all',
-      ['==', ['get', 'operator'], state.activeOperator],
-      ['match', ['get', 'network'], selectedNetworks, true, false],
-    ];
+    ['place_other', 'place_suburb', 'place_village', 'place_town', 'water_name'].forEach((layerId) => {
+      safeSetPaint(map, layerId, 'text-color', '#99a3aa');
+      safeSetPaint(map, layerId, 'text-opacity', ['interpolate', ['linear'], ['zoom'], 3, 0.28, 9, 0.42, 14, 0.54]);
+    });
   };
 
   const updateLayerStatus = () => {
@@ -202,123 +99,14 @@
 
     const selectedNetworks = Array.from(state.activeNetworks);
     const networkText = selectedNetworks.length ? selectedNetworks.join(', ') : 'inga valda n&auml;t';
-    layerStatus.innerHTML = `Visar mocklager f&ouml;r ${operatorLabels[state.activeOperator]}: ${networkText}. Detta &auml;r inte verklig operat&ouml;rst&auml;ckning. <a href="jamfor-tackning.html">L&auml;s mer &rarr;</a>`;
+    layerStatus.innerHTML = `${operatorLabels[state.activeOperator]} valt: ${networkText}. Kartan visar inga fejkade t&auml;ckningseffekter. <a href="jamfor-tackning.html">L&auml;s mer &rarr;</a>`;
   };
 
-  const updateCoverageFilter = (map) => {
-    const filter = buildCoverageFilter();
-    ['dealett-coverage-fill', 'dealett-coverage-line', 'dealett-coverage-labels'].forEach((layerId) => {
-      if (map.getLayer(layerId)) {
-        map.setFilter(layerId, filter);
-      }
-    });
+  const updateCoverageFilter = () => {
     updateLayerStatus();
   };
 
   const addMapLayers = (map) => {
-    if (!map.getSource('dealett-sweden')) {
-      map.addSource('dealett-sweden', {
-        type: 'geojson',
-        data: swedenPolygon,
-      });
-    }
-
-    if (!map.getLayer('dealett-sweden-fill')) {
-      map.addLayer({
-        id: 'dealett-sweden-fill',
-        type: 'fill',
-        source: 'dealett-sweden',
-        paint: {
-          'fill-color': '#ef8214',
-          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 3, 0.06, 6, 0.09, 12, 0.025],
-        },
-      }, firstSymbolLayerId(map));
-    }
-
-    if (!map.getLayer('dealett-sweden-line')) {
-      map.addLayer({
-        id: 'dealett-sweden-line',
-        type: 'line',
-        source: 'dealett-sweden',
-        paint: {
-          'line-color': '#ef8214',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 3, 1.2, 7, 2.2, 12, 1],
-          'line-opacity': 0.5,
-          'line-blur': 0.4,
-        },
-      }, firstSymbolLayerId(map));
-    }
-
-    if (!map.getSource('dealett-coverage-placeholder')) {
-      map.addSource('dealett-coverage-placeholder', {
-        type: 'geojson',
-        data: buildMockCoverageData(),
-        // Later: replace this generated mock FeatureCollection with real per-operator
-        // coverage GeoJSON that includes properties: operator, network, and isMockCoverage.
-      });
-    }
-
-    if (!map.getLayer('dealett-coverage-fill')) {
-      map.addLayer({
-        id: 'dealett-coverage-fill',
-        type: 'fill',
-        source: 'dealett-coverage-placeholder',
-        paint: {
-          'fill-color': [
-            'match',
-            ['get', 'network'],
-            '2G', '#f0a036',
-            '3G', '#ef9430',
-            '4G', '#ef8214',
-            '4G+', '#f49b1f',
-            '5G', '#ffd166',
-            '5G+', '#ffe08a',
-            '#ef8214',
-          ],
-          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 3, 0.12, 8, 0.18, 13, 0.11],
-        },
-        filter: buildCoverageFilter(),
-      }, firstSymbolLayerId(map));
-    }
-
-    if (!map.getLayer('dealett-coverage-line')) {
-      map.addLayer({
-        id: 'dealett-coverage-line',
-        type: 'line',
-        source: 'dealett-coverage-placeholder',
-        paint: {
-          'line-color': '#ffc45f',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.8, 8, 1.7, 13, 2.4],
-          'line-opacity': 0.42,
-          'line-blur': 0.3,
-        },
-        filter: buildCoverageFilter(),
-      }, firstSymbolLayerId(map));
-    }
-
-    if (!map.getLayer('dealett-coverage-labels')) {
-      map.addLayer({
-        id: 'dealett-coverage-labels',
-        type: 'symbol',
-        source: 'dealett-coverage-placeholder',
-        minzoom: 6,
-        layout: {
-          'text-field': ['concat', ['get', 'operatorLabel'], ' ', ['get', 'network'], ' mock'],
-          'text-size': ['interpolate', ['linear'], ['zoom'], 6, 10, 12, 12],
-          'text-font': ['Noto Sans Regular'],
-          'text-allow-overlap': false,
-          'symbol-placement': 'point',
-        },
-        paint: {
-          'text-color': '#ffd166',
-          'text-halo-color': '#101c27',
-          'text-halo-width': 1.4,
-          'text-opacity': 0.86,
-        },
-        filter: buildCoverageFilter(),
-      });
-    }
-
     if (!map.getLayer('dealett-building-extrusion')) {
       map.addLayer({
         id: 'dealett-building-extrusion',
@@ -327,7 +115,7 @@
         'source-layer': 'building',
         minzoom: 13,
         paint: {
-          'fill-extrusion-color': '#2a3a42',
+          'fill-extrusion-color': ['interpolate', ['linear'], ['zoom'], 13, '#252d34', 15, '#303942', 17, '#3c454d'],
           'fill-extrusion-height': [
             'interpolate',
             ['linear'],
@@ -338,22 +126,27 @@
             ['coalesce', ['to-number', ['get', 'render_height']], ['to-number', ['get', 'height']], 18],
           ],
           'fill-extrusion-base': ['coalesce', ['to-number', ['get', 'render_min_height']], ['to-number', ['get', 'min_height']], 0],
-          'fill-extrusion-opacity': 0.34,
+          'fill-extrusion-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0.24, 15, 0.36, 17, 0.44],
+          'fill-extrusion-vertical-gradient': true,
         },
-      }, firstSymbolLayerId(map));
+      });
     }
   };
 
   const map = new maplibregl.Map({
     container: mapElement,
-    style: 'https://tiles.openfreemap.org/styles/dark',
+    style: 'https://tiles.openfreemap.org/styles/liberty',
     center: initialCamera.center,
     zoom: initialCamera.zoom,
     pitch: initialCamera.pitch,
     bearing: initialCamera.bearing,
+    maxBounds: [[9.2, 54.4], [25.4, 70.3]],
+    minZoom: 3.65,
+    maxZoom: 15.8,
     attributionControl: false,
     antialias: true,
-    maxPitch: 68,
+    maxPitch: 42,
+    cooperativeGestures: true,
   });
 
   map.touchZoomRotate.enable();
@@ -484,7 +277,7 @@
       map.flyTo({
         center,
         zoom: result.bbox ? 11 : 13,
-        pitch: 42,
+        pitch: 30,
         bearing: map.getBearing(),
         duration: 1500,
         essential: true,
@@ -531,7 +324,7 @@
         map.flyTo({
           center: coordinates,
           zoom: 13,
-          pitch: 42,
+          pitch: 30,
           bearing: map.getBearing(),
           duration: 1500,
           essential: true,
@@ -600,7 +393,7 @@
         operatorButton.classList.toggle('is-active', isActive);
         operatorButton.setAttribute('aria-pressed', String(isActive));
       });
-      updateCoverageFilter(map);
+      updateCoverageFilter();
     });
   });
 
@@ -621,7 +414,7 @@
       const isActive = state.activeNetworks.has(network);
       button.classList.toggle('is-active', isActive);
       button.setAttribute('aria-pressed', String(isActive));
-      updateCoverageFilter(map);
+      updateCoverageFilter();
     });
   });
 

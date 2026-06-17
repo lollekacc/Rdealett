@@ -106,26 +106,6 @@
     ),
   };
 
-  if (usesBackdropMap) {
-    [
-      { key: 'norway', label: 'Norge', coords: [61.2, 8.8] },
-      { key: 'sweden', label: 'Sverige', coords: [61.0, 16.1] },
-      { key: 'finland', label: 'Finland', coords: [64.3, 26.0] },
-      { key: 'estonia', label: 'Estland', coords: [58.8, 25.0] },
-      { key: 'latvia', label: 'Lettland', coords: [56.9, 24.8] },
-      { key: 'lithuania', label: 'Litauen', coords: [55.2, 23.8] },
-      { key: 'denmark', label: 'Danmark', coords: [56.2, 10.4] },
-    ].forEach(({ key, label, coords }) => {
-      L.marker(coords, {
-        interactive: false,
-        icon: L.divIcon({
-          className: `coverage-country-marker coverage-country-marker--${key}`,
-          html: `<span class="coverage-country-label"><span class="coverage-country-label__flag coverage-country-label__flag--${key}"></span><span>${label}</span></span>`,
-        }),
-      }).addTo(map);
-    });
-  }
-
   let activeOverlay = null;
   let activeOperatorKey = null;
   let searchMarker = null;

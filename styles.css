@@ -1537,13 +1537,17 @@ img {
 }
 
 .coverage-main[data-coverage-map="real"]::before {
-  background: linear-gradient(180deg, rgba(250, 248, 245, 0.76) 0, rgba(250, 248, 245, 0.26) 54px, rgba(250, 248, 245, 0) 1180px);
+  background:
+    radial-gradient(ellipse at 56% 42%, rgba(239, 130, 20, 0.1), transparent 34%),
+    linear-gradient(90deg, rgba(4, 13, 23, 0.78) 0%, rgba(4, 13, 23, 0.42) 18%, rgba(4, 13, 23, 0.04) 48%, rgba(4, 13, 23, 0.26) 100%),
+    linear-gradient(180deg, rgba(4, 13, 23, 0.86) 0%, rgba(4, 13, 23, 0.26) 24%, rgba(4, 13, 23, 0.04) 52%, rgba(4, 13, 23, 0.62) 100%);
 }
 
 .coverage-main[data-coverage-map="real"]::after {
   background:
-    linear-gradient(90deg, rgba(3, 9, 18, 0.46), transparent 22%, transparent 72%, rgba(3, 9, 18, 0.32)),
-    linear-gradient(180deg, transparent 56%, rgba(3, 9, 18, 0.68));
+    radial-gradient(ellipse at 8% 40%, rgba(4, 13, 23, 0.36), transparent 28%),
+    linear-gradient(90deg, rgba(3, 9, 18, 0.48), transparent 19%, transparent 76%, rgba(3, 9, 18, 0.38)),
+    linear-gradient(180deg, transparent 64%, rgba(3, 9, 18, 0.72));
 }
 
 .coverage-main[data-coverage-map="real"] > .page-shell {
@@ -1693,6 +1697,39 @@ img {
     linear-gradient(90deg, transparent 0 30%, #fff 30% 42%, transparent 42%),
     linear-gradient(180deg, transparent 0 42%, #fff 42% 54%, transparent 54%),
     #d82f37;
+}
+
+.coverage-country-label__flag--sweden {
+  position: relative;
+  width: 20px;
+  height: 24px;
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, transparent 0 42%, var(--accent) 42% 58%, transparent 58%),
+    linear-gradient(180deg, transparent 0 44%, var(--accent) 44% 58%, transparent 58%);
+  box-shadow: none;
+}
+
+.coverage-country-label__flag--sweden::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  bottom: 0;
+  height: 19px;
+  border: 2px solid var(--accent);
+  border-top: 0;
+  border-radius: 1px 1px 0 0;
+}
+
+.coverage-country-marker--sweden .coverage-country-label {
+  padding: 13px 18px;
+  border-color: var(--accent);
+  background: rgba(14, 24, 38, 0.86);
+  box-shadow:
+    inset 0 0 0 1px rgba(239, 130, 20, 0.2),
+    0 0 24px rgba(239, 130, 20, 0.2),
+    0 18px 34px rgba(3, 9, 18, 0.34);
 }
 
 .coverage-main[data-coverage-map="real"] .coverage-sidebar {

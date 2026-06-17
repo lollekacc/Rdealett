@@ -109,6 +109,7 @@
   if (usesBackdropMap) {
     [
       { key: 'norway', label: 'Norge', coords: [61.2, 8.8] },
+      { key: 'sweden', label: 'Sverige', coords: [61.0, 16.1] },
       { key: 'finland', label: 'Finland', coords: [64.3, 26.0] },
       { key: 'estonia', label: 'Estland', coords: [58.8, 25.0] },
       { key: 'latvia', label: 'Lettland', coords: [56.9, 24.8] },

@@ -843,7 +843,7 @@ img {
   --hero-scale: 1;
   --hero-position-x: 50%;
   --hero-position-y: 0%;
-  --quiz-card-height: 620px;
+  --quiz-card-height: 440px;
   --quiz-offset-y: -18px;
   position: relative;
   display: grid;
@@ -2568,12 +2568,22 @@ body.cart-drawer-open {
   height: var(--quiz-card-height, 620px);
   min-height: 0;
   overflow: hidden;
-  padding: clamp(22px, 2.4vw, 34px);
+  padding: clamp(16px, 1.55vw, 24px);
 }
 
 .hero.quiz-in-hero .quiz-title,
 .hero.quiz-in-hero .result-title {
-  font-size: clamp(28px, 2.7vw, 40px);
+  font-size: clamp(24px, 2.05vw, 32px);
+}
+
+.hero.quiz-in-hero .quiz-card-toolbar {
+  margin-bottom: 4px;
+}
+
+.hero.quiz-in-hero .quiz-card-body {
+  justify-content: flex-start;
+  padding-top: 8px;
+  overflow-y: auto;
 }
 
 .hero.quiz-in-hero + .deployment-cards {

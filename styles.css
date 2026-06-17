@@ -2550,12 +2550,15 @@ body.cart-drawer-open {
 }
 
 .hero.quiz-in-hero {
+  --quiz-card-height: 510px;
   overflow: hidden;
+  padding-bottom: 12px;
 }
 
 .hero.quiz-in-hero .hero-content {
   max-width: none;
   padding: 0;
+  transform: translateY(-34px);
 }
 
 .hero.quiz-in-hero .hero-quiz-mount {

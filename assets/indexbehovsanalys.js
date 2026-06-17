@@ -407,11 +407,6 @@ function createIndexQuiz() {
           state.price = option.dataset.price || null;
         });
         break;
-      case 4:
-        handleSingleChoiceStep(step, "[data-binding]", option, () => {
-          state.binding = option.dataset.binding || null;
-        });
-        break;
       default:
         break;
     }

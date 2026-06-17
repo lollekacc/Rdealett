@@ -1517,6 +1517,327 @@ img {
   min-height: auto;
 }
 
+.coverage-main[data-coverage-map="real"] {
+  position: relative;
+  isolation: isolate;
+  min-height: 900px;
+  padding: 44px clamp(28px, 6vw, 100px) 72px;
+  overflow: hidden;
+  scroll-margin-top: 94px;
+  background: #0a1220;
+}
+
+.coverage-main[data-coverage-map="real"]::before,
+.coverage-main[data-coverage-map="real"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.coverage-main[data-coverage-map="real"]::before {
+  background:
+    linear-gradient(180deg, rgba(250, 248, 245, 1) 0%, rgba(250, 248, 245, 0.96) 18%, rgba(250, 248, 245, 0.62) 32%, rgba(250, 248, 245, 0.08) 48%, rgba(3, 9, 18, 0.12) 100%),
+    radial-gradient(circle at 54% 58%, rgba(239, 130, 20, 0.2), transparent 28%);
+}
+
+.coverage-main[data-coverage-map="real"]::after {
+  background:
+    linear-gradient(90deg, rgba(3, 9, 18, 0.46), transparent 22%, transparent 72%, rgba(3, 9, 18, 0.32)),
+    linear-gradient(180deg, transparent 56%, rgba(3, 9, 18, 0.68));
+}
+
+.coverage-main[data-coverage-map="real"] > .page-shell {
+  position: static;
+  max-width: none;
+  min-height: inherit;
+}
+
+.coverage-main[data-coverage-map="real"] .section-head {
+  position: relative;
+  z-index: 3;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.coverage-main[data-coverage-map="real"] .section-label {
+  margin-bottom: 8px;
+  color: var(--accent);
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.coverage-main[data-coverage-map="real"] .section-head h2 {
+  font-size: clamp(40px, 4vw, 58px);
+  line-height: 1.05;
+}
+
+.coverage-main[data-coverage-map="real"] .section-head p {
+  margin-top: 12px;
+  max-width: 620px;
+  color: rgba(39, 36, 67, 0.82);
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-shell,
+.coverage-main[data-coverage-map="real"] .coverage-grid {
+  display: block;
+  margin: 0;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-map-area,
+.coverage-main[data-coverage-map="real"] .coverage-map-card,
+.coverage-main[data-coverage-map="real"] .coverage-map {
+  position: absolute;
+  inset: 0;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-map-area {
+  z-index: 0;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-map-card {
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: #0a1220;
+  box-shadow: none;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-map.leaflet-container {
+  height: 100%;
+  min-height: 100%;
+  background: #0a1220;
+}
+
+.coverage-main[data-coverage-map="real"] .leaflet-tile-pane {
+  filter: saturate(1.08) contrast(1.05);
+}
+
+.coverage-main[data-coverage-map="real"] .leaflet-control-container {
+  display: none;
+}
+
+.coverage-country-marker {
+  width: auto !important;
+  height: auto !important;
+  border: 0;
+  background: transparent;
+}
+
+.coverage-country-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: max-content;
+  padding: 11px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(14, 24, 38, 0.78);
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 18px 34px rgba(3, 9, 18, 0.34);
+  backdrop-filter: blur(10px);
+  transform: translate(-50%, -50%);
+}
+
+.coverage-country-label__flag {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42);
+}
+
+.coverage-country-label__flag--norway {
+  background:
+    linear-gradient(90deg, transparent 0 32%, #fff 32% 42%, #1f4f9a 42% 52%, #fff 52% 62%, transparent 62%),
+    linear-gradient(180deg, transparent 0 36%, #fff 36% 46%, #1f4f9a 46% 56%, #fff 56% 66%, transparent 66%),
+    #e63d3d;
+}
+
+.coverage-country-label__flag--finland {
+  background:
+    linear-gradient(90deg, transparent 0 32%, #2b5fab 32% 50%, transparent 50%),
+    linear-gradient(180deg, transparent 0 38%, #2b5fab 38% 56%, transparent 56%),
+    #f7f8fb;
+}
+
+.coverage-country-label__flag--estonia {
+  background: linear-gradient(180deg, #4e9bdc 0 33%, #121826 33% 66%, #fff 66%);
+}
+
+.coverage-country-label__flag--latvia {
+  background: linear-gradient(180deg, #a63343 0 42%, #fff 42% 58%, #a63343 58%);
+}
+
+.coverage-country-label__flag--lithuania {
+  background: linear-gradient(180deg, #f4c542 0 33%, #2fa35b 33% 66%, #d13b3b 66%);
+}
+
+.coverage-country-label__flag--denmark {
+  background:
+    linear-gradient(90deg, transparent 0 30%, #fff 30% 42%, transparent 42%),
+    linear-gradient(180deg, transparent 0 42%, #fff 42% 54%, transparent 54%),
+    #d82f37;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-sidebar {
+  position: absolute;
+  left: clamp(28px, 6vw, 100px);
+  top: 204px;
+  z-index: 3;
+  width: min(280px, calc(100vw - 56px));
+  gap: 14px;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-card {
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 24px 54px rgba(3, 9, 18, 0.18);
+  backdrop-filter: blur(16px);
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-card--sidebar {
+  padding: 18px;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-card__head {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+}
+
+.coverage-main[data-coverage-map="real"] .operator-list {
+  gap: 8px;
+}
+
+.coverage-main[data-coverage-map="real"] .operator-card {
+  position: relative;
+  min-height: 50px;
+  background: rgba(255, 255, 255, 0.66);
+  border-color: rgba(39, 36, 67, 0.08);
+}
+
+.coverage-main[data-coverage-map="real"] .operator-card.is-active {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(239, 130, 20, 0.36);
+}
+
+.coverage-main[data-coverage-map="real"] .operator-card.is-active::after {
+  content: "\2713";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  transform: translateY(-50%);
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-filter-grid {
+  gap: 8px;
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-filter {
+  min-height: 30px;
+  background: rgba(255, 255, 255, 0.68);
+  border-color: rgba(39, 36, 67, 0.12);
+}
+
+.coverage-main[data-coverage-map="real"] .coverage-filter.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.coverage-main[data-coverage-map="real"] .sidebar-info-note {
+  grid-template-columns: 28px 1fr;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 6px rgba(3, 9, 18, 0.45);
+}
+
+.coverage-main[data-coverage-map="real"] .sidebar-info-note__icon {
+  background: rgba(239, 130, 20, 0.14);
+  color: var(--accent);
+}
+
+.coverage-main[data-coverage-map="real"] .sidebar-info-link {
+  color: var(--accent);
+}
+
+.coverage-main[data-coverage-map="real"] .map-ui,
+.coverage-main[data-coverage-map="real"] .map-legend-overlay,
+.coverage-main[data-coverage-map="real"] .map-bottom-bar {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .coverage-main[data-coverage-map="real"] {
+    min-height: 860px;
+    padding: 72px 24px 56px;
+  }
+
+  .coverage-main[data-coverage-map="real"] .section-head {
+    max-width: 680px;
+  }
+
+  .coverage-main[data-coverage-map="real"] .coverage-sidebar {
+    left: 24px;
+    right: 24px;
+    top: 258px;
+    width: auto;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .coverage-main[data-coverage-map="real"] .sidebar-info-note {
+    grid-column: 1 / -1;
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 680px) {
+  .coverage-main[data-coverage-map="real"] {
+    min-height: 980px;
+    padding: 62px 18px 48px;
+  }
+
+  .coverage-main[data-coverage-map="real"] .section-head h2 {
+    font-size: 34px;
+  }
+
+  .coverage-main[data-coverage-map="real"] .section-head p {
+    font-size: 16px;
+  }
+
+  .coverage-main[data-coverage-map="real"] .coverage-sidebar {
+    left: 18px;
+    right: 18px;
+    top: 300px;
+    grid-template-columns: 1fr;
+  }
+
+  .coverage-country-label {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+}
+
 .deployment-cards {
   position: relative;
   z-index: 2;

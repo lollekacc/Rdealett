@@ -6,15 +6,26 @@
     return;
   }
 
-  const defaultView = {
-    center: [62.0, 15.0],
-    zoom: 5,
-  };
+  const usesBackdropMap = app.dataset.coverageMap === 'real';
+  const defaultView = usesBackdropMap
+    ? {
+        center: [61.9, 16.5],
+        zoom: 5,
+      }
+    : {
+        center: [62.0, 15.0],
+        zoom: 5,
+      };
 
   const swedenBounds = [
     [55.0, 10.0],
     [69.5, 24.5],
   ];
+  const nordicBounds = [
+    [53.0, 3.0],
+    [71.5, 33.5],
+  ];
+  const activeBounds = usesBackdropMap ? nordicBounds : swedenBounds;
 
   const operatorMeta = {
     telia: {
@@ -42,14 +53,20 @@
   const map = L.map('map', {
     zoomControl: false,
     attributionControl: false,
-    maxBounds: swedenBounds,
+    maxBounds: activeBounds,
     maxBoundsViscosity: 1.0,
     minZoom: 4,
   }).setView(defaultView.center, defaultView.zoom);
 
-  const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-  }).addTo(map);
+  const baseLayer = L.tileLayer(
+    usesBackdropMap
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+      maxZoom: 18,
+      subdomains: usesBackdropMap ? 'abcd' : 'abc',
+    }
+  ).addTo(map);
 
   const overlays = {
     tele2: L.tileLayer(
@@ -88,6 +105,25 @@
       }
     ),
   };
+
+  if (usesBackdropMap) {
+    [
+      { key: 'norway', label: 'Norge', coords: [61.2, 8.8] },
+      { key: 'finland', label: 'Finland', coords: [64.3, 26.0] },
+      { key: 'estonia', label: 'Estland', coords: [58.8, 25.0] },
+      { key: 'latvia', label: 'Lettland', coords: [56.9, 24.8] },
+      { key: 'lithuania', label: 'Litauen', coords: [55.2, 23.8] },
+      { key: 'denmark', label: 'Danmark', coords: [56.2, 10.4] },
+    ].forEach(({ key, label, coords }) => {
+      L.marker(coords, {
+        interactive: false,
+        icon: L.divIcon({
+          className: `coverage-country-marker coverage-country-marker--${key}`,
+          html: `<span class="coverage-country-label"><span class="coverage-country-label__flag coverage-country-label__flag--${key}"></span><span>${label}</span></span>`,
+        }),
+      }).addTo(map);
+    });
+  }
 
   let activeOverlay = null;
   let activeOperatorKey = null;
@@ -329,13 +365,17 @@
   });
 
   map.on('drag', () => {
-    map.panInsideBounds(swedenBounds, { animate: false });
+    map.panInsideBounds(activeBounds, { animate: false });
   });
 
   map.on('zoomend', updateZoom);
   map.on('moveend', updateCenter);
 
-  setActiveOperatorUI(null);
+  if (usesBackdropMap) {
+    activateOperator('telia');
+  } else {
+    setActiveOperatorUI(null);
+  }
   updateZoom();
   updateCenter();
 

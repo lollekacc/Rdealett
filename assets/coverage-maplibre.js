@@ -32,6 +32,8 @@
     pitch: 18,
     bearing: -6,
   };
+  const mapPitch2D = 0;
+  const mapPitch3D = 22;
 
   const localizedName = ['coalesce', ['get', 'name:latin'], ['get', 'name_en'], ['get', 'name']];
   const roadName = ['coalesce', ['get', 'name:latin'], ['get', 'name_en'], ['get', 'name'], ['get', 'ref']];
@@ -54,6 +56,10 @@
       coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.025, 8, 0.04, 13, 0.055],
       coverageLine: '#edf8fb',
       coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.035, 11, 0.065, 15, 0.1],
+      nightRoadHaloOpacity: 0,
+      nightRoadCoreOpacity: 0,
+      nightCarOpacity: 0,
+      nightBuildingOpacity: 0,
     },
     dark: {
       background: '#071018',
@@ -73,6 +79,10 @@
       coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.018, 8, 0.03, 13, 0.044],
       coverageLine: '#edf8fb',
       coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.03, 11, 0.052, 15, 0.08],
+      nightRoadHaloOpacity: ['interpolate', ['linear'], ['zoom'], 8, 0, 10, 0.1, 13, 0.22, 16, 0.28],
+      nightRoadCoreOpacity: ['interpolate', ['linear'], ['zoom'], 9, 0, 11, 0.16, 14, 0.34, 16, 0.42],
+      nightCarOpacity: ['interpolate', ['linear'], ['zoom'], 12, 0, 14, 0.22, 16, 0.36],
+      nightBuildingOpacity: ['interpolate', ['linear'], ['zoom'], 13, 0, 14, 0.035, 16, 0.075, 18, 0.1],
     },
   };
 
@@ -388,17 +398,30 @@
     activeOperator: 'telia',
     activeNetworks: new Set(['2G', '4G', '5G']),
     mapTheme: getStoredMapTheme(),
+    isPerspectiveMode: true,
     selectedMarker: null,
     locateMarker: null,
   };
 
   const selectedPlace = app.querySelector('#coverageSelectedPlace');
   const layerStatus = app.querySelector('#coverageLayerStatus');
+  const perspectiveButton = app.querySelector('#coverageMapPerspective');
 
   const setPaintIfLayerExists = (layerId, property, value) => {
     if (map.getLayer(layerId)) {
       map.setPaintProperty(layerId, property, value);
     }
+  };
+
+  const syncPerspectiveButton = () => {
+    if (!perspectiveButton) {
+      return;
+    }
+
+    state.isPerspectiveMode = map.getPitch() > 6;
+    perspectiveButton.textContent = state.isPerspectiveMode ? '3D' : '2D';
+    perspectiveButton.classList.toggle('is-active', state.isPerspectiveMode);
+    perspectiveButton.setAttribute('aria-pressed', String(state.isPerspectiveMode));
   };
 
   const updateMapThemeButtons = () => {
@@ -435,6 +458,10 @@
     setPaintIfLayerExists('dealett-coverage-placeholder-fill', 'fill-opacity', paint.coverageFillOpacity);
     setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-color', paint.coverageLine);
     setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-opacity', paint.coverageLineOpacity);
+    setPaintIfLayerExists('dealett-night-road-halo', 'line-opacity', paint.nightRoadHaloOpacity);
+    setPaintIfLayerExists('dealett-night-road-core', 'line-opacity', paint.nightRoadCoreOpacity);
+    setPaintIfLayerExists('dealett-night-car-lights', 'line-opacity', paint.nightCarOpacity);
+    setPaintIfLayerExists('dealett-night-building-lights', 'fill-opacity', paint.nightBuildingOpacity);
     updateMapThemeButtons();
   };
 
@@ -533,6 +560,98 @@
     const coverageBeforeLayer = map.getLayer('dealett-road-major')
       ? 'dealett-road-major'
       : undefined;
+    const labelBeforeLayer = map.getLayer('dealett-road-labels')
+      ? 'dealett-road-labels'
+      : undefined;
+
+    if (!map.getLayer('dealett-night-road-halo')) {
+      map.addLayer({
+        id: 'dealett-night-road-halo',
+        type: 'line',
+        source: 'openmaptiles',
+        'source-layer': 'transportation',
+        minzoom: 8,
+        filter: [
+          'all',
+          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
+          ['match', ['get', 'class'], ['motorway', 'trunk', 'primary', 'secondary'], true, false],
+        ],
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#ffc66f',
+          'line-width': ['interpolate', ['exponential', 1.2], ['zoom'], 8, 0.8, 12, 2.2, 16, 5.4],
+          'line-opacity': 0,
+          'line-blur': ['interpolate', ['linear'], ['zoom'], 8, 0.4, 14, 1.8, 16, 2.6],
+        },
+      }, labelBeforeLayer);
+    }
+
+    if (!map.getLayer('dealett-night-road-core')) {
+      map.addLayer({
+        id: 'dealett-night-road-core',
+        type: 'line',
+        source: 'openmaptiles',
+        'source-layer': 'transportation',
+        minzoom: 9,
+        filter: [
+          'all',
+          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
+          ['match', ['get', 'class'], ['motorway', 'trunk', 'primary', 'secondary'], true, false],
+        ],
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#ffe5a8',
+          'line-width': ['interpolate', ['exponential', 1.2], ['zoom'], 9, 0.18, 13, 0.55, 16, 1.15],
+          'line-opacity': 0,
+        },
+      }, labelBeforeLayer);
+    }
+
+    if (!map.getLayer('dealett-night-car-lights')) {
+      map.addLayer({
+        id: 'dealett-night-car-lights',
+        type: 'line',
+        source: 'openmaptiles',
+        'source-layer': 'transportation',
+        minzoom: 12,
+        filter: [
+          'all',
+          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
+          ['match', ['get', 'class'], ['motorway', 'trunk', 'primary'], true, false],
+        ],
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#fff3cf',
+          'line-width': ['interpolate', ['exponential', 1.2], ['zoom'], 12, 0.6, 15, 1.2, 17, 1.8],
+          'line-opacity': 0,
+          'line-dasharray': [0.1, 2.4],
+        },
+      }, labelBeforeLayer);
+    }
+
+    if (!map.getLayer('dealett-night-building-lights')) {
+      map.addLayer({
+        id: 'dealett-night-building-lights',
+        type: 'fill',
+        source: 'openmaptiles',
+        'source-layer': 'building',
+        minzoom: 13,
+        paint: {
+          'fill-color': '#ffd492',
+          'fill-opacity': 0,
+        },
+      }, labelBeforeLayer);
+    }
+
     if (!map.getSource('dealett-coverage-placeholder')) {
       // Replace this source with real operator coverage GeoJSON later.
       // Keep the operator and network_* properties if the existing filters should continue to work.
@@ -634,6 +753,24 @@
       return;
     }
 
+    const selectSearchResult = (result) => {
+      const center = result.center || result.geometry?.coordinates;
+
+      if (!center) {
+        return;
+      }
+
+      setSelectedPlace(result.place_name || result.text, center);
+      map.flyTo({
+        center,
+        zoom: result.bbox ? 11 : 13,
+        pitch: 18,
+        bearing: map.getBearing(),
+        duration: 1500,
+        essential: true,
+      });
+    };
+
     const geocoderApi = {
       forwardGeocode: async (config) => {
         const query = config.query.trim();
@@ -706,22 +843,7 @@
 
     geocoder.addTo(geocoderElement);
     geocoder.on('result', (event) => {
-      const result = event.result;
-      const center = result.center || result.geometry?.coordinates;
-
-      if (!center) {
-        return;
-      }
-
-      setSelectedPlace(result.place_name || result.text, center);
-      map.flyTo({
-        center,
-        zoom: result.bbox ? 11 : 13,
-        pitch: 18,
-        bearing: map.getBearing(),
-        duration: 1500,
-        essential: true,
-      });
+      selectSearchResult(event.result);
     });
 
     geocoder.on('clear', () => {
@@ -732,6 +854,28 @@
 
       if (selectedPlace) {
         selectedPlace.textContent = 'Ingen plats vald';
+      }
+    });
+
+    const geocoderInput = geocoderElement.querySelector('input');
+
+    geocoderInput?.addEventListener('keydown', async (event) => {
+      if (event.key !== 'Enter') {
+        return;
+      }
+
+      const query = geocoderInput.value.trim();
+
+      if (!query) {
+        return;
+      }
+
+      event.preventDefault();
+      const results = await geocoderApi.forwardGeocode({ query });
+      const firstResult = results.features[0];
+
+      if (firstResult) {
+        selectSearchResult(firstResult);
       }
     });
   };
@@ -799,6 +943,7 @@
     setupGeocoder();
     map.resize();
     resetToSweden(false);
+    syncPerspectiveButton();
   });
 
   app.querySelector('#coverageMapZoomIn')?.addEventListener('click', () => {
@@ -808,6 +953,26 @@
   app.querySelector('#coverageMapZoomOut')?.addEventListener('click', () => {
     map.easeTo({ zoom: map.getZoom() - 0.8, duration: 600, easing: (t) => 1 - Math.pow(1 - t, 3) });
   });
+
+  app.querySelector('#coverageMapCompass')?.addEventListener('click', () => {
+    map.easeTo({
+      bearing: 0,
+      duration: 650,
+      easing: (t) => 1 - Math.pow(1 - t, 3),
+    });
+  });
+
+  perspectiveButton?.addEventListener('click', () => {
+    const shouldUse3D = map.getPitch() <= 6;
+
+    map.easeTo({
+      pitch: shouldUse3D ? mapPitch3D : mapPitch2D,
+      duration: 650,
+      easing: (t) => 1 - Math.pow(1 - t, 3),
+    });
+  });
+
+  map.on('moveend', syncPerspectiveButton);
 
   app.querySelectorAll('[data-map-action]').forEach((button) => {
     button.addEventListener('click', () => {

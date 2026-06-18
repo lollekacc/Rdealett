@@ -25,10 +25,9 @@
   };
 
   const swedenBounds = [10.4, 55.0, 24.5, 69.3];
-  const swedenMaxBounds = [[9.2, 54.4], [25.4, 70.3]];
-  const initialCamera = {
-    center: [16.6, 62.2],
-    zoom: 4.45,
+  const swedenFitBounds = [[10.4, 55.0], [24.5, 69.3]];
+  const swedenMaxBounds = [[-8.0, 48.0], [39.0, 76.5]];
+  const swedenCameraBase = {
     pitch: 35,
     bearing: -6,
   };
@@ -302,8 +301,62 @@
   const selectedPlace = app.querySelector('#coverageSelectedPlace');
   const layerStatus = app.querySelector('#coverageLayerStatus');
 
+  const getSwedenFitPadding = () => {
+    if (window.matchMedia('(max-width: 720px)').matches) {
+      return { top: 240, right: 24, bottom: 160, left: 24 };
+    }
+
+    if (window.matchMedia('(max-width: 1100px)').matches) {
+      return { top: 180, right: 70, bottom: 120, left: 48 };
+    }
+
+    return { top: 90, right: 80, bottom: 100, left: 280 };
+  };
+
+  const getSwedenCamera = () => map.cameraForBounds(swedenFitBounds, {
+    padding: getSwedenFitPadding(),
+    bearing: swedenCameraBase.bearing,
+    pitch: swedenCameraBase.pitch,
+  });
+
+  const applySwedenMinZoom = () => {
+    const swedenCamera = getSwedenCamera();
+
+    if (!swedenCamera) {
+      return null;
+    }
+
+    map.setMinZoom(swedenCamera.zoom);
+    return swedenCamera;
+  };
+
+  const resetToSweden = (animated = true) => {
+    map.setMinZoom(0);
+    const swedenCamera = applySwedenMinZoom();
+
+    if (!swedenCamera) {
+      return;
+    }
+
+    const camera = {
+      ...swedenCamera,
+      ...swedenCameraBase,
+    };
+
+    if (animated) {
+      map.once('moveend', () => {
+        map.setMinZoom(map.getZoom());
+      });
+      flyTo(camera);
+      return;
+    }
+
+    map.jumpTo(camera);
+    map.setMinZoom(map.getZoom());
+  };
+
   const isInsideSwedenBounds = ([longitude, latitude]) => {
-    const [[west, south], [east, north]] = swedenMaxBounds;
+    const [[west, south], [east, north]] = swedenFitBounds;
     return longitude >= west && longitude <= east && latitude >= south && latitude <= north;
   };
 
@@ -424,12 +477,12 @@
   const map = new maplibregl.Map({
     container: mapElement,
     style: satelliteHybridStyle,
-    center: initialCamera.center,
-    zoom: initialCamera.zoom,
-    pitch: initialCamera.pitch,
-    bearing: initialCamera.bearing,
+    center: [16.6, 62.2],
+    zoom: 4,
+    pitch: swedenCameraBase.pitch,
+    bearing: swedenCameraBase.bearing,
     maxBounds: swedenMaxBounds,
-    minZoom: 4,
+    minZoom: 3,
     maxZoom: 18,
     renderWorldCopies: false,
     attributionControl: true,
@@ -647,6 +700,7 @@
     updateLayerStatus();
     setupGeocoder();
     map.resize();
+    resetToSweden(false);
   });
 
   app.querySelector('#coverageMapZoomIn')?.addEventListener('click', () => {
@@ -666,7 +720,7 @@
       }
 
       if (action === 'reset') {
-        flyTo(initialCamera);
+        resetToSweden();
       }
 
       if (action === 'locate') {
@@ -715,13 +769,21 @@
   });
 
   window.addEventListener('resize', () => {
+    const isAtSwedenLimit = map.getZoom() <= map.getMinZoom() + 0.05;
     map.resize();
+
+    if (isAtSwedenLimit) {
+      resetToSweden(false);
+      return;
+    }
+
+    applySwedenMinZoom();
   });
 
   window.dealettCoverageMap = {
     map,
     flyToStockholm: () => flyTo(stockholmCamera),
-    resetToSweden: () => flyTo(initialCamera),
+    resetToSweden,
     getActiveCoverageFilters: () => ({
       operator: state.activeOperator,
       networks: Array.from(state.activeNetworks),

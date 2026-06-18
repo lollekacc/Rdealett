@@ -78,41 +78,182 @@ img {
 }
 
 .dealett-chat-toggle {
-  width: 64px;
-  height: 64px;
-  border: 0;
+  position: relative;
+  width: min(430px, calc(100vw - 28px));
+  height: 86px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 139, 33, 0.34);
   border-radius: 999px;
-  background: #272443;
-  color: #fff;
-  box-shadow: 0 18px 38px rgba(39, 36, 67, 0.26);
-  display: inline-flex;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 250, 242, 0.97) 100%);
+  color: #282321;
+  box-shadow:
+    0 18px 34px rgba(134, 69, 6, 0.18),
+    0 8px 18px rgba(239, 130, 20, 0.14),
+    inset 0 0 0 5px rgba(255, 219, 190, 0.58),
+    inset 0 0 0 9px rgba(255, 255, 255, 0.78);
+  display: grid;
+  grid-template-columns: 74px minmax(170px, 1fr) 2px 82px 82px;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
+  justify-content: stretch;
+  gap: 0;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .dealett-chat-toggle:hover {
-  background: #da392b;
-  box-shadow: 0 22px 44px rgba(218, 57, 43, 0.22);
+  filter: saturate(1.04);
+  box-shadow:
+    0 22px 42px rgba(134, 69, 6, 0.22),
+    0 10px 24px rgba(239, 130, 20, 0.2),
+    inset 0 0 0 5px rgba(255, 219, 190, 0.7),
+    inset 0 0 0 9px rgba(255, 255, 255, 0.86);
   transform: translateY(-2px);
 }
 
-.dealett-chat-toggle i {
-  font-size: 20px;
+.dealett-chat-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 8px 8px 8px auto;
+  width: 92px;
+  border-radius: 0 999px 999px 0;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.62), transparent 28%),
+    linear-gradient(180deg, #ffbd3c 0%, #ff8b1a 44%, #ff6108 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 24px 50%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -10px 20px rgba(213, 66, 0, 0.2);
 }
 
-.dealett-chat-toggle span {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0;
+.dealett-chat-toggle__sparkles {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 74px;
+  height: 100%;
+}
+
+.dealett-chat-toggle__sparkles::before,
+.dealett-chat-toggle__sparkles::after {
+  content: "";
+  position: absolute;
+  background: #ff8a00;
+  clip-path: polygon(50% 0, 62% 36%, 100% 50%, 62% 64%, 50% 100%, 38% 64%, 0 50%, 38% 36%);
+  filter: drop-shadow(0 4px 8px rgba(255, 138, 0, 0.28));
+}
+
+.dealett-chat-toggle__sparkles::before {
+  left: 24px;
+  top: 26px;
+  width: 31px;
+  height: 31px;
+}
+
+.dealett-chat-toggle__sparkles::after {
+  left: 45px;
+  top: 45px;
+  width: 23px;
+  height: 23px;
+}
+
+.dealett-chat-toggle__label {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  color: #2d2827;
+  font-family: 'Roboto', sans-serif;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-align: left;
+  white-space: nowrap;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.72);
+}
+
+.dealett-chat-toggle__divider {
+  position: relative;
+  z-index: 1;
+  width: 2px;
+  height: 42px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent, rgba(255, 139, 33, 0.76), transparent);
+}
+
+.dealett-chat-toggle__bot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 58px;
+  margin-left: 6px;
+  border: 4px solid #fff7ed;
+  border-radius: 21px;
+  background: linear-gradient(180deg, #1e1918 0%, #070707 100%);
+  box-shadow:
+    0 7px 14px rgba(193, 79, 10, 0.28),
+    0 0 0 2px rgba(255, 184, 105, 0.42),
+    inset 0 1px 8px rgba(255, 255, 255, 0.08);
+}
+
+.dealett-chat-toggle__bot::before,
+.dealett-chat-toggle__bot::after {
+  content: "";
+  position: absolute;
+  top: 17px;
+  width: 17px;
+  height: 17px;
+  border: 4px solid #f8ece3;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 68% 28%, #fff 0 3px, transparent 3.5px),
+    #262120;
+}
+
+.dealett-chat-toggle__bot::before {
+  left: 14px;
+}
+
+.dealett-chat-toggle__bot::after {
+  right: 14px;
+}
+
+.dealett-chat-toggle__bot span {
+  position: absolute;
+  left: 50%;
+  bottom: 11px;
+  width: 20px;
+  height: 10px;
+  border-bottom: 4px solid #fff1e7;
+  border-radius: 0 0 999px 999px;
+  transform: translateX(-50%);
+}
+
+.dealett-chat-toggle__arrow {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 82px;
+  height: 100%;
+}
+
+.dealett-chat-toggle__arrow::before {
+  content: "";
+  width: 27px;
+  height: 27px;
+  border-top: 10px solid #fff;
+  border-right: 10px solid #fff;
+  border-radius: 5px;
+  filter: drop-shadow(0 3px 4px rgba(209, 69, 0, 0.18));
+  transform: rotate(45deg) translate(-3px, 3px);
 }
 
 .dealett-chat-panel {
   position: absolute;
   right: 0;
-  bottom: 78px;
+  bottom: 104px;
   width: min(380px, calc(100vw - 28px));
   height: min(620px, calc(100vh - 116px));
   border: 1px solid rgba(39, 36, 67, 0.12);
@@ -495,6 +636,484 @@ img {
 .dealett-chat-input:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+
+/* Dealett AI chat: light premium yellow style */
+.dealett-chat {
+  --chat-gold: #ffb313;
+  --chat-orange: #ff7412;
+  --chat-ink: #251f1c;
+  --chat-cream: #fffaf0;
+}
+
+.dealett-chat-toggle {
+  width: min(520px, calc(100vw - 28px));
+  height: 96px;
+  border-color: rgba(255, 185, 27, 0.55);
+  background:
+    radial-gradient(circle at 14% 24%, rgba(255, 255, 255, 0.98) 0 14%, transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(255, 250, 231, 0.97) 100%);
+  color: var(--chat-ink);
+  grid-template-columns: 96px minmax(190px, 1fr) 2px 92px 96px;
+  box-shadow:
+    0 18px 34px rgba(169, 95, 0, 0.18),
+    0 8px 18px rgba(255, 179, 19, 0.16),
+    inset 0 0 0 4px rgba(255, 213, 84, 0.72),
+    inset 0 0 0 10px rgba(255, 255, 255, 0.78),
+    inset 0 -18px 38px rgba(255, 185, 28, 0.1);
+}
+
+.dealett-chat-toggle:hover {
+  box-shadow:
+    0 22px 42px rgba(169, 95, 0, 0.22),
+    0 10px 24px rgba(255, 179, 19, 0.24),
+    inset 0 0 0 4px rgba(255, 213, 84, 0.84),
+    inset 0 0 0 10px rgba(255, 255, 255, 0.88),
+    inset 0 -18px 38px rgba(255, 185, 28, 0.14);
+}
+
+.dealett-chat-toggle::before {
+  width: 110px;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.62), transparent 28%),
+    linear-gradient(180deg, #ffd74a 0%, #ffb516 44%, #ff7b10 100%);
+}
+
+.dealett-chat-toggle__sparkles {
+  width: 96px;
+}
+
+.dealett-chat-toggle__sparkles::before,
+.dealett-chat-toggle__sparkles::after {
+  background: linear-gradient(180deg, #ffd43b, #ff8b00);
+  filter: drop-shadow(0 4px 8px rgba(255, 179, 19, 0.38));
+}
+
+.dealett-chat-toggle__sparkles::before {
+  left: 34px;
+  top: 27px;
+  width: 35px;
+  height: 35px;
+}
+
+.dealett-chat-toggle__sparkles::after {
+  left: 59px;
+  top: 49px;
+  width: 27px;
+  height: 27px;
+}
+
+.dealett-chat-toggle__label {
+  color: #2b2522;
+  font-size: 38px;
+  letter-spacing: 0;
+}
+
+.dealett-chat-toggle__divider {
+  height: 48px;
+  background: linear-gradient(180deg, transparent, rgba(255, 179, 19, 0.76), transparent);
+}
+
+.dealett-chat-toggle__bot {
+  width: 78px;
+  height: 64px;
+  border: 5px solid #fff7ea;
+  border-radius: 24px;
+  box-shadow:
+    0 10px 20px rgba(193, 94, 10, 0.28),
+    0 0 0 2px rgba(255, 196, 78, 0.48),
+    inset 0 1px 8px rgba(255, 255, 255, 0.08);
+}
+
+.dealett-chat-toggle__bot::before,
+.dealett-chat-toggle__bot::after {
+  top: 18px;
+  width: 18px;
+  height: 18px;
+  border-color: #f8eee2;
+}
+
+.dealett-chat-toggle__bot::before {
+  left: 15px;
+}
+
+.dealett-chat-toggle__bot::after {
+  right: 15px;
+}
+
+.dealett-chat-toggle__bot span {
+  bottom: 12px;
+}
+
+.dealett-chat-toggle__arrow {
+  width: 96px;
+}
+
+.dealett-chat-toggle__arrow::before {
+  width: 31px;
+  height: 31px;
+}
+
+.dealett-chat-panel {
+  bottom: 114px;
+  width: min(760px, calc(100vw - 28px));
+  height: min(560px, calc(100vh - 126px));
+  border: 1px solid rgba(255, 180, 85, 0.3);
+  border-radius: 44px;
+  background:
+    radial-gradient(circle at 4% 5%, rgba(255, 193, 82, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 251, 243, 0.98));
+  box-shadow:
+    0 26px 70px rgba(113, 65, 0, 0.18),
+    0 10px 24px rgba(255, 134, 20, 0.16),
+    inset 0 0 0 4px rgba(255, 237, 215, 0.68),
+    inset 0 -10px 22px rgba(255, 128, 22, 0.12);
+  grid-template-rows: 1fr auto auto;
+}
+
+.dealett-chat-header {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 3;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--chat-ink);
+  gap: 8px;
+}
+
+.dealett-chat-header > div {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.dealett-chat-close,
+.dealett-chat-reset {
+  width: 34px;
+  height: 34px;
+  border-color: rgba(255, 162, 31, 0.28);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--chat-orange);
+  box-shadow: 0 8px 20px rgba(151, 72, 0, 0.1);
+}
+
+.dealett-chat-messages {
+  padding: 40px 28px 14px;
+  gap: 18px;
+  background:
+    linear-gradient(90deg, rgba(255, 179, 19, 0.04), transparent 32%, rgba(255, 128, 22, 0.04)),
+    transparent;
+}
+
+.dealett-chat-message {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 17px;
+}
+
+.dealett-chat-message--assistant {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  color: var(--chat-ink);
+}
+
+.dealett-chat-message--user {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px;
+  gap: 10px;
+  align-items: end;
+  color: var(--chat-ink);
+}
+
+.dealett-chat-bubble {
+  position: relative;
+  width: fit-content;
+  max-width: min(430px, 100%);
+  padding: 18px 24px 16px;
+  border: 1px solid rgba(255, 169, 67, 0.25);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 14px 30px rgba(137, 74, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.72),
+    inset 0 -10px 20px rgba(255, 155, 35, 0.05);
+}
+
+.dealett-chat-message--assistant .dealett-chat-bubble {
+  border-radius: 28px 28px 28px 10px;
+}
+
+.dealett-chat-message--user .dealett-chat-bubble {
+  justify-self: end;
+  max-width: min(360px, 100%);
+  padding-right: 38px;
+  border-radius: 28px 28px 10px 28px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 199, 96, 0.24), transparent 32%),
+    linear-gradient(180deg, rgba(255, 248, 236, 0.98), rgba(255, 228, 190, 0.96));
+}
+
+.dealett-chat-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.dealett-chat-avatar--bot {
+  width: 66px;
+  height: 66px;
+  border: 1px solid rgba(255, 156, 55, 0.28);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fff8ee, #ffd9b0);
+  box-shadow:
+    0 10px 24px rgba(207, 89, 0, 0.18),
+    inset 0 0 0 4px rgba(255, 255, 255, 0.58);
+}
+
+.dealett-chat-avatar--bot::before,
+.dealett-chat-avatar--bot::after {
+  content: "";
+  position: absolute;
+  top: 24px;
+  width: 8px;
+  height: 26px;
+  border: 1px solid rgba(255, 147, 35, 0.32);
+  border-radius: 999px;
+  background: #ffd3a3;
+}
+
+.dealett-chat-avatar--bot::before {
+  left: -4px;
+}
+
+.dealett-chat-avatar--bot::after {
+  right: -4px;
+}
+
+.dealett-chat-avatar--bot span {
+  position: relative;
+  width: 48px;
+  height: 38px;
+  border: 3px solid #fff5e6;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #191514, #070707);
+  box-shadow: inset 0 1px 8px rgba(255, 255, 255, 0.08);
+}
+
+.dealett-chat-avatar--bot span::before,
+.dealett-chat-avatar--bot span::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  width: 12px;
+  height: 12px;
+  border: 3px solid #f8eee2;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 68% 28%, #fff 0 2px, transparent 2.5px),
+    #262120;
+}
+
+.dealett-chat-avatar--bot span::before {
+  left: 8px;
+}
+
+.dealett-chat-avatar--bot span::after {
+  right: 8px;
+}
+
+.dealett-chat-avatar--user {
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgba(255, 136, 26, 0.36);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff1df, #ffd3a1);
+  box-shadow:
+    0 10px 22px rgba(207, 89, 0, 0.14),
+    inset 0 0 0 3px rgba(255, 255, 255, 0.52);
+}
+
+.dealett-chat-avatar--user::before,
+.dealett-chat-avatar--user::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  background: #ff8b20;
+  transform: translateX(-50%);
+}
+
+.dealett-chat-avatar--user::before {
+  top: 11px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+}
+
+.dealett-chat-avatar--user::after {
+  bottom: 10px;
+  width: 28px;
+  height: 14px;
+  border-radius: 14px 14px 5px 5px;
+}
+
+.dealett-chat-time {
+  display: block;
+  margin-top: 8px;
+  color: #ff6800;
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dealett-chat-check {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 13px;
+  height: 8px;
+  border-left: 2px solid #ff6800;
+  border-bottom: 2px solid #ff6800;
+  transform: rotate(-45deg);
+}
+
+.dealett-chat-feedback,
+.dealett-chat-message--assistant > .dealett-chat-embedded-widget,
+.dealett-chat-message--assistant > .dealett-chat-quick-replies,
+.dealett-chat-message--assistant > .dealett-chat-offers {
+  grid-column: 2;
+}
+
+.dealett-chat-feedback {
+  width: fit-content;
+  max-width: min(430px, 100%);
+  margin-top: -8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 169, 67, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.dealett-chat-feedback__button,
+.dealett-chat-quick-reply,
+.dealett-chat-widget-button,
+.dealett-chat-address-input,
+.dealett-chat-chip {
+  border-color: rgba(255, 169, 67, 0.3);
+}
+
+.dealett-chat-feedback__button:hover,
+.dealett-chat-feedback__button.is-selected,
+.dealett-chat-quick-reply:hover,
+.dealett-chat-widget-button:hover,
+.dealett-chat-chip:hover {
+  border-color: rgba(255, 116, 18, 0.58);
+  background: rgba(255, 179, 19, 0.12);
+}
+
+.dealett-chat-feedback__button--primary,
+.dealett-chat-widget-button--primary {
+  border-color: var(--chat-orange);
+  background: linear-gradient(180deg, #ffbf2f, var(--chat-orange));
+  color: #fff;
+}
+
+.dealett-chat-embedded-widget {
+  border-color: rgba(255, 169, 67, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.dealett-chat-feedback__text:focus,
+.dealett-chat-address-input:focus {
+  outline: 3px solid rgba(255, 179, 19, 0.18);
+  border-color: var(--chat-orange);
+}
+
+.dealett-chat-suggestions {
+  padding: 4px 28px 12px;
+  border-top: 0;
+  background: transparent;
+}
+
+.dealett-chat-chip {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.dealett-chat-form {
+  position: relative;
+  margin: 0 18px 18px;
+  padding: 6px 7px;
+  grid-template-columns: 1fr 54px;
+  gap: 8px;
+  border: 1px solid rgba(255, 162, 31, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    0 12px 28px rgba(147, 76, 0, 0.12),
+    inset 0 0 0 3px rgba(255, 235, 211, 0.82),
+    inset 0 -8px 18px rgba(255, 128, 22, 0.09);
+}
+
+.dealett-chat-form::before {
+  content: "+";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffbf2f, var(--chat-orange));
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 31px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow:
+    0 8px 18px rgba(255, 116, 18, 0.24),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.38);
+  transform: translateY(-50%);
+}
+
+.dealett-chat-input {
+  height: 54px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 12px 0 72px;
+  color: var(--chat-ink);
+  background: transparent;
+  font-size: 17px;
+}
+
+.dealett-chat-input:focus {
+  outline: none;
+}
+
+.dealett-chat-send {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.6), transparent 24%),
+    linear-gradient(180deg, #ffbf2f, var(--chat-orange));
+  color: #fff;
+  font-size: 20px;
+  box-shadow:
+    0 8px 18px rgba(255, 116, 18, 0.25),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.36);
 }
 
 .site-header {
@@ -3403,6 +4022,89 @@ textarea {
   letter-spacing: 0.22em;
 }
 
+/* Footer social plates: light Dealett-yellow reference style */
+.footer-social-grid {
+  gap: 20px 24px;
+}
+
+.footer-social-plate {
+  grid-template-columns: 78px minmax(0, 1fr);
+  min-height: 74px;
+  padding: 10px 28px 10px 0;
+  border: 1px solid rgba(255, 191, 47, 0.88);
+  background:
+    radial-gradient(circle at 14% 22%, rgba(255, 220, 90, 0.22), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 249, 230, 0.96));
+  color: #3b2d24;
+  box-shadow:
+    0 15px 30px rgba(148, 89, 0, 0.14),
+    0 0 0 1px rgba(255, 213, 84, 0.22),
+    inset 0 0 0 4px rgba(255, 252, 240, 0.72),
+    inset 0 -12px 26px rgba(255, 179, 19, 0.08);
+}
+
+.footer-social-plate::before {
+  background:
+    linear-gradient(90deg, transparent 0 21%, rgba(255, 179, 19, 0.26) 21% 21.5%, transparent 21.5%),
+    repeating-linear-gradient(90deg, rgba(255, 180, 40, 0.06) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(0deg, rgba(255, 180, 40, 0.05) 0 1px, transparent 1px 18px);
+  opacity: 0.88;
+}
+
+.footer-social-plate::after {
+  border-color: rgba(255, 197, 41, 0.48);
+  box-shadow:
+    0 0 18px rgba(255, 192, 36, 0.28),
+    inset 0 0 22px rgba(255, 179, 19, 0.1);
+}
+
+.footer-social-plate:hover {
+  filter: saturate(1.08) brightness(1.01);
+  box-shadow:
+    0 20px 40px rgba(148, 89, 0, 0.18),
+    0 0 26px rgba(255, 179, 19, 0.25),
+    inset 0 0 0 4px rgba(255, 252, 240, 0.84),
+    inset 0 -12px 26px rgba(255, 179, 19, 0.12);
+}
+
+.footer-social-icon {
+  position: relative;
+  width: 78px;
+  color: #ffb313;
+  font-size: 39px;
+  text-shadow:
+    0 0 12px rgba(255, 191, 47, 0.36),
+    1px 1px 0 rgba(255, 255, 255, 0.86);
+}
+
+.footer-social-icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 3px;
+  width: 2px;
+  height: 32px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent, rgba(255, 179, 19, 0.58), transparent);
+  transform: translateY(-50%);
+}
+
+.footer-social-copy {
+  gap: 8px;
+}
+
+.footer-social-copy strong {
+  color: #3a2b24;
+  font-size: clamp(12px, 0.98vw, 15px);
+  letter-spacing: 0.07em;
+}
+
+.footer-social-copy small {
+  color: #d88900;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+}
+
 @media (max-width: 1280px) {
   .deployment-card-grid {
     grid-template-columns: repeat(3, minmax(220px, 1fr));
@@ -5383,13 +6085,87 @@ body.cart-drawer-open {
   }
 
   .dealett-chat-toggle {
-    width: 58px;
-    height: 58px;
+    width: min(300px, calc(100vw - 28px));
+    height: 72px;
+    grid-template-columns: 54px minmax(0, 1fr) 2px 58px 62px;
+  }
+
+  .dealett-chat-toggle::before {
+    inset: 7px 7px 7px auto;
+    width: 76px;
+  }
+
+  .dealett-chat-toggle__sparkles {
+    width: 54px;
+  }
+
+  .dealett-chat-toggle__sparkles::before {
+    left: 18px;
+    top: 22px;
+    width: 25px;
+    height: 25px;
+  }
+
+  .dealett-chat-toggle__sparkles::after {
+    left: 34px;
+    top: 38px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .dealett-chat-toggle__label {
+    font-size: 25px;
+  }
+
+  .dealett-chat-toggle__divider {
+    height: 34px;
+  }
+
+  .dealett-chat-toggle__bot {
+    width: 52px;
+    height: 45px;
+    margin-left: 6px;
+    border-width: 3px;
+    border-radius: 16px;
+  }
+
+  .dealett-chat-toggle__bot::before,
+  .dealett-chat-toggle__bot::after {
+    top: 12px;
+    width: 12px;
+    height: 12px;
+    border-width: 3px;
+  }
+
+  .dealett-chat-toggle__bot::before {
+    left: 10px;
+  }
+
+  .dealett-chat-toggle__bot::after {
+    right: 10px;
+  }
+
+  .dealett-chat-toggle__bot span {
+    bottom: 8px;
+    width: 15px;
+    height: 8px;
+    border-bottom-width: 3px;
+  }
+
+  .dealett-chat-toggle__arrow {
+    width: 62px;
+  }
+
+  .dealett-chat-toggle__arrow::before {
+    width: 21px;
+    height: 21px;
+    border-top-width: 8px;
+    border-right-width: 8px;
   }
 
   .dealett-chat-panel {
     right: -2px;
-    bottom: 70px;
+    bottom: 86px;
     width: calc(100vw - 24px);
     height: min(560px, calc(100vh - 96px));
   }
@@ -5478,5 +6254,116 @@ body.cart-drawer-open {
   .offer-card__top,
   .offer-card__head {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 680px) {
+  .dealett-chat-toggle {
+    width: min(340px, calc(100vw - 28px));
+    height: 76px;
+    grid-template-columns: 58px minmax(0, 1fr) 2px 58px 70px;
+  }
+
+  .dealett-chat-toggle::before {
+    width: 78px;
+  }
+
+  .dealett-chat-toggle__sparkles {
+    width: 58px;
+  }
+
+  .dealett-chat-toggle__label {
+    font-size: 26px;
+  }
+
+  .dealett-chat-toggle__bot {
+    width: 52px;
+    height: 45px;
+    border-width: 3px;
+    border-radius: 16px;
+  }
+
+  .dealett-chat-toggle__arrow {
+    width: 70px;
+  }
+
+  .dealett-chat-panel {
+    right: -2px;
+    bottom: 90px;
+    width: calc(100vw - 24px);
+    height: min(600px, calc(100vh - 102px));
+    border-radius: 30px;
+  }
+
+  .dealett-chat-messages {
+    padding: 40px 16px 12px;
+  }
+
+  .dealett-chat-message {
+    font-size: 15px;
+  }
+
+  .dealett-chat-message--assistant {
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .dealett-chat-message--user {
+    grid-template-columns: minmax(0, 1fr) 42px;
+  }
+
+  .dealett-chat-avatar--bot {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+  }
+
+  .dealett-chat-avatar--bot span {
+    width: 37px;
+    height: 29px;
+    border-width: 2px;
+    border-radius: 11px;
+  }
+
+  .dealett-chat-avatar--bot span::before,
+  .dealett-chat-avatar--bot span::after {
+    top: 8px;
+    width: 9px;
+    height: 9px;
+    border-width: 2px;
+  }
+
+  .dealett-chat-avatar--user {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+  }
+
+  .dealett-chat-bubble,
+  .dealett-chat-message--user .dealett-chat-bubble {
+    max-width: 100%;
+    padding: 14px 16px;
+  }
+
+  .dealett-chat-message--user .dealett-chat-bubble {
+    padding-right: 34px;
+  }
+
+  .dealett-chat-suggestions {
+    padding: 2px 16px 10px;
+  }
+
+  .dealett-chat-form {
+    margin: 0 12px 12px;
+  }
+
+  .footer-social-plate {
+    grid-template-columns: 66px minmax(0, 1fr);
+    min-height: 66px;
+  }
+
+  .footer-social-icon {
+    width: 66px;
+    font-size: 32px;
   }
 }

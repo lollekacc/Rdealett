@@ -938,7 +938,7 @@
         title: 'Dealett assistant',
         status: 'AI-rådgivare',
         greeting: 'Hej! Jag kan hjälpa dig jämföra mobilabonnemang, bredband, täckning och presentkort. Vad vill du börja med?',
-        placeholder: 'Skriv din fråga...',
+        placeholder: 'Ask AI anything...',
         send: 'Skicka',
         typing: 'Dealett assistant skriver...',
         error: 'Jag kunde inte svara just nu. Kontrollera att AI-tjänsten är konfigurerad och försök igen.',
@@ -957,7 +957,7 @@
         title: 'Dealett assistant',
         status: 'AI advisor',
         greeting: 'Hi! I can help you compare mobile plans, broadband, coverage and gift cards. What would you like to start with?',
-        placeholder: 'Write your question...',
+        placeholder: 'Ask AI anything...',
         send: 'Send',
         typing: 'Dealett assistant is typing...',
         error: 'I could not answer right now. Check that the AI service is configured and try again.',
@@ -990,8 +990,11 @@
     root.dataset.noTranslate = 'true';
     root.innerHTML = [
       `<button class="dealett-chat-toggle" type="button" aria-label="${text.open}" aria-expanded="false">`,
-      '  <i class="fa-solid fa-comments"></i>',
-      '  <span>AI</span>',
+      '  <span class="dealett-chat-toggle__sparkles" aria-hidden="true"></span>',
+      '  <span class="dealett-chat-toggle__label">Chat Now</span>',
+      '  <span class="dealett-chat-toggle__divider" aria-hidden="true"></span>',
+      '  <span class="dealett-chat-toggle__bot" aria-hidden="true"><span></span></span>',
+      '  <span class="dealett-chat-toggle__arrow" aria-hidden="true"></span>',
       '</button>',
       '<div class="dealett-chat-panel" role="dialog" aria-modal="false" aria-labelledby="dealettChatTitle" hidden>',
       '  <header class="dealett-chat-header">',
@@ -1006,7 +1009,7 @@
       '  <div class="dealett-chat-suggestions"></div>',
       '  <form class="dealett-chat-form">',
       `    <input class="dealett-chat-input" type="text" autocomplete="off" placeholder="${text.placeholder}" />`,
-      `    <button class="dealett-chat-send" type="submit" aria-label="${text.send}"><i class="fa-solid fa-paper-plane"></i></button>`,
+      `    <button class="dealett-chat-send" type="submit" aria-label="${text.send}"><i class="fa-solid fa-wand-magic-sparkles"></i></button>`,
       '  </form>',
       '</div>',
     ].join('');
@@ -1029,6 +1032,11 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+
+    const getChatTimeLabel = () => new Intl.DateTimeFormat(chatLanguage === 'en' ? 'en-US' : 'sv-SE', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date());
 
     const createChatSessionId = () => [
       'dealett-chat',
@@ -1510,7 +1518,16 @@
     const addMessage = (role, content) => {
       const item = document.createElement('article');
       item.className = `dealett-chat-message dealett-chat-message--${role}`;
-      item.innerHTML = `<p>${escapeChatText(content)}</p>`;
+      const isUser = role === 'user';
+      item.innerHTML = [
+        isUser ? '' : '<span class="dealett-chat-avatar dealett-chat-avatar--bot" aria-hidden="true"><span></span></span>',
+        '<div class="dealett-chat-bubble">',
+        `  <p>${escapeChatText(content)}</p>`,
+        `  <time class="dealett-chat-time">${escapeChatText(getChatTimeLabel())}</time>`,
+        isUser ? '  <span class="dealett-chat-check" aria-hidden="true"></span>' : '',
+        '</div>',
+        isUser ? '<span class="dealett-chat-avatar dealett-chat-avatar--user" aria-hidden="true"></span>' : '',
+      ].join('');
       messageList.append(item);
       messages.push({ role, content });
       if (messages.length > 10) messages.splice(0, messages.length - 10);

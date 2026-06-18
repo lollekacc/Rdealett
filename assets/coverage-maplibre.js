@@ -8,6 +8,7 @@
 
   const operators = ['telia', 'tele2', 'telenor', 'tre', 'halebop'];
   const networks = ['2G', '3G', '4G', '4G+', '5G', '5G+'];
+  const mapThemeStorageKey = 'dealettCoverageMapTheme';
   const operatorLabels = {
     telia: 'Telia',
     tele2: 'Tele2',
@@ -34,6 +35,50 @@
 
   const localizedName = ['coalesce', ['get', 'name:latin'], ['get', 'name_en'], ['get', 'name']];
   const roadName = ['coalesce', ['get', 'name:latin'], ['get', 'name_en'], ['get', 'name'], ['get', 'ref']];
+  const mapThemePaint = {
+    light: {
+      background: '#dfe9ec',
+      rasterSaturation: 0.08,
+      rasterContrast: 0.05,
+      rasterBrightnessMin: 0.03,
+      rasterBrightnessMax: 1,
+      roadMajor: ['interpolate', ['linear'], ['zoom'], 5, '#f1e8d0', 12, '#fff5df'],
+      roadMajorOpacity: ['interpolate', ['linear'], ['zoom'], 5, 0.32, 10, 0.52, 15, 0.74],
+      roadMinor: '#f1efe7',
+      roadMinorOpacity: ['interpolate', ['linear'], ['zoom'], 12, 0.18, 15, 0.42, 17, 0.58],
+      label: '#20262b',
+      localLabel: '#42494e',
+      roadLabel: '#30363b',
+      halo: '#f7f4eb',
+      coverageFill: '#d7edf4',
+      coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.025, 8, 0.04, 13, 0.055],
+      coverageLine: '#edf8fb',
+      coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.035, 11, 0.065, 15, 0.1],
+      building: ['interpolate', ['linear'], ['zoom'], 13, '#7f837d', 14.5, '#aca99f', 17, '#d2cec1'],
+      buildingOpacity: ['interpolate', ['linear'], ['zoom'], 13, 0.18, 14, 0.48, 16, 0.68],
+    },
+    dark: {
+      background: '#071018',
+      rasterSaturation: -0.18,
+      rasterContrast: 0.14,
+      rasterBrightnessMin: 0,
+      rasterBrightnessMax: 0.58,
+      roadMajor: ['interpolate', ['linear'], ['zoom'], 5, '#9b998f', 12, '#d8d2c3'],
+      roadMajorOpacity: ['interpolate', ['linear'], ['zoom'], 5, 0.24, 10, 0.38, 15, 0.56],
+      roadMinor: '#a9ada7',
+      roadMinorOpacity: ['interpolate', ['linear'], ['zoom'], 12, 0.1, 15, 0.26, 17, 0.38],
+      label: '#f4f0e7',
+      localLabel: '#d7d1c6',
+      roadLabel: '#e9e3d7',
+      halo: '#071018',
+      coverageFill: '#d7edf4',
+      coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.018, 8, 0.03, 13, 0.044],
+      coverageLine: '#edf8fb',
+      coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.03, 11, 0.052, 15, 0.08],
+      building: ['interpolate', ['linear'], ['zoom'], 13, '#343a3b', 14.5, '#4a504f', 17, '#686c68'],
+      buildingOpacity: ['interpolate', ['linear'], ['zoom'], 13, 0.14, 14, 0.4, 16, 0.58],
+    },
+  };
 
   const satelliteHybridStyle = {
     version: 8,
@@ -285,15 +330,119 @@
     })),
   };
 
+  const getStoredMapTheme = () => {
+    try {
+      const storedTheme = localStorage.getItem(mapThemeStorageKey);
+      return ['auto', 'light', 'dark'].includes(storedTheme) ? storedTheme : 'auto';
+    } catch {
+      return 'auto';
+    }
+  };
+
+  const saveMapTheme = (theme) => {
+    try {
+      localStorage.setItem(mapThemeStorageKey, theme);
+    } catch {
+      // Storage can be unavailable in private contexts; the live map can still switch modes.
+    }
+  };
+
+  const getStockholmTimeParts = () => {
+    const parts = new Intl.DateTimeFormat('sv-SE', {
+      timeZone: 'Europe/Stockholm',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    }).formatToParts(new Date());
+    const values = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, Number(part.value)]));
+
+    return {
+      year: values.year,
+      month: values.month,
+      day: values.day,
+      hour: values.hour,
+      minute: values.minute,
+    };
+  };
+
+  const getDayOfYear = ({ year, month, day }) => {
+    const start = Date.UTC(year, 0, 0);
+    const current = Date.UTC(year, month - 1, day);
+    return Math.floor((current - start) / 86400000);
+  };
+
+  const isSwedenDaylight = () => {
+    const time = getStockholmTimeParts();
+    const dayOfYear = getDayOfYear(time);
+    const daylightHours = 12 + 6.4 * Math.cos((2 * Math.PI * (dayOfYear - 172)) / 365);
+    const solarNoon = 12.75;
+    const sunrise = solarNoon - daylightHours / 2;
+    const sunset = solarNoon + daylightHours / 2;
+    const currentHour = time.hour + time.minute / 60;
+
+    return currentHour >= sunrise && currentHour < sunset;
+  };
+
+  const resolveMapTheme = (theme) => (theme === 'auto' ? (isSwedenDaylight() ? 'light' : 'dark') : theme);
+
   const state = {
     activeOperator: 'telia',
     activeNetworks: new Set(['2G', '4G', '5G']),
+    mapTheme: getStoredMapTheme(),
     selectedMarker: null,
     locateMarker: null,
   };
 
   const selectedPlace = app.querySelector('#coverageSelectedPlace');
   const layerStatus = app.querySelector('#coverageLayerStatus');
+
+  const setPaintIfLayerExists = (layerId, property, value) => {
+    if (map.getLayer(layerId)) {
+      map.setPaintProperty(layerId, property, value);
+    }
+  };
+
+  const updateMapThemeButtons = () => {
+    app.querySelectorAll('[data-map-theme]').forEach((button) => {
+      const isActive = button.dataset.mapTheme === state.mapTheme;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-pressed', String(isActive));
+    });
+  };
+
+  const applyMapTheme = () => {
+    const resolvedTheme = resolveMapTheme(state.mapTheme);
+    const paint = mapThemePaint[resolvedTheme];
+
+    app.dataset.mapTheme = resolvedTheme;
+    setPaintIfLayerExists('dealett-satellite-background', 'background-color', paint.background);
+    setPaintIfLayerExists('dealett-satellite-imagery', 'raster-saturation', paint.rasterSaturation);
+    setPaintIfLayerExists('dealett-satellite-imagery', 'raster-contrast', paint.rasterContrast);
+    setPaintIfLayerExists('dealett-satellite-imagery', 'raster-brightness-min', paint.rasterBrightnessMin);
+    setPaintIfLayerExists('dealett-satellite-imagery', 'raster-brightness-max', paint.rasterBrightnessMax);
+    setPaintIfLayerExists('dealett-road-major', 'line-color', paint.roadMajor);
+    setPaintIfLayerExists('dealett-road-major', 'line-opacity', paint.roadMajorOpacity);
+    setPaintIfLayerExists('dealett-road-minor', 'line-color', paint.roadMinor);
+    setPaintIfLayerExists('dealett-road-minor', 'line-opacity', paint.roadMinorOpacity);
+    setPaintIfLayerExists('dealett-road-labels', 'text-color', paint.roadLabel);
+    setPaintIfLayerExists('dealett-road-labels', 'text-halo-color', paint.halo);
+    setPaintIfLayerExists('dealett-place-country-labels', 'text-color', paint.label);
+    setPaintIfLayerExists('dealett-place-country-labels', 'text-halo-color', paint.halo);
+    setPaintIfLayerExists('dealett-place-city-labels', 'text-color', paint.label);
+    setPaintIfLayerExists('dealett-place-city-labels', 'text-halo-color', paint.halo);
+    setPaintIfLayerExists('dealett-place-local-labels', 'text-color', paint.localLabel);
+    setPaintIfLayerExists('dealett-place-local-labels', 'text-halo-color', paint.halo);
+    setPaintIfLayerExists('dealett-coverage-placeholder-fill', 'fill-color', paint.coverageFill);
+    setPaintIfLayerExists('dealett-coverage-placeholder-fill', 'fill-opacity', paint.coverageFillOpacity);
+    setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-color', paint.coverageLine);
+    setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-opacity', paint.coverageLineOpacity);
+    setPaintIfLayerExists('dealett-building-extrusion', 'fill-extrusion-color', paint.building);
+    setPaintIfLayerExists('dealett-building-extrusion', 'fill-extrusion-opacity', paint.buildingOpacity);
+    updateMapThemeButtons();
+  };
 
   const getSwedenFitPadding = () => {
     if (window.matchMedia('(max-width: 720px)').matches) {
@@ -466,6 +615,8 @@
         },
       }, buildingBeforeLayer);
     }
+
+    applyMapTheme();
   };
 
   const map = new maplibregl.Map({
@@ -714,6 +865,26 @@
       }
     });
   });
+
+  app.querySelectorAll('[data-map-theme]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const theme = button.dataset.mapTheme;
+
+      if (!['auto', 'light', 'dark'].includes(theme)) {
+        return;
+      }
+
+      state.mapTheme = theme;
+      saveMapTheme(theme);
+      applyMapTheme();
+    });
+  });
+
+  window.setInterval(() => {
+    if (state.mapTheme === 'auto') {
+      applyMapTheme();
+    }
+  }, 600000);
 
   app.querySelectorAll('.coverage-maplibre-operator').forEach((button) => {
     button.addEventListener('click', () => {

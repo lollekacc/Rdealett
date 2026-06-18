@@ -993,7 +993,7 @@
       '  <span class="dealett-chat-toggle__sparkles" aria-hidden="true"></span>',
       '  <span class="dealett-chat-toggle__label">Chat Now</span>',
       '  <span class="dealett-chat-toggle__divider" aria-hidden="true"></span>',
-      '  <span class="dealett-chat-toggle__bot" aria-hidden="true"><span></span></span>',
+      '  <span class="dealett-chat-toggle__bot" aria-hidden="true"><span><b></b></span></span>',
       '  <span class="dealett-chat-toggle__arrow" aria-hidden="true"></span>',
       '</button>',
       '<div class="dealett-chat-panel" role="dialog" aria-modal="false" aria-labelledby="dealettChatTitle" hidden>',
@@ -1520,7 +1520,7 @@
       item.className = `dealett-chat-message dealett-chat-message--${role}`;
       const isUser = role === 'user';
       item.innerHTML = [
-        isUser ? '' : '<span class="dealett-chat-avatar dealett-chat-avatar--bot" aria-hidden="true"><span></span></span>',
+        isUser ? '' : '<span class="dealett-chat-avatar dealett-chat-avatar--bot" aria-hidden="true"><span><b></b></span></span>',
         '<div class="dealett-chat-bubble">',
         `  <p>${escapeChatText(content)}</p>`,
         `  <time class="dealett-chat-time">${escapeChatText(getChatTimeLabel())}</time>`,

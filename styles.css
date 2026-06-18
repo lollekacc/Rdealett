@@ -6367,3 +6367,332 @@ body.cart-drawer-open {
     font-size: 32px;
   }
 }
+
+/* Final reference match: exact Dealett chat launcher and bot badge styling. */
+.dealett-chat {
+  --chat-yellow: #ffbd18;
+  --chat-yellow-deep: #ff8f00;
+  --chat-cream-edge: #ffe2b6;
+}
+
+.dealett-chat-toggle {
+  width: min(560px, calc(100vw - 28px));
+  height: 128px;
+  border: 1px solid rgba(255, 190, 24, 0.82);
+  background:
+    radial-gradient(circle at 11% 33%, rgba(255, 237, 143, 0.38), transparent 16%),
+    linear-gradient(180deg, #fffefa 0%, #fffaf1 52%, #fff1d4 100%);
+  grid-template-columns: 122px minmax(190px, 1fr) 2px 110px 124px;
+  box-shadow:
+    0 18px 34px rgba(164, 86, 0, 0.2),
+    0 3px 0 rgba(255, 143, 0, 0.16),
+    inset 0 0 0 4px #ffd444,
+    inset 0 0 0 9px rgba(255, 255, 255, 0.94),
+    inset 0 -12px 24px rgba(255, 184, 24, 0.14);
+}
+
+.dealett-chat-toggle:hover {
+  box-shadow:
+    0 22px 42px rgba(164, 86, 0, 0.24),
+    0 6px 16px rgba(255, 179, 19, 0.2),
+    inset 0 0 0 4px #ffd444,
+    inset 0 0 0 9px rgba(255, 255, 255, 0.96),
+    inset 0 -12px 24px rgba(255, 184, 24, 0.18);
+}
+
+.dealett-chat-toggle::before {
+  inset: 7px 7px 7px auto;
+  width: 135px;
+  border-radius: 0 999px 999px 0;
+  background:
+    radial-gradient(circle at 40% 18%, rgba(255, 255, 255, 0.52), transparent 28%),
+    linear-gradient(180deg, #ffd948 0%, #ffc31c 42%, #ff9708 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 32px 50%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -15px 26px rgba(211, 85, 0, 0.18),
+    -8px 0 16px rgba(255, 255, 255, 0.78);
+}
+
+.dealett-chat-toggle__sparkles {
+  width: 122px;
+}
+
+.dealett-chat-toggle__sparkles::before,
+.dealett-chat-toggle__sparkles::after {
+  background: linear-gradient(180deg, #ffd236 0%, #ffb100 45%, #ff8a00 100%);
+  filter: drop-shadow(0 5px 9px rgba(255, 188, 24, 0.36));
+}
+
+.dealett-chat-toggle__sparkles::before {
+  left: 38px;
+  top: 38px;
+  width: 44px;
+  height: 44px;
+}
+
+.dealett-chat-toggle__sparkles::after {
+  left: 75px;
+  top: 62px;
+  width: 35px;
+  height: 35px;
+}
+
+.dealett-chat-toggle__label {
+  color: #24201f;
+  font-size: 44px;
+  font-weight: 900;
+  text-align: left;
+  text-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.82),
+    0 6px 18px rgba(42, 32, 22, 0.12);
+}
+
+.dealett-chat-toggle__divider {
+  height: 56px;
+  background: linear-gradient(180deg, transparent, rgba(255, 187, 56, 0.82), transparent);
+}
+
+.dealett-chat-toggle__bot {
+  width: 92px;
+  height: 82px;
+  margin-left: 10px;
+  border: 0;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 240, 218, 0.96));
+  box-shadow:
+    0 9px 19px rgba(191, 86, 0, 0.26),
+    0 0 0 2px rgba(255, 189, 24, 0.56),
+    inset 0 0 0 6px rgba(255, 255, 255, 0.76),
+    inset 0 -10px 18px rgba(255, 156, 42, 0.18);
+}
+
+.dealett-chat-toggle__bot::before,
+.dealett-chat-toggle__bot::after {
+  content: "";
+  position: absolute;
+  top: 30px;
+  z-index: -1;
+  width: 12px;
+  height: 36px;
+  border: 1px solid rgba(255, 145, 32, 0.34);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff4e1, #ffc58b);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.dealett-chat-toggle__bot::before {
+  left: -8px;
+}
+
+.dealett-chat-toggle__bot::after {
+  right: -8px;
+}
+
+.dealett-chat-toggle__bot span,
+.dealett-chat-avatar--bot span {
+  position: relative;
+  display: block;
+  border: 0;
+  background:
+    radial-gradient(circle at 31% 39%, #fff 0 6px, transparent 6.5px),
+    radial-gradient(circle at 69% 39%, #fff 0 6px, transparent 6.5px),
+    radial-gradient(circle at 34% 36%, #1f1b1a 0 11px, transparent 11.5px),
+    radial-gradient(circle at 66% 36%, #1f1b1a 0 11px, transparent 11.5px),
+    linear-gradient(180deg, #201b1a 0%, #070707 100%);
+  box-shadow:
+    inset 0 6px 12px rgba(255, 255, 255, 0.08),
+    inset 0 -8px 12px rgba(0, 0, 0, 0.24);
+}
+
+.dealett-chat-toggle__bot span {
+  width: 68px;
+  height: 51px;
+  border-radius: 19px;
+}
+
+.dealett-chat-toggle__bot span::before,
+.dealett-chat-toggle__bot span::after,
+.dealett-chat-avatar--bot span::before,
+.dealett-chat-avatar--bot span::after {
+  content: none;
+}
+
+.dealett-chat-toggle__bot span b,
+.dealett-chat-avatar--bot span b {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 18px;
+  height: 9px;
+  border-bottom: 4px solid #fff4e7;
+  border-radius: 0 0 999px 999px;
+  transform: translateX(-50%);
+}
+
+.dealett-chat-toggle__arrow {
+  width: 124px;
+}
+
+.dealett-chat-toggle__arrow::before {
+  width: 31px;
+  height: 31px;
+  border-top-width: 12px;
+  border-right-width: 12px;
+  filter: drop-shadow(0 4px 5px rgba(202, 82, 0, 0.18));
+}
+
+.dealett-chat-avatar--bot {
+  width: 76px;
+  height: 76px;
+  border: 1px solid rgba(255, 160, 68, 0.3);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff8ee, #ffd5a9);
+  box-shadow:
+    0 11px 22px rgba(203, 91, 0, 0.2),
+    inset 0 0 0 4px rgba(255, 255, 255, 0.7);
+}
+
+.dealett-chat-avatar--bot::before,
+.dealett-chat-avatar--bot::after {
+  top: 25px;
+  width: 8px;
+  height: 31px;
+  border-color: rgba(255, 145, 32, 0.34);
+  background: linear-gradient(180deg, #fff4e1, #ffc58b);
+}
+
+.dealett-chat-avatar--bot::before {
+  left: -5px;
+}
+
+.dealett-chat-avatar--bot::after {
+  right: -5px;
+}
+
+.dealett-chat-avatar--bot span {
+  width: 57px;
+  height: 42px;
+  border-radius: 14px;
+}
+
+.dealett-chat-avatar--bot span b {
+  bottom: 8px;
+  width: 14px;
+  height: 7px;
+  border-bottom-width: 3px;
+}
+
+@media (max-width: 680px) {
+  .dealett-chat-toggle {
+    width: min(350px, calc(100vw - 28px));
+    height: 81px;
+    grid-template-columns: 70px minmax(0, 1fr) 2px 58px 74px;
+  }
+
+  .dealett-chat-toggle::before {
+    width: 86px;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 22px 50%);
+  }
+
+  .dealett-chat-toggle__sparkles {
+    width: 70px;
+  }
+
+  .dealett-chat-toggle__sparkles::before {
+    left: 20px;
+    top: 25px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .dealett-chat-toggle__sparkles::after {
+    left: 43px;
+    top: 42px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .dealett-chat-toggle__label {
+    font-size: 28px;
+  }
+
+  .dealett-chat-toggle__divider {
+    height: 38px;
+  }
+
+  .dealett-chat-toggle__bot {
+    width: 54px;
+    height: 49px;
+    margin-left: 4px;
+    border-radius: 17px;
+    box-shadow:
+      0 8px 16px rgba(191, 86, 0, 0.22),
+      0 0 0 1px rgba(255, 189, 24, 0.56),
+      inset 0 0 0 4px rgba(255, 255, 255, 0.76);
+  }
+
+  .dealett-chat-toggle__bot::before,
+  .dealett-chat-toggle__bot::after {
+    top: 18px;
+    width: 7px;
+    height: 23px;
+  }
+
+  .dealett-chat-toggle__bot::before {
+    left: -5px;
+  }
+
+  .dealett-chat-toggle__bot::after {
+    right: -5px;
+  }
+
+  .dealett-chat-toggle__bot span {
+    width: 39px;
+    height: 29px;
+    border-radius: 11px;
+    background:
+      radial-gradient(circle at 31% 39%, #fff 0 4px, transparent 4.5px),
+      radial-gradient(circle at 69% 39%, #fff 0 4px, transparent 4.5px),
+      radial-gradient(circle at 34% 36%, #1f1b1a 0 7px, transparent 7.5px),
+      radial-gradient(circle at 66% 36%, #1f1b1a 0 7px, transparent 7.5px),
+      linear-gradient(180deg, #201b1a 0%, #070707 100%);
+  }
+
+  .dealett-chat-toggle__bot span b {
+    bottom: 5px;
+    width: 11px;
+    height: 5px;
+    border-bottom-width: 2px;
+  }
+
+  .dealett-chat-toggle__arrow {
+    width: 74px;
+  }
+
+  .dealett-chat-toggle__arrow::before {
+    width: 22px;
+    height: 22px;
+    border-top-width: 8px;
+    border-right-width: 8px;
+  }
+
+  .dealett-chat-avatar--bot {
+    width: 58px;
+    height: 58px;
+    border-radius: 15px;
+  }
+
+  .dealett-chat-avatar--bot span {
+    width: 43px;
+    height: 32px;
+    border-radius: 11px;
+    background:
+      radial-gradient(circle at 31% 39%, #fff 0 4px, transparent 4.5px),
+      radial-gradient(circle at 69% 39%, #fff 0 4px, transparent 4.5px),
+      radial-gradient(circle at 34% 36%, #1f1b1a 0 7px, transparent 7.5px),
+      radial-gradient(circle at 66% 36%, #1f1b1a 0 7px, transparent 7.5px),
+      linear-gradient(180deg, #201b1a 0%, #070707 100%);
+  }
+}

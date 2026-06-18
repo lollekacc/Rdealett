@@ -2132,6 +2132,20 @@ img {
     linear-gradient(180deg, rgba(4, 8, 12, 0.06) 0%, transparent 56%, rgba(4, 8, 12, 0.18) 100%);
 }
 
+.coverage-main.coverage-maplibre-section[data-map-theme="light"] .coverage-maplibre-scrim {
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 76%, rgba(12, 18, 22, 0.12) 100%),
+    linear-gradient(90deg, rgba(8, 14, 18, 0.34) 0%, rgba(8, 14, 18, 0.06) 24%, transparent 64%, rgba(8, 14, 18, 0.06) 100%),
+    linear-gradient(180deg, rgba(8, 14, 18, 0.04) 0%, transparent 58%, rgba(8, 14, 18, 0.12) 100%);
+}
+
+.coverage-main.coverage-maplibre-section[data-map-theme="dark"] .coverage-maplibre-scrim {
+  background:
+    radial-gradient(ellipse at 50% 48%, transparent 66%, rgba(2, 5, 8, 0.34) 100%),
+    linear-gradient(90deg, rgba(2, 5, 8, 0.56) 0%, rgba(2, 5, 8, 0.12) 28%, transparent 60%, rgba(2, 5, 8, 0.14) 100%),
+    linear-gradient(180deg, rgba(2, 5, 8, 0.12) 0%, transparent 52%, rgba(2, 5, 8, 0.32) 100%);
+}
+
 .coverage-maplibre-copy,
 .coverage-maplibre-search,
 .coverage-maplibre-place,

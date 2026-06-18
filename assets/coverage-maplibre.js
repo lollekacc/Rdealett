@@ -44,6 +44,12 @@
       rasterContrast: 0.05,
       rasterBrightnessMin: 0.03,
       rasterBrightnessMax: 1,
+      terrainExaggeration: 0.78,
+      hillshadeShadow: 'rgba(8, 14, 18, 0.16)',
+      hillshadeHighlight: 'rgba(255, 251, 235, 0.12)',
+      hillshadeAccent: 'rgba(70, 96, 104, 0.08)',
+      waterDepthColor: '#7f9eaa',
+      waterDepthOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.16, 9, 0.1, 14, 0.04],
       roadMajor: ['interpolate', ['linear'], ['zoom'], 5, '#f1e8d0', 12, '#fff5df'],
       roadMajorOpacity: ['interpolate', ['linear'], ['zoom'], 5, 0.32, 10, 0.52, 15, 0.74],
       roadMinor: '#f1efe7',
@@ -53,9 +59,12 @@
       roadLabel: '#30363b',
       halo: '#f7f4eb',
       coverageFill: '#d7edf4',
-      coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.025, 8, 0.04, 13, 0.055],
+      coverageFillOpacity: 0,
       coverageLine: '#edf8fb',
-      coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.035, 11, 0.065, 15, 0.1],
+      coverageLineOpacity: 0,
+      coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.1, 7, 0.17, 10, 0.12, 14, 0.03],
+      coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.1, 8, 0.2, 12, 0.3, 16, 0.18],
+      nightRoadLineOpacity: 0,
       nightRoadPointOpacity: 0,
       nightCarPointOpacity: 0,
       nightBuildingPointOpacity: 0,
@@ -66,6 +75,12 @@
       rasterContrast: 0.14,
       rasterBrightnessMin: 0,
       rasterBrightnessMax: 0.58,
+      terrainExaggeration: 1.22,
+      hillshadeShadow: 'rgba(0, 0, 0, 0.34)',
+      hillshadeHighlight: 'rgba(255, 230, 178, 0.14)',
+      hillshadeAccent: 'rgba(70, 108, 120, 0.1)',
+      waterDepthColor: '#061019',
+      waterDepthOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.4, 9, 0.32, 14, 0.18],
       roadMajor: ['interpolate', ['linear'], ['zoom'], 5, '#9b998f', 12, '#d8d2c3'],
       roadMajorOpacity: ['interpolate', ['linear'], ['zoom'], 5, 0.24, 10, 0.38, 15, 0.56],
       roadMinor: '#a9ada7',
@@ -75,9 +90,12 @@
       roadLabel: '#e9e3d7',
       halo: '#071018',
       coverageFill: '#d7edf4',
-      coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.018, 8, 0.03, 13, 0.044],
+      coverageFillOpacity: 0,
       coverageLine: '#edf8fb',
-      coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.03, 11, 0.052, 15, 0.08],
+      coverageLineOpacity: 0,
+      coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.16, 7, 0.28, 10, 0.2, 14, 0.05],
+      coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.12, 8, 0.24, 12, 0.34, 16, 0.2],
+      nightRoadLineOpacity: ['interpolate', ['linear'], ['zoom'], 6, 0.02, 9, 0.1, 12, 0.14, 16, 0.05],
       nightRoadPointOpacity: ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 0.16, 15, 0.34, 17, 0.42],
       nightCarPointOpacity: ['interpolate', ['linear'], ['zoom'], 12, 0, 14, 0.08, 16, 0.16],
       nightBuildingPointOpacity: ['interpolate', ['linear'], ['zoom'], 13, 0, 14, 0.08, 16, 0.18, 18, 0.24],
@@ -101,6 +119,21 @@
         type: 'vector',
         url: 'https://tiles.openfreemap.org/planet',
       },
+      'dealett-terrain-dem': {
+        type: 'raster-dem',
+        tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        maxzoom: 15,
+        encoding: 'terrarium',
+        attribution: 'Terrain: AWS Terrain Tiles',
+      },
+      'dealett-terrain-shade-dem': {
+        type: 'raster-dem',
+        tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        maxzoom: 15,
+        encoding: 'terrarium',
+      },
     },
     layers: [
       {
@@ -120,6 +153,116 @@
           'raster-contrast': 0.04,
           'raster-brightness-min': 0,
           'raster-brightness-max': 1,
+        },
+      },
+      {
+        id: 'dealett-water-depth',
+        type: 'fill',
+        source: 'openmaptiles',
+        'source-layer': 'water',
+        paint: {
+          'fill-color': '#061019',
+          'fill-opacity': 0.16,
+        },
+      },
+      {
+        id: 'dealett-terrain-shade',
+        type: 'hillshade',
+        source: 'dealett-terrain-shade-dem',
+        paint: {
+          'hillshade-illumination-direction': 315,
+          'hillshade-shadow-color': '#061019',
+          'hillshade-highlight-color': '#f2efe4',
+          'hillshade-accent-color': '#31424a',
+          'hillshade-exaggeration': 0.45,
+        },
+      },
+      {
+        id: 'dealett-coverage-vein-fair',
+        type: 'line',
+        source: 'openmaptiles',
+        'source-layer': 'transportation',
+        minzoom: 3,
+        filter: [
+          'all',
+          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
+          ['match', ['get', 'class'], ['tertiary', 'secondary'], true, false],
+        ],
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#f2ac45',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.16, 8, 0.42, 12, 0.62, 16, 0.34],
+          'line-opacity': 0.08,
+          'line-blur': ['interpolate', ['linear'], ['zoom'], 4, 0.28, 10, 0.7, 14, 0.25],
+        },
+      },
+      {
+        id: 'dealett-coverage-vein-good',
+        type: 'line',
+        source: 'openmaptiles',
+        'source-layer': 'transportation',
+        minzoom: 3,
+        filter: [
+          'all',
+          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
+          ['match', ['get', 'class'], ['primary', 'secondary'], true, false],
+        ],
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#6db8b4',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.2, 8, 0.54, 12, 0.78, 16, 0.42],
+          'line-opacity': 0.08,
+          'line-blur': ['interpolate', ['linear'], ['zoom'], 4, 0.24, 10, 0.64, 14, 0.22],
+        },
+      },
+      {
+        id: 'dealett-coverage-vein-excellent',
+        type: 'line',
+        source: 'openmaptiles',
+        'source-layer': 'transportation',
+        minzoom: 3,
+        filter: [
+          'all',
+          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
+          ['match', ['get', 'class'], ['motorway', 'trunk', 'primary'], true, false],
+        ],
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#726ea1',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.22, 8, 0.62, 12, 0.9, 16, 0.46],
+          'line-opacity': 0.08,
+          'line-blur': ['interpolate', ['linear'], ['zoom'], 4, 0.18, 10, 0.5, 14, 0.18],
+        },
+      },
+      {
+        id: 'dealett-night-road-veins',
+        type: 'line',
+        source: 'openmaptiles',
+        'source-layer': 'transportation',
+        minzoom: 6,
+        filter: [
+          'all',
+          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
+          ['match', ['get', 'class'], ['motorway', 'trunk', 'primary'], true, false],
+        ],
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#ffbd70',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.16, 10, 0.46, 13, 0.66, 16, 0.28],
+          'line-opacity': 0,
+          'line-blur': ['interpolate', ['linear'], ['zoom'], 6, 0.5, 10, 1.1, 14, 0.35],
         },
       },
       {
@@ -397,6 +540,7 @@
     activeNetworks: new Set(['2G', '4G', '5G']),
     mapTheme: getStoredMapTheme(),
     isPerspectiveMode: true,
+    coverageSignature: '',
     nightLightSignature: '',
     selectedMarker: null,
     locateMarker: null,
@@ -410,6 +554,17 @@
     if (map.getLayer(layerId)) {
       map.setPaintProperty(layerId, property, value);
     }
+  };
+
+  const setTerrainForTheme = (paint) => {
+    if (typeof map.setTerrain !== 'function' || !map.getSource('dealett-terrain-dem')) {
+      return;
+    }
+
+    map.setTerrain({
+      source: 'dealett-terrain-dem',
+      exaggeration: paint.terrainExaggeration,
+    });
   };
 
   const syncPerspectiveButton = () => {
@@ -441,6 +596,15 @@
     setPaintIfLayerExists('dealett-satellite-imagery', 'raster-contrast', paint.rasterContrast);
     setPaintIfLayerExists('dealett-satellite-imagery', 'raster-brightness-min', paint.rasterBrightnessMin);
     setPaintIfLayerExists('dealett-satellite-imagery', 'raster-brightness-max', paint.rasterBrightnessMax);
+    setPaintIfLayerExists('dealett-water-depth', 'fill-color', paint.waterDepthColor);
+    setPaintIfLayerExists('dealett-water-depth', 'fill-opacity', paint.waterDepthOpacity);
+    setPaintIfLayerExists('dealett-terrain-shade', 'hillshade-shadow-color', paint.hillshadeShadow);
+    setPaintIfLayerExists('dealett-terrain-shade', 'hillshade-highlight-color', paint.hillshadeHighlight);
+    setPaintIfLayerExists('dealett-terrain-shade', 'hillshade-accent-color', paint.hillshadeAccent);
+    setPaintIfLayerExists('dealett-coverage-vein-fair', 'line-opacity', paint.coverageVeinOpacity);
+    setPaintIfLayerExists('dealett-coverage-vein-good', 'line-opacity', paint.coverageVeinOpacity);
+    setPaintIfLayerExists('dealett-coverage-vein-excellent', 'line-opacity', paint.coverageVeinOpacity);
+    setPaintIfLayerExists('dealett-night-road-veins', 'line-opacity', paint.nightRoadLineOpacity);
     setPaintIfLayerExists('dealett-road-major', 'line-color', paint.roadMajor);
     setPaintIfLayerExists('dealett-road-major', 'line-opacity', paint.roadMajorOpacity);
     setPaintIfLayerExists('dealett-road-minor', 'line-color', paint.roadMinor);
@@ -460,7 +624,10 @@
     setPaintIfLayerExists('dealett-night-road-points', 'circle-opacity', paint.nightRoadPointOpacity);
     setPaintIfLayerExists('dealett-night-car-points', 'circle-opacity', paint.nightCarPointOpacity);
     setPaintIfLayerExists('dealett-night-building-points', 'circle-opacity', paint.nightBuildingPointOpacity);
+    setPaintIfLayerExists('dealett-coverage-measurement-points', 'circle-opacity', paint.coveragePointOpacity);
+    setTerrainForTheme(paint);
     updateMapThemeButtons();
+    window.requestAnimationFrame(updateCoverageMeasurements);
     window.requestAnimationFrame(updateNightLightPoints);
   };
 
@@ -552,6 +719,8 @@
       }
     });
 
+    state.coverageSignature = '';
+    window.requestAnimationFrame(updateCoverageMeasurements);
     updateLayerStatus();
   };
 
@@ -609,6 +778,229 @@
   const countNightFeatures = (features, kind) => features.reduce((count, feature) => (
     feature.properties.kind === kind ? count + 1 : count
   ), 0);
+
+  const operatorCoverageProfiles = {
+    telia: { density: 1.08, urbanBias: 0.14, northReliability: 0.94, salt: 101 },
+    tele2: { density: 0.92, urbanBias: 0.36, northReliability: 0.7, salt: 203 },
+    telenor: { density: 0.96, urbanBias: 0.28, northReliability: 0.76, salt: 307 },
+    tre: { density: 0.8, urbanBias: 0.72, northReliability: 0.5, salt: 409 },
+    halebop: { density: 1, urbanBias: 0.18, northReliability: 0.9, salt: 503 },
+  };
+
+  const networkCoverageProfiles = {
+    '2G': { density: 0.72, urbanBoost: 0.04, remotePenalty: 0.08, salt: 2 },
+    '3G': { density: 0.66, urbanBoost: 0.12, remotePenalty: 0.16, salt: 3 },
+    '4G': { density: 0.95, urbanBoost: 0.18, remotePenalty: 0.12, salt: 4 },
+    '4G+': { density: 0.86, urbanBoost: 0.32, remotePenalty: 0.22, salt: 44 },
+    '5G': { density: 0.64, urbanBoost: 0.62, remotePenalty: 0.46, salt: 5 },
+    '5G+': { density: 0.42, urbanBoost: 0.9, remotePenalty: 0.66, salt: 55 },
+  };
+
+  const swedenCityAnchors = [
+    [18.0686, 59.3293, 1.2],
+    [11.9746, 57.7089, 1],
+    [13.0038, 55.605, 0.95],
+    [17.6389, 59.8586, 0.82],
+    [15.6214, 58.4108, 0.68],
+    [16.1924, 58.5877, 0.58],
+    [20.263, 63.8258, 0.62],
+    [22.1567, 65.5848, 0.46],
+    [14.1618, 57.7826, 0.5],
+    [12.6945, 56.0465, 0.44],
+    [15.2134, 59.2753, 0.5],
+    [13.5115, 59.4022, 0.42],
+    [18.2948, 57.6348, 0.34],
+    [17.3069, 62.3908, 0.36],
+  ];
+
+  const getCoverageCityInfluence = (longitude, latitude) => swedenCityAnchors.reduce((strongest, [cityLongitude, cityLatitude, weight]) => {
+    const distance = Math.hypot((longitude - cityLongitude) * 0.72, latitude - cityLatitude);
+    const influence = weight * Math.exp(-distance / 0.95);
+    return Math.max(strongest, influence);
+  }, 0);
+
+  const getRoadCoverageFactor = (roadClass) => ({
+    motorway: 1.35,
+    trunk: 1.25,
+    primary: 1.08,
+    secondary: 0.9,
+    tertiary: 0.72,
+    minor: 0.5,
+    service: 0.36,
+  }[roadClass] ?? 0.58);
+
+  const getSelectedNetworkProfile = () => {
+    const selectedNetworks = Array.from(state.activeNetworks);
+
+    if (!selectedNetworks.length) {
+      return null;
+    }
+
+    return selectedNetworks.reduce((profile, network) => {
+      const networkProfile = networkCoverageProfiles[network];
+
+      return {
+        density: profile.density + networkProfile.density,
+        urbanBoost: profile.urbanBoost + networkProfile.urbanBoost,
+        remotePenalty: profile.remotePenalty + networkProfile.remotePenalty,
+        salt: profile.salt + networkProfile.salt,
+        count: profile.count,
+      };
+    }, { density: 0, urbanBoost: 0, remotePenalty: 0, salt: 0, count: selectedNetworks.length });
+  };
+
+  const getCoverageQuality = (score) => {
+    if (score > 1.08) {
+      return 'excellent';
+    }
+
+    if (score > 0.72) {
+      return 'good';
+    }
+
+    return 'fair';
+  };
+
+  const createCoverageMeasurementFeature = (coordinates, quality) => ({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates,
+    },
+    properties: {
+      quality,
+    },
+  });
+
+  const countCoverageFeatures = (features) => features.length;
+
+  const sampleCoverageMeasurements = (feature, features, usedKeys, zoom, operatorProfile, networkProfile) => {
+    const roadClass = feature.properties?.class;
+    const roadFactor = getRoadCoverageFactor(roadClass);
+    const maxFeatures = zoom < 7 ? 900 : zoom < 12 ? 1500 : 950;
+
+    if (roadFactor < 0.5 || countCoverageFeatures(features) >= maxFeatures) {
+      return;
+    }
+
+    const networkCount = Math.max(1, networkProfile.count);
+    const averagedNetwork = {
+      density: networkProfile.density / networkCount,
+      urbanBoost: networkProfile.urbanBoost / networkCount,
+      remotePenalty: networkProfile.remotePenalty / networkCount,
+      salt: networkProfile.salt,
+    };
+    const spacing = zoom < 7 ? 0.05 : zoom < 11 ? 0.032 : 0.014;
+
+    for (const line of getLineStrings(feature.geometry)) {
+      for (let index = 1; index < line.length; index += 1) {
+        if (countCoverageFeatures(features) >= maxFeatures) {
+          return;
+        }
+
+        const point = line[index];
+        const segmentStart = line[index - 1];
+        const segmentLength = Math.hypot(point[0] - segmentStart[0], point[1] - segmentStart[1]);
+        const steps = Math.min(18, Math.max(1, Math.floor(segmentLength / spacing)));
+
+        for (let step = 1; step <= steps; step += 1) {
+          if (countCoverageFeatures(features) >= maxFeatures) {
+            return;
+          }
+
+          const t = step / (steps + 1);
+          const longitude = segmentStart[0] + (point[0] - segmentStart[0]) * t;
+          const latitude = segmentStart[1] + (point[1] - segmentStart[1]) * t;
+
+          if (!isInsideSwedenBounds([longitude, latitude])) {
+            continue;
+          }
+
+          const cityInfluence = getCoverageCityInfluence(longitude, latitude);
+          const northness = Math.max(0, Math.min(1, (latitude - 60.5) / 8.2));
+          const remoteFactor = 1 - (northness * averagedNetwork.remotePenalty * (1 - operatorProfile.northReliability));
+          const density = operatorProfile.density * averagedNetwork.density * roadFactor * remoteFactor * (0.7 + cityInfluence * (operatorProfile.urbanBias + averagedNetwork.urbanBoost + 0.35));
+          const seed = createNightLightSeed(longitude, latitude, operatorProfile.salt + averagedNetwork.salt + step);
+          const threshold = Math.max(0.05, Math.min(0.58, density * 0.24));
+
+          if (seed > threshold) {
+            continue;
+          }
+
+          const key = `coverage-${longitude.toFixed(4)}-${latitude.toFixed(4)}`;
+
+          if (usedKeys.has(key)) {
+            continue;
+          }
+
+          usedKeys.add(key);
+          features.push(createCoverageMeasurementFeature([longitude, latitude], getCoverageQuality(density)));
+        }
+      }
+    }
+  };
+
+  const updateCoverageMeasurements = () => {
+    const source = map.getSource('dealett-coverage-measurements');
+
+    if (!source) {
+      return;
+    }
+
+    const selectedNetworks = Array.from(state.activeNetworks);
+    const networkProfile = getSelectedNetworkProfile();
+    const zoom = map.getZoom();
+    const bounds = map.getBounds();
+    const signature = [
+      state.activeOperator,
+      selectedNetworks.sort().join(','),
+      zoom.toFixed(1),
+      bounds.getWest().toFixed(2),
+      bounds.getSouth().toFixed(2),
+      bounds.getEast().toFixed(2),
+      bounds.getNorth().toFixed(2),
+    ].join('|');
+
+    if (signature === state.coverageSignature) {
+      return;
+    }
+
+    if (!networkProfile) {
+      state.coverageSignature = signature;
+      source.setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+
+    const roadLayers = [
+      'dealett-road-major',
+      'dealett-road-minor',
+      'dealett-coverage-vein-fair',
+      'dealett-coverage-vein-good',
+      'dealett-coverage-vein-excellent',
+    ].filter((layerId) => map.getLayer(layerId));
+    const roadFeatures = roadLayers.length
+      ? map.queryRenderedFeatures({ layers: roadLayers })
+      : [];
+
+    if (!roadFeatures.length) {
+      source.setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+
+    const features = [];
+    const usedKeys = new Set();
+    const operatorProfile = operatorCoverageProfiles[state.activeOperator] ?? operatorCoverageProfiles.telia;
+
+    roadFeatures.forEach((feature) => {
+      sampleCoverageMeasurements(feature, features, usedKeys, zoom, operatorProfile, networkProfile);
+    });
+
+    source.setData({
+      type: 'FeatureCollection',
+      features,
+    });
+    state.coverageSignature = signature;
+  };
 
   const sampleNightRoadLights = (feature, features, usedKeys, zoom) => {
     const roadClass = feature.properties?.class;
@@ -787,6 +1179,41 @@
     const coverageBeforeLayer = map.getLayer('dealett-road-major')
       ? 'dealett-road-major'
       : undefined;
+
+    if (!map.getSource('dealett-coverage-measurements')) {
+      map.addSource('dealett-coverage-measurements', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [],
+        },
+      });
+    }
+
+    if (!map.getLayer('dealett-coverage-measurement-points')) {
+      map.addLayer({
+        id: 'dealett-coverage-measurement-points',
+        type: 'circle',
+        source: 'dealett-coverage-measurements',
+        filter: ['match', ['get', 'quality'], ['fair', 'good', 'excellent'], true, false],
+        paint: {
+          'circle-color': [
+            'match',
+            ['get', 'quality'],
+            'excellent',
+            '#7471a8',
+            'good',
+            '#6bb8b4',
+            'fair',
+            '#f4ad48',
+            '#f4ad48',
+          ],
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 0.42, 8, 0.58, 12, 0.74, 16, 0.46],
+          'circle-opacity': 0.18,
+          'circle-blur': ['interpolate', ['linear'], ['zoom'], 4, 0.22, 10, 0.12, 16, 0.04],
+        },
+      }, coverageBeforeLayer);
+    }
 
     if (!map.getSource('dealett-night-light-points')) {
       map.addSource('dealett-night-light-points', {
@@ -1186,6 +1613,7 @@
     map.resize();
     resetToSweden(false);
     syncPerspectiveButton();
+    updateCoverageMeasurements();
     updateNightLightPoints();
   });
 
@@ -1217,9 +1645,13 @@
 
   map.on('moveend', () => {
     syncPerspectiveButton();
+    updateCoverageMeasurements();
     updateNightLightPoints();
   });
-  map.on('idle', updateNightLightPoints);
+  map.on('idle', () => {
+    updateCoverageMeasurements();
+    updateNightLightPoints();
+  });
 
   app.querySelectorAll('[data-map-action]').forEach((button) => {
     button.addEventListener('click', () => {

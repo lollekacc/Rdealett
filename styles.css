@@ -6696,3 +6696,47 @@ body.cart-drawer-open {
       linear-gradient(180deg, #201b1a 0%, #070707 100%);
   }
 }
+
+/* Use the provided artwork for the launcher instead of reconstructing it in CSS. */
+.dealett-chat-toggle {
+  position: relative;
+  display: block;
+  width: min(250px, calc(100vw - 28px));
+  height: auto;
+  aspect-ratio: 4.52 / 1;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dealett-chat-toggle:hover {
+  filter: saturate(1.04) brightness(1.01);
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+.dealett-chat-toggle::before {
+  content: none;
+}
+
+.dealett-chat-toggle__image {
+  position: absolute;
+  left: -3%;
+  top: -104%;
+  width: 106%;
+  max-width: none;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 680px) {
+  .dealett-chat-toggle {
+    width: min(300px, calc(100vw - 28px));
+    height: auto;
+    grid-template-columns: none;
+  }
+}

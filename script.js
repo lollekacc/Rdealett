@@ -990,11 +990,7 @@
     root.dataset.noTranslate = 'true';
     root.innerHTML = [
       `<button class="dealett-chat-toggle" type="button" aria-label="${text.open}" aria-expanded="false">`,
-      '  <span class="dealett-chat-toggle__sparkles" aria-hidden="true"></span>',
-      '  <span class="dealett-chat-toggle__label">Chat Now</span>',
-      '  <span class="dealett-chat-toggle__divider" aria-hidden="true"></span>',
-      '  <span class="dealett-chat-toggle__bot" aria-hidden="true"><span><b></b></span></span>',
-      '  <span class="dealett-chat-toggle__arrow" aria-hidden="true"></span>',
+      '  <img class="dealett-chat-toggle__image" src="images/chatbutton.png" alt="" decoding="async" loading="eager" />',
       '</button>',
       '<div class="dealett-chat-panel" role="dialog" aria-modal="false" aria-labelledby="dealettChatTitle" hidden>',
       '  <header class="dealett-chat-header">',

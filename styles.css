@@ -2059,13 +2059,13 @@ img {
 
 .coverage-maplibre-section {
   padding: 0;
-  background: #151d24;
+  background: #0b1117;
 }
 
 .coverage-main.coverage-maplibre-section[data-coverage-map="real"] {
   min-height: 0;
   padding: 0;
-  background: #151d24;
+  background: #0b1117;
 }
 
 .coverage-main.coverage-maplibre-section::before,
@@ -2080,7 +2080,7 @@ img {
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  background: #242b31;
+  background: #0b1117;
   box-shadow: none;
   isolation: isolate;
 }
@@ -2091,7 +2091,7 @@ img {
   z-index: 0;
   width: 100%;
   height: 100%;
-  background: #242b31;
+  background: #0b1117;
 }
 
 #coverageMapLibre.coverage-maplibre-canvas.maplibregl-map {
@@ -2106,7 +2106,19 @@ img {
 }
 
 .coverage-maplibre-canvas .maplibregl-ctrl-attrib {
-  display: none;
+  max-width: min(520px, calc(100vw - 32px));
+  margin: 0 10px 8px 0;
+  border-radius: 999px;
+  background: rgba(9, 15, 21, 0.72);
+  color: rgba(255, 255, 255, 0.72);
+  font-family: 'Roboto', sans-serif;
+  font-size: 10px;
+  line-height: 1.4;
+  backdrop-filter: blur(12px);
+}
+
+.coverage-maplibre-canvas .maplibregl-ctrl-attrib a {
+  color: rgba(255, 255, 255, 0.86);
 }
 
 .coverage-maplibre-scrim {
@@ -2115,9 +2127,9 @@ img {
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 50%, transparent 58%, rgba(9, 13, 18, 0.2) 100%),
-    linear-gradient(90deg, rgba(9, 13, 18, 0.48) 0%, rgba(9, 13, 18, 0.14) 23%, transparent 54%, rgba(9, 13, 18, 0.18) 100%),
-    linear-gradient(180deg, rgba(9, 13, 18, 0.2) 0%, transparent 44%, rgba(9, 13, 18, 0.34) 100%);
+    radial-gradient(ellipse at 50% 50%, transparent 72%, rgba(4, 8, 12, 0.14) 100%),
+    linear-gradient(90deg, rgba(4, 8, 12, 0.42) 0%, rgba(4, 8, 12, 0.08) 25%, transparent 62%, rgba(4, 8, 12, 0.08) 100%),
+    linear-gradient(180deg, rgba(4, 8, 12, 0.06) 0%, transparent 56%, rgba(4, 8, 12, 0.18) 100%);
 }
 
 .coverage-maplibre-copy,
@@ -2157,7 +2169,7 @@ img {
   font-size: clamp(29px, 2.35vw, 35px);
   line-height: 1.08;
   letter-spacing: 0;
-  text-shadow: 0 18px 46px rgba(0, 0, 0, 0.38);
+  text-shadow: 0 18px 46px rgba(0, 0, 0, 0.48);
 }
 
 .coverage-maplibre-copy p:last-child {
@@ -2178,7 +2190,7 @@ img {
   display: block;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 15px;
-  background: rgba(16, 23, 30, 0.74);
+  background: rgba(16, 23, 30, 0.76);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 18px 40px rgba(0, 0, 0, 0.28);
@@ -2281,7 +2293,7 @@ img {
   padding: 0 16px;
   border: 1px solid rgba(239, 130, 20, 0.42);
   border-radius: 999px;
-  background: rgba(21, 30, 39, 0.54);
+  background: rgba(21, 30, 39, 0.62);
   color: #fff;
   font-family: 'Roboto', sans-serif;
   font-size: 12px;
@@ -2313,7 +2325,7 @@ img {
   padding: 0 20px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
-  background: rgba(16, 23, 30, 0.42);
+  background: rgba(16, 23, 30, 0.44);
   color: rgba(255, 255, 255, 0.78);
   font-family: 'Roboto', sans-serif;
   font-size: 14px;
@@ -2366,7 +2378,7 @@ img {
   padding: 0 14px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
-  background: rgba(16, 23, 30, 0.48);
+  background: rgba(16, 23, 30, 0.5);
   color: #fff;
   font-family: 'Roboto', sans-serif;
   font-size: 13px;

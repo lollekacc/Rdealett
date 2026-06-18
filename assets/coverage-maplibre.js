@@ -62,8 +62,8 @@
       coverageFillOpacity: 0,
       coverageLine: '#edf8fb',
       coverageLineOpacity: 0,
-      coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.1, 7, 0.17, 10, 0.12, 14, 0.03],
-      coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.1, 8, 0.2, 12, 0.3, 16, 0.18],
+      coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.08, 7, 0.16, 10, 0.08, 13, 0],
+      coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.08, 8, 0.18, 12, 0.26, 16, 0.12],
       nightRoadLineOpacity: 0,
       nightRoadPointOpacity: 0,
       nightCarPointOpacity: 0,
@@ -93,11 +93,11 @@
       coverageFillOpacity: 0,
       coverageLine: '#edf8fb',
       coverageLineOpacity: 0,
-      coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.16, 7, 0.28, 10, 0.2, 14, 0.05],
-      coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.12, 8, 0.24, 12, 0.34, 16, 0.2],
-      nightRoadLineOpacity: ['interpolate', ['linear'], ['zoom'], 6, 0.02, 9, 0.1, 12, 0.14, 16, 0.05],
-      nightRoadPointOpacity: ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 0.16, 15, 0.34, 17, 0.42],
-      nightCarPointOpacity: ['interpolate', ['linear'], ['zoom'], 12, 0, 14, 0.08, 16, 0.16],
+      coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.14, 7, 0.26, 10, 0.16, 13, 0],
+      coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.1, 8, 0.22, 12, 0.3, 16, 0.14],
+      nightRoadLineOpacity: ['interpolate', ['linear'], ['zoom'], 5, 0, 7, 0.1, 9, 0.16, 11.5, 0.08, 13.5, 0],
+      nightRoadPointOpacity: ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 0.12, 15, 0.18, 17, 0.1],
+      nightCarPointOpacity: ['interpolate', ['linear'], ['zoom'], 12, 0, 14, 0.055, 16, 0.08],
       nightBuildingPointOpacity: ['interpolate', ['linear'], ['zoom'], 13, 0, 14, 0.08, 16, 0.18, 18, 0.24],
     },
   };
@@ -183,6 +183,7 @@
         source: 'openmaptiles',
         'source-layer': 'transportation',
         minzoom: 3,
+        maxzoom: 13,
         filter: [
           'all',
           ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
@@ -196,7 +197,7 @@
           'line-color': '#f2ac45',
           'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.16, 8, 0.42, 12, 0.62, 16, 0.34],
           'line-opacity': 0.08,
-          'line-blur': ['interpolate', ['linear'], ['zoom'], 4, 0.28, 10, 0.7, 14, 0.25],
+          'line-blur': 0,
         },
       },
       {
@@ -205,6 +206,7 @@
         source: 'openmaptiles',
         'source-layer': 'transportation',
         minzoom: 3,
+        maxzoom: 13,
         filter: [
           'all',
           ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
@@ -218,7 +220,7 @@
           'line-color': '#6db8b4',
           'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.2, 8, 0.54, 12, 0.78, 16, 0.42],
           'line-opacity': 0.08,
-          'line-blur': ['interpolate', ['linear'], ['zoom'], 4, 0.24, 10, 0.64, 14, 0.22],
+          'line-blur': 0,
         },
       },
       {
@@ -227,6 +229,7 @@
         source: 'openmaptiles',
         'source-layer': 'transportation',
         minzoom: 3,
+        maxzoom: 13,
         filter: [
           'all',
           ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
@@ -240,7 +243,7 @@
           'line-color': '#726ea1',
           'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.22, 8, 0.62, 12, 0.9, 16, 0.46],
           'line-opacity': 0.08,
-          'line-blur': ['interpolate', ['linear'], ['zoom'], 4, 0.18, 10, 0.5, 14, 0.18],
+          'line-blur': 0,
         },
       },
       {
@@ -576,6 +579,13 @@
     perspectiveButton.textContent = state.isPerspectiveMode ? '3D' : '2D';
     perspectiveButton.classList.toggle('is-active', state.isPerspectiveMode);
     perspectiveButton.setAttribute('aria-pressed', String(state.isPerspectiveMode));
+  };
+
+  const updateMapScaleMode = () => {
+    const zoom = map.getZoom();
+    const scaleMode = zoom < 8 ? 'overview' : zoom < 12.5 ? 'medium' : 'city';
+
+    app.dataset.mapScale = scaleMode;
   };
 
   const updateMapThemeButtons = () => {
@@ -1210,7 +1220,7 @@
           ],
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 0.42, 8, 0.58, 12, 0.74, 16, 0.46],
           'circle-opacity': 0.18,
-          'circle-blur': ['interpolate', ['linear'], ['zoom'], 4, 0.22, 10, 0.12, 16, 0.04],
+          'circle-blur': 0,
         },
       }, coverageBeforeLayer);
     }
@@ -1613,6 +1623,7 @@
     map.resize();
     resetToSweden(false);
     syncPerspectiveButton();
+    updateMapScaleMode();
     updateCoverageMeasurements();
     updateNightLightPoints();
   });
@@ -1645,6 +1656,7 @@
 
   map.on('moveend', () => {
     syncPerspectiveButton();
+    updateMapScaleMode();
     updateCoverageMeasurements();
     updateNightLightPoints();
   });

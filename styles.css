@@ -2146,6 +2146,27 @@ img {
     linear-gradient(180deg, rgba(2, 5, 8, 0.12) 0%, transparent 52%, rgba(2, 5, 8, 0.32) 100%);
 }
 
+.coverage-main.coverage-maplibre-section[data-map-theme="light"][data-map-scale="overview"] .coverage-maplibre-scrim {
+  background:
+    radial-gradient(ellipse at 58% 50%, transparent 58%, rgba(12, 18, 22, 0.16) 100%),
+    linear-gradient(90deg, rgba(8, 14, 18, 0.42) 0%, rgba(8, 14, 18, 0.08) 27%, transparent 64%, rgba(8, 14, 18, 0.1) 100%),
+    linear-gradient(180deg, rgba(8, 14, 18, 0.04) 0%, transparent 54%, rgba(8, 14, 18, 0.16) 100%);
+}
+
+.coverage-main.coverage-maplibre-section[data-map-theme="dark"][data-map-scale="overview"] .coverage-maplibre-scrim {
+  background:
+    radial-gradient(ellipse at 58% 50%, transparent 52%, rgba(1, 4, 7, 0.58) 100%),
+    linear-gradient(90deg, rgba(1, 4, 7, 0.68) 0%, rgba(1, 4, 7, 0.18) 30%, transparent 61%, rgba(1, 4, 7, 0.22) 100%),
+    linear-gradient(180deg, rgba(1, 4, 7, 0.16) 0%, transparent 50%, rgba(1, 4, 7, 0.44) 100%);
+}
+
+.coverage-main.coverage-maplibre-section[data-map-scale="city"] .coverage-maplibre-scrim {
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 78%, rgba(4, 8, 12, 0.1) 100%),
+    linear-gradient(90deg, rgba(4, 8, 12, 0.28) 0%, rgba(4, 8, 12, 0.04) 25%, transparent 68%, rgba(4, 8, 12, 0.04) 100%),
+    linear-gradient(180deg, rgba(4, 8, 12, 0.03) 0%, transparent 60%, rgba(4, 8, 12, 0.1) 100%);
+}
+
 .coverage-maplibre-copy,
 .coverage-maplibre-search,
 .coverage-maplibre-place,

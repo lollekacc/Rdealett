@@ -56,10 +56,9 @@
       coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.025, 8, 0.04, 13, 0.055],
       coverageLine: '#edf8fb',
       coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.035, 11, 0.065, 15, 0.1],
-      nightRoadHaloOpacity: 0,
-      nightRoadCoreOpacity: 0,
-      nightCarOpacity: 0,
-      nightBuildingOpacity: 0,
+      nightRoadPointOpacity: 0,
+      nightCarPointOpacity: 0,
+      nightBuildingPointOpacity: 0,
     },
     dark: {
       background: '#071018',
@@ -79,10 +78,9 @@
       coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.018, 8, 0.03, 13, 0.044],
       coverageLine: '#edf8fb',
       coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.03, 11, 0.052, 15, 0.08],
-      nightRoadHaloOpacity: ['interpolate', ['linear'], ['zoom'], 8, 0, 10, 0.1, 13, 0.22, 16, 0.28],
-      nightRoadCoreOpacity: ['interpolate', ['linear'], ['zoom'], 9, 0, 11, 0.16, 14, 0.34, 16, 0.42],
-      nightCarOpacity: ['interpolate', ['linear'], ['zoom'], 12, 0, 14, 0.22, 16, 0.36],
-      nightBuildingOpacity: ['interpolate', ['linear'], ['zoom'], 13, 0, 14, 0.035, 16, 0.075, 18, 0.1],
+      nightRoadPointOpacity: ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 0.16, 15, 0.34, 17, 0.42],
+      nightCarPointOpacity: ['interpolate', ['linear'], ['zoom'], 12, 0, 14, 0.08, 16, 0.16],
+      nightBuildingPointOpacity: ['interpolate', ['linear'], ['zoom'], 13, 0, 14, 0.08, 16, 0.18, 18, 0.24],
     },
   };
 
@@ -399,6 +397,7 @@
     activeNetworks: new Set(['2G', '4G', '5G']),
     mapTheme: getStoredMapTheme(),
     isPerspectiveMode: true,
+    nightLightSignature: '',
     selectedMarker: null,
     locateMarker: null,
   };
@@ -458,11 +457,11 @@
     setPaintIfLayerExists('dealett-coverage-placeholder-fill', 'fill-opacity', paint.coverageFillOpacity);
     setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-color', paint.coverageLine);
     setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-opacity', paint.coverageLineOpacity);
-    setPaintIfLayerExists('dealett-night-road-halo', 'line-opacity', paint.nightRoadHaloOpacity);
-    setPaintIfLayerExists('dealett-night-road-core', 'line-opacity', paint.nightRoadCoreOpacity);
-    setPaintIfLayerExists('dealett-night-car-lights', 'line-opacity', paint.nightCarOpacity);
-    setPaintIfLayerExists('dealett-night-building-lights', 'fill-opacity', paint.nightBuildingOpacity);
+    setPaintIfLayerExists('dealett-night-road-points', 'circle-opacity', paint.nightRoadPointOpacity);
+    setPaintIfLayerExists('dealett-night-car-points', 'circle-opacity', paint.nightCarPointOpacity);
+    setPaintIfLayerExists('dealett-night-building-points', 'circle-opacity', paint.nightBuildingPointOpacity);
     updateMapThemeButtons();
+    window.requestAnimationFrame(updateNightLightPoints);
   };
 
   const getSwedenFitPadding = () => {
@@ -556,100 +555,295 @@
     updateLayerStatus();
   };
 
+  const createNightLightSeed = (longitude, latitude, salt = 0) => {
+    const x = Math.round((longitude + 180) * 10000);
+    const y = Math.round((latitude + 90) * 10000);
+    const raw = Math.sin((x * 12.9898) + (y * 78.233) + (salt * 37.719)) * 43758.5453;
+    return raw - Math.floor(raw);
+  };
+
+  const createNightPointFeature = (coordinates, kind, color) => ({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates,
+    },
+    properties: {
+      kind,
+      color,
+    },
+  });
+
+  const getLineStrings = (geometry) => {
+    if (!geometry) {
+      return [];
+    }
+
+    if (geometry.type === 'LineString') {
+      return [geometry.coordinates];
+    }
+
+    if (geometry.type === 'MultiLineString') {
+      return geometry.coordinates;
+    }
+
+    return [];
+  };
+
+  const getPolygonCentroid = (geometry) => {
+    const rings = geometry?.type === 'Polygon'
+      ? geometry.coordinates
+      : geometry?.type === 'MultiPolygon'
+        ? geometry.coordinates[0]
+        : null;
+    const ring = rings?.[0];
+
+    if (!ring?.length) {
+      return null;
+    }
+
+    const sum = ring.reduce((total, point) => [total[0] + point[0], total[1] + point[1]], [0, 0]);
+    return [sum[0] / ring.length, sum[1] / ring.length];
+  };
+
+  const countNightFeatures = (features, kind) => features.reduce((count, feature) => (
+    feature.properties.kind === kind ? count + 1 : count
+  ), 0);
+
+  const sampleNightRoadLights = (feature, features, usedKeys, zoom) => {
+    const roadClass = feature.properties?.class;
+    const isMajorRoad = ['motorway', 'trunk', 'primary', 'secondary'].includes(roadClass);
+    const maxRoadLights = 320;
+
+    if (!isMajorRoad || countNightFeatures(features, 'road') >= maxRoadLights) {
+      return;
+    }
+
+    const spacing = zoom > 15 ? 0.026 : 0.044;
+
+    for (const line of getLineStrings(feature.geometry)) {
+      for (let index = 1; index < line.length; index += 1) {
+        if (countNightFeatures(features, 'road') >= maxRoadLights) {
+          return;
+        }
+
+        const point = line[index];
+        const segmentStart = line[index - 1];
+        const segmentLength = Math.hypot(point[0] - segmentStart[0], point[1] - segmentStart[1]);
+        const steps = Math.min(14, Math.max(1, Math.floor(segmentLength / spacing)));
+
+        for (let step = 1; step <= steps; step += 1) {
+          const t = step / (steps + 1);
+          const longitude = segmentStart[0] + (point[0] - segmentStart[0]) * t;
+          const latitude = segmentStart[1] + (point[1] - segmentStart[1]) * t;
+          const seed = createNightLightSeed(longitude, latitude, 11);
+
+          if (seed > 0.18) {
+            continue;
+          }
+
+          const key = `road-${longitude.toFixed(4)}-${latitude.toFixed(4)}`;
+
+          if (usedKeys.has(key)) {
+            continue;
+          }
+
+          usedKeys.add(key);
+          features.push(createNightPointFeature([longitude, latitude], 'road', seed > 0.16 ? '#ffe2a3' : '#ffc46f'));
+
+          if (countNightFeatures(features, 'road') >= maxRoadLights) {
+            return;
+          }
+        }
+      }
+    }
+  };
+
+  const sampleNightCarLights = (feature, features, usedKeys, zoom) => {
+    const roadClass = feature.properties?.class;
+    const maxCarLights = 14;
+
+    if (zoom < 13 || !['motorway', 'trunk', 'primary'].includes(roadClass) || countNightFeatures(features, 'car') >= maxCarLights) {
+      return;
+    }
+
+    for (const line of getLineStrings(feature.geometry)) {
+      for (let index = 1; index < line.length; index += 1) {
+        if (countNightFeatures(features, 'car') >= maxCarLights) {
+          return;
+        }
+
+        const point = line[index];
+        const previous = line[index - 1];
+        const seed = createNightLightSeed(point[0], point[1], 23);
+
+        if (seed > 0.012) {
+          continue;
+        }
+
+        const coordinates = [
+          previous[0] + (point[0] - previous[0]) * seed,
+          previous[1] + (point[1] - previous[1]) * seed,
+        ];
+        const key = `car-${coordinates[0].toFixed(4)}-${coordinates[1].toFixed(4)}`;
+
+        if (usedKeys.has(key)) {
+          continue;
+        }
+
+        usedKeys.add(key);
+        features.push(createNightPointFeature(coordinates, 'car', seed > 0.006 ? '#fff1d6' : '#e24b3d'));
+      }
+    }
+  };
+
+  const sampleNightBuildingLights = (feature, features, usedKeys, zoom) => {
+    if (zoom < 13 || countNightFeatures(features, 'building') >= 140) {
+      return;
+    }
+
+    const centroid = getPolygonCentroid(feature.geometry);
+
+    if (!centroid) {
+      return;
+    }
+
+    const seed = createNightLightSeed(centroid[0], centroid[1], 41);
+
+    if (seed > 0.055) {
+      return;
+    }
+
+    const jitter = (seed - 0.5) * 0.00022;
+    const coordinates = [centroid[0] + jitter, centroid[1] - jitter];
+    const key = `building-${coordinates[0].toFixed(5)}-${coordinates[1].toFixed(5)}`;
+
+    if (usedKeys.has(key)) {
+      return;
+    }
+
+    usedKeys.add(key);
+    features.push(createNightPointFeature(coordinates, 'building', seed > 0.09 ? '#ffdca1' : '#fff3cc'));
+  };
+
+  const updateNightLightPoints = () => {
+    const source = map.getSource('dealett-night-light-points');
+
+    if (!source) {
+      return;
+    }
+
+    const resolvedTheme = resolveMapTheme(state.mapTheme);
+    const zoom = map.getZoom();
+    const bounds = map.getBounds();
+    const signature = [
+      resolvedTheme,
+      zoom.toFixed(1),
+      bounds.getWest().toFixed(2),
+      bounds.getSouth().toFixed(2),
+      bounds.getEast().toFixed(2),
+      bounds.getNorth().toFixed(2),
+    ].join('|');
+
+    if (signature === state.nightLightSignature) {
+      return;
+    }
+
+    if (resolvedTheme !== 'dark' || zoom < 10) {
+      state.nightLightSignature = signature;
+      source.setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+
+    const features = [];
+    const usedKeys = new Set();
+    const roadLayers = ['dealett-road-major', 'dealett-road-minor'].filter((layerId) => map.getLayer(layerId));
+    const roadFeatures = roadLayers.length
+      ? map.queryRenderedFeatures({ layers: roadLayers })
+      : [];
+    const buildingFeatures = [];
+
+    if (!roadFeatures.length && !buildingFeatures.length) {
+      source.setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+
+    roadFeatures.forEach((feature) => {
+      sampleNightRoadLights(feature, features, usedKeys, zoom);
+      sampleNightCarLights(feature, features, usedKeys, zoom);
+    });
+    buildingFeatures.forEach((feature) => {
+      sampleNightBuildingLights(feature, features, usedKeys, zoom);
+    });
+
+    source.setData({
+      type: 'FeatureCollection',
+      features,
+    });
+    state.nightLightSignature = signature;
+  };
+
   const addMapLayers = (map) => {
     const coverageBeforeLayer = map.getLayer('dealett-road-major')
       ? 'dealett-road-major'
       : undefined;
-    const labelBeforeLayer = map.getLayer('dealett-road-labels')
-      ? 'dealett-road-labels'
-      : undefined;
 
-    if (!map.getLayer('dealett-night-road-halo')) {
-      map.addLayer({
-        id: 'dealett-night-road-halo',
-        type: 'line',
-        source: 'openmaptiles',
-        'source-layer': 'transportation',
-        minzoom: 8,
-        filter: [
-          'all',
-          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
-          ['match', ['get', 'class'], ['motorway', 'trunk', 'primary', 'secondary'], true, false],
-        ],
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round',
+    if (!map.getSource('dealett-night-light-points')) {
+      map.addSource('dealett-night-light-points', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [],
         },
-        paint: {
-          'line-color': '#ffc66f',
-          'line-width': ['interpolate', ['exponential', 1.2], ['zoom'], 8, 0.8, 12, 2.2, 16, 5.4],
-          'line-opacity': 0,
-          'line-blur': ['interpolate', ['linear'], ['zoom'], 8, 0.4, 14, 1.8, 16, 2.6],
-        },
-      }, labelBeforeLayer);
+      });
     }
 
-    if (!map.getLayer('dealett-night-road-core')) {
+    if (!map.getLayer('dealett-night-road-points')) {
       map.addLayer({
-        id: 'dealett-night-road-core',
-        type: 'line',
-        source: 'openmaptiles',
-        'source-layer': 'transportation',
-        minzoom: 9,
-        filter: [
-          'all',
-          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
-          ['match', ['get', 'class'], ['motorway', 'trunk', 'primary', 'secondary'], true, false],
-        ],
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round',
-        },
+        id: 'dealett-night-road-points',
+        type: 'circle',
+        source: 'dealett-night-light-points',
+        minzoom: 10,
+        filter: ['==', ['get', 'kind'], 'road'],
         paint: {
-          'line-color': '#ffe5a8',
-          'line-width': ['interpolate', ['exponential', 1.2], ['zoom'], 9, 0.18, 13, 0.55, 16, 1.15],
-          'line-opacity': 0,
+          'circle-color': ['get', 'color'],
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 0.18, 13, 0.32, 16, 0.52],
+          'circle-opacity': 0,
+          'circle-blur': ['interpolate', ['linear'], ['zoom'], 10, 0.1, 16, 0.28],
         },
-      }, labelBeforeLayer);
+      }, coverageBeforeLayer);
     }
 
-    if (!map.getLayer('dealett-night-car-lights')) {
+    if (!map.getLayer('dealett-night-car-points')) {
       map.addLayer({
-        id: 'dealett-night-car-lights',
-        type: 'line',
-        source: 'openmaptiles',
-        'source-layer': 'transportation',
+        id: 'dealett-night-car-points',
+        type: 'circle',
+        source: 'dealett-night-light-points',
         minzoom: 12,
-        filter: [
-          'all',
-          ['match', ['get', 'brunnel'], ['bridge', 'tunnel'], false, true],
-          ['match', ['get', 'class'], ['motorway', 'trunk', 'primary'], true, false],
-        ],
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round',
-        },
+        filter: ['==', ['get', 'kind'], 'car'],
         paint: {
-          'line-color': '#fff3cf',
-          'line-width': ['interpolate', ['exponential', 1.2], ['zoom'], 12, 0.6, 15, 1.2, 17, 1.8],
-          'line-opacity': 0,
-          'line-dasharray': [0.1, 2.4],
+          'circle-color': ['get', 'color'],
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 0.24, 15, 0.42, 17, 0.58],
+          'circle-opacity': 0,
+          'circle-blur': 0.18,
         },
-      }, labelBeforeLayer);
+      }, coverageBeforeLayer);
     }
 
-    if (!map.getLayer('dealett-night-building-lights')) {
+    if (!map.getLayer('dealett-night-building-points')) {
       map.addLayer({
-        id: 'dealett-night-building-lights',
-        type: 'fill',
-        source: 'openmaptiles',
-        'source-layer': 'building',
+        id: 'dealett-night-building-points',
+        type: 'circle',
+        source: 'dealett-night-light-points',
         minzoom: 13,
+        filter: ['==', ['get', 'kind'], 'building'],
         paint: {
-          'fill-color': '#ffd492',
-          'fill-opacity': 0,
+          'circle-color': ['get', 'color'],
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 0.16, 16, 0.34, 18, 0.48],
+          'circle-opacity': 0,
+          'circle-blur': 0.12,
         },
-      }, labelBeforeLayer);
+      }, coverageBeforeLayer);
     }
 
     if (!map.getSource('dealett-coverage-placeholder')) {
@@ -753,6 +947,54 @@
       return;
     }
 
+    const getSearchResultZoom = (result) => {
+      const properties = result.properties || {};
+      const resultType = String(properties.addresstype || properties.type || properties.class || '').toLowerCase();
+
+      if (['house', 'building', 'address'].includes(resultType)) {
+        return 17;
+      }
+
+      if (['road', 'street', 'residential', 'pedestrian', 'service'].includes(resultType)) {
+        return 16.3;
+      }
+
+      if (['suburb', 'neighbourhood', 'quarter', 'city_block'].includes(resultType)) {
+        return 14.5;
+      }
+
+      if (['city', 'town', 'village', 'hamlet'].includes(resultType)) {
+        return 12.8;
+      }
+
+      if (['municipality', 'administrative'].includes(resultType)) {
+        return 10.5;
+      }
+
+      if (result.bbox) {
+        const [west, south, east, north] = result.bbox;
+        const span = Math.max(Math.abs(east - west), Math.abs(north - south));
+
+        if (span < 0.006) {
+          return 17;
+        }
+
+        if (span < 0.025) {
+          return 16;
+        }
+
+        if (span < 0.08) {
+          return 14.5;
+        }
+
+        if (span < 0.3) {
+          return 12.5;
+        }
+      }
+
+      return 13;
+    };
+
     const selectSearchResult = (result) => {
       const center = result.center || result.geometry?.coordinates;
 
@@ -763,7 +1005,7 @@
       setSelectedPlace(result.place_name || result.text, center);
       map.flyTo({
         center,
-        zoom: result.bbox ? 11 : 13,
+        zoom: getSearchResultZoom(result),
         pitch: 18,
         bearing: map.getBearing(),
         duration: 1500,
@@ -944,6 +1186,7 @@
     map.resize();
     resetToSweden(false);
     syncPerspectiveButton();
+    updateNightLightPoints();
   });
 
   app.querySelector('#coverageMapZoomIn')?.addEventListener('click', () => {
@@ -972,7 +1215,11 @@
     });
   });
 
-  map.on('moveend', syncPerspectiveButton);
+  map.on('moveend', () => {
+    syncPerspectiveButton();
+    updateNightLightPoints();
+  });
+  map.on('idle', updateNightLightPoints);
 
   app.querySelectorAll('[data-map-action]').forEach((button) => {
     button.addEventListener('click', () => {

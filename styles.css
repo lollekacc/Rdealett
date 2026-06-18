@@ -2746,6 +2746,445 @@ img {
   }
 }
 
+.coverage-main.coverage-maplibre-section[data-coverage-map="cinematic"] {
+  position: relative;
+  z-index: 10001;
+  min-height: 0;
+  padding: 0;
+  background: #f8f4ed;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-shell {
+  height: clamp(880px, 86vw, 948px);
+  min-height: 880px;
+  border-radius: 0;
+  background: #07111b;
+  box-shadow: none;
+}
+
+.coverage-cinematic-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 51%;
+  transform: scale(1.01);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-scrim {
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(250, 247, 240, 0.98) 0%, rgba(250, 247, 240, 0.82) 8%, rgba(250, 247, 240, 0.2) 23%, rgba(250, 247, 240, 0) 34%),
+    radial-gradient(ellipse at 50% 7%, rgba(255, 252, 244, 0.86) 0%, rgba(255, 252, 244, 0.42) 23%, transparent 42%),
+    linear-gradient(90deg, rgba(1, 6, 11, 0.18) 0%, transparent 32%, transparent 72%, rgba(1, 6, 11, 0.22) 100%),
+    linear-gradient(180deg, transparent 54%, rgba(1, 6, 11, 0.18) 100%);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-copy {
+  left: 50%;
+  top: 43px;
+  width: min(1080px, calc(100% - 48px));
+  max-width: none;
+  color: #111827;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-kicker,
+.coverage-card-kicker {
+  margin: 0 0 8px;
+  color: #ff5b13;
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-copy h2 {
+  margin: 0;
+  color: #111827;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(38px, 3vw, 48px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: 0;
+  text-shadow: none;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-copy p:last-child {
+  max-width: none;
+  margin: 14px 0 0;
+  color: #536171;
+  font-family: 'Roboto', sans-serif;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.coverage-cinematic-card {
+  z-index: 3;
+  width: 282px;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  border-radius: 21px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 28px 60px rgba(0, 10, 24, 0.18),
+    0 8px 22px rgba(0, 10, 24, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.coverage-cinematic-card h3 {
+  margin: 0 0 16px;
+  color: #111827;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-operators {
+  left: 86px;
+  top: 171px;
+  display: grid;
+  gap: 8px;
+  padding: 18px 18px 16px;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-operator {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 47px;
+  padding: 0 44px;
+  border: 1px solid #e5e9ef;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
+  cursor: pointer;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-operator:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 91, 19, 0.36);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-operator.is-active {
+  border-color: #ff5b13;
+  box-shadow: inset 0 0 0 1px rgba(255, 91, 19, 0.1), 0 8px 18px rgba(255, 91, 19, 0.08);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-operator.is-active::after {
+  content: "\2713";
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ff8b21 0%, #ff5b13 100%);
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  transform: translateY(-50%);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-operator img {
+  display: block;
+  max-width: 88px;
+  max-height: 30px;
+  object-fit: contain;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-operator--telia img {
+  max-width: 78px;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-operator--tele2 img {
+  max-width: 82px;
+  filter: contrast(1.08);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-operator--telenor img {
+  max-width: 76px;
+  mix-blend-mode: multiply;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-operator--tre img {
+  width: 47px;
+  height: 32px;
+  border-radius: 5px;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-operator--halebop img {
+  max-width: 94px;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-networks {
+  left: 86px;
+  top: 560px;
+  bottom: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 12px;
+  max-width: none;
+  padding: 22px 18px 20px;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-networks .coverage-card-kicker,
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-networks h3 {
+  grid-column: 1 / -1;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-networks h3 {
+  margin-bottom: 8px;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-network {
+  min-width: 0;
+  min-height: 32px;
+  padding: 0 18px;
+  border: 1px solid #e2e7ee;
+  border-radius: 999px;
+  background: #fff;
+  color: #202936;
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 6px rgba(16, 24, 40, 0.04);
+  cursor: pointer;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-network.is-active {
+  border-color: transparent;
+  background: linear-gradient(180deg, #ff8c1a 0%, #ff5b13 100%);
+  color: #fff;
+  box-shadow: 0 10px 18px rgba(255, 91, 19, 0.23);
+}
+
+.coverage-country-pill {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 16px 0 12px;
+  border-radius: 11px;
+  background: rgba(33, 42, 51, 0.72);
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.coverage-country-pill::before {
+  content: "";
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.coverage-country-pill--norway {
+  left: 38%;
+  top: 44%;
+}
+
+.coverage-country-pill--norway::before {
+  background:
+    linear-gradient(90deg, transparent 0 30%, #fff 30% 44%, #173a8f 44% 54%, #fff 54% 68%, transparent 68%),
+    linear-gradient(0deg, transparent 0 30%, #fff 30% 44%, #173a8f 44% 54%, #fff 54% 68%, transparent 68%),
+    #ef2b2d;
+}
+
+.coverage-country-pill--finland {
+  right: 18%;
+  top: 41%;
+}
+
+.coverage-country-pill--finland::before {
+  background:
+    linear-gradient(90deg, transparent 0 34%, #1b5aa6 34% 52%, transparent 52%),
+    linear-gradient(0deg, transparent 0 40%, #1b5aa6 40% 58%, transparent 58%),
+    #fff;
+}
+
+.coverage-country-pill--denmark {
+  left: 33%;
+  bottom: 22%;
+}
+
+.coverage-country-pill--denmark::before {
+  background:
+    linear-gradient(90deg, transparent 0 30%, #fff 30% 43%, transparent 43%),
+    linear-gradient(0deg, transparent 0 42%, #fff 42% 55%, transparent 55%),
+    #c8102e;
+}
+
+.coverage-country-pill--estonia {
+  right: 15%;
+  top: 57%;
+}
+
+.coverage-country-pill--estonia::before {
+  background: linear-gradient(180deg, #4891d9 0 33.33%, #101820 33.33% 66.66%, #fff 66.66%);
+}
+
+.coverage-country-pill--latvia {
+  right: 10.5%;
+  top: 66%;
+}
+
+.coverage-country-pill--latvia::before {
+  background: linear-gradient(180deg, #9e3039 0 42%, #fff 42% 58%, #9e3039 58%);
+}
+
+.coverage-country-pill--lithuania {
+  right: 14%;
+  top: 77%;
+}
+
+.coverage-country-pill--lithuania::before {
+  background: linear-gradient(180deg, #fdb913 0 33.33%, #006a44 33.33% 66.66%, #c1272d 66.66%);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-note {
+  left: 88px;
+  bottom: 105px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 260px);
+  gap: 11px;
+  align-items: start;
+  width: auto;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Roboto', sans-serif;
+  font-size: 11px;
+  line-height: 1.48;
+  text-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-note__icon {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border: 1px solid #ff5b13;
+  border-radius: 50%;
+  color: #ff5b13;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-note p {
+  margin: 0;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-note a {
+  color: #ff7a1a;
+  font-weight: 900;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-zoom {
+  right: 33px;
+  top: auto;
+  bottom: 30px;
+  width: 51px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(25, 35, 45, 0.76);
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-zoom button {
+  width: 51px;
+  height: 51px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 26px;
+  font-weight: 300;
+}
+
+.coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-zoom button + button {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 900px) {
+  .coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-shell {
+    height: auto;
+    min-height: 1120px;
+  }
+
+  .coverage-cinematic-image {
+    object-position: 54% 50%;
+  }
+
+  .coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-copy {
+    top: 32px;
+  }
+
+  .coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-copy h2 {
+    font-size: 34px;
+  }
+
+  .coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-copy p:last-child {
+    font-size: 14px;
+  }
+
+  .coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-operators,
+  .coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-networks {
+    left: 18px;
+    width: min(282px, calc(100vw - 36px));
+  }
+
+  .coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-operators {
+    top: 188px;
+  }
+
+  .coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-networks {
+    top: 544px;
+  }
+
+  .coverage-country-pill {
+    transform: scale(0.86);
+  }
+
+  .coverage-country-pill--norway,
+  .coverage-country-pill--denmark {
+    left: auto;
+    right: 22px;
+  }
+
+  .coverage-country-pill--norway {
+    top: 48%;
+  }
+
+  .coverage-country-pill--denmark {
+    bottom: 27%;
+  }
+
+  .coverage-main[data-coverage-map="cinematic"] .coverage-maplibre-note {
+    left: 22px;
+    bottom: 95px;
+  }
+}
+
 .deployment-cards {
   position: relative;
   z-index: 2;

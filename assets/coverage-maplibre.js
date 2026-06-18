@@ -2,6 +2,37 @@
   const app = document.querySelector('#coverageApp[data-map-engine="maplibre"]');
   const mapElement = document.querySelector('#coverageMapLibre');
 
+  const cinematicApp = document.querySelector('#coverageApp[data-map-engine="cinematic"]');
+
+  const setupCinematicCoverageControls = () => {
+    if (!cinematicApp) {
+      return;
+    }
+
+    cinematicApp.querySelectorAll('.coverage-maplibre-operator').forEach((button) => {
+      button.addEventListener('click', () => {
+        cinematicApp.querySelectorAll('.coverage-maplibre-operator').forEach((operatorButton) => {
+          const isActive = operatorButton === button;
+          operatorButton.classList.toggle('is-active', isActive);
+          operatorButton.setAttribute('aria-pressed', String(isActive));
+        });
+      });
+    });
+
+    cinematicApp.querySelectorAll('.coverage-maplibre-network').forEach((button) => {
+      button.addEventListener('click', () => {
+        const isActive = !button.classList.contains('is-active');
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+    });
+  };
+
+  if (cinematicApp && !app) {
+    setupCinematicCoverageControls();
+    return;
+  }
+
   if (!app || !mapElement || !window.maplibregl) {
     return;
   }

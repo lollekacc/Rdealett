@@ -2182,6 +2182,7 @@ img {
 }
 
 .coverage-maplibre-search {
+  z-index: 5;
   top: clamp(24px, 3.2vw, 32px);
   left: 50%;
   transform: translateX(-50%);
@@ -2239,6 +2240,8 @@ img {
 }
 
 .coverage-maplibre-search .suggestions-wrapper {
+  position: relative;
+  z-index: 6;
   overflow: hidden;
   border-radius: 14px;
 }
@@ -2279,18 +2282,17 @@ img {
 }
 
 .coverage-maplibre-actions {
-  top: 106px;
-  left: 50%;
-  transform: translateX(-50%);
+  z-index: 4;
+  top: clamp(24px, 3.2vw, 32px);
+  left: calc(50% + min(210px, 16.5vw) + 10px);
+  transform: none;
   display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
-  width: min(420px, 33vw);
+  width: auto;
 }
 
 .coverage-maplibre-action {
-  min-height: 34px;
-  padding: 0 16px;
+  min-height: 46px;
+  padding: 0 18px;
   border: 1px solid rgba(239, 130, 20, 0.42);
   border-radius: 999px;
   background: rgba(21, 30, 39, 0.62);
@@ -2490,7 +2492,7 @@ img {
     left: 42px;
     top: 228px;
     transform: none;
-    width: min(440px, calc(100% - 128px));
+    width: min(360px, calc(100% - 220px));
   }
 
   .coverage-maplibre-place {
@@ -2501,14 +2503,14 @@ img {
   }
 
   .coverage-maplibre-actions {
-    left: 42px;
-    top: 306px;
+    left: calc(42px + min(360px, calc(100% - 220px)) + 10px);
+    top: 228px;
     transform: none;
-    width: min(440px, calc(100% - 128px));
+    width: auto;
   }
 
   .coverage-maplibre-operators {
-    top: 370px;
+    top: 330px;
   }
 }
 
@@ -2540,7 +2542,7 @@ img {
 
   .coverage-maplibre-search {
     left: 18px;
-    right: 86px;
+    right: 164px;
     top: 218px;
     transform: none;
     width: auto;
@@ -2555,18 +2557,18 @@ img {
   }
 
   .coverage-maplibre-actions {
-    left: 18px;
-    right: 18px;
-    top: 294px;
+    left: auto;
+    right: 80px;
+    top: 218px;
     transform: none;
-    width: auto;
-    gap: 7px;
+    width: 76px;
   }
 
   .coverage-maplibre-action {
-    min-height: 32px;
-    padding: 0 11px;
-    font-size: 11px;
+    width: 76px;
+    min-height: 48px;
+    padding: 0 8px;
+    font-size: 10px;
   }
 
   .coverage-maplibre-zoom {
@@ -2583,7 +2585,7 @@ img {
   .coverage-maplibre-operators {
     left: 18px;
     right: 18px;
-    top: 374px;
+    top: 326px;
     width: auto;
     gap: 7px;
   }

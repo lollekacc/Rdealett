@@ -32,12 +32,6 @@
     bearing: -6,
   };
 
-  const stockholmCamera = {
-    center: [18.0686, 59.3293],
-    zoom: 14.75,
-    pitch: 42,
-    bearing: -12,
-  };
   const localizedName = ['coalesce', ['get', 'name:latin'], ['get', 'name_en'], ['get', 'name']];
   const roadName = ['coalesce', ['get', 'name:latin'], ['get', 'name_en'], ['get', 'name'], ['get', 'ref']];
 
@@ -715,14 +709,6 @@
     button.addEventListener('click', () => {
       const action = button.dataset.mapAction;
 
-      if (action === 'stockholm') {
-        flyTo(stockholmCamera);
-      }
-
-      if (action === 'reset') {
-        resetToSweden();
-      }
-
       if (action === 'locate') {
         locateUser(button);
       }
@@ -782,7 +768,6 @@
 
   window.dealettCoverageMap = {
     map,
-    flyToStockholm: () => flyTo(stockholmCamera),
     resetToSweden,
     getActiveCoverageFilters: () => ({
       operator: state.activeOperator,

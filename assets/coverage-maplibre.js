@@ -29,7 +29,7 @@
   const swedenFitBounds = [[10.4, 55.0], [24.5, 69.3]];
   const swedenMaxBounds = [[-8.0, 48.0], [39.0, 76.5]];
   const swedenCameraBase = {
-    pitch: 35,
+    pitch: 18,
     bearing: -6,
   };
 
@@ -54,8 +54,6 @@
       coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.025, 8, 0.04, 13, 0.055],
       coverageLine: '#edf8fb',
       coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.035, 11, 0.065, 15, 0.1],
-      building: ['interpolate', ['linear'], ['zoom'], 13, '#7f837d', 14.5, '#aca99f', 17, '#d2cec1'],
-      buildingOpacity: ['interpolate', ['linear'], ['zoom'], 13, 0.18, 14, 0.48, 16, 0.68],
     },
     dark: {
       background: '#071018',
@@ -75,8 +73,6 @@
       coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.018, 8, 0.03, 13, 0.044],
       coverageLine: '#edf8fb',
       coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.03, 11, 0.052, 15, 0.08],
-      building: ['interpolate', ['linear'], ['zoom'], 13, '#343a3b', 14.5, '#4a504f', 17, '#686c68'],
-      buildingOpacity: ['interpolate', ['linear'], ['zoom'], 13, 0.14, 14, 0.4, 16, 0.58],
     },
   };
 
@@ -439,8 +435,6 @@
     setPaintIfLayerExists('dealett-coverage-placeholder-fill', 'fill-opacity', paint.coverageFillOpacity);
     setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-color', paint.coverageLine);
     setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-opacity', paint.coverageLineOpacity);
-    setPaintIfLayerExists('dealett-building-extrusion', 'fill-extrusion-color', paint.building);
-    setPaintIfLayerExists('dealett-building-extrusion', 'fill-extrusion-opacity', paint.buildingOpacity);
     updateMapThemeButtons();
   };
 
@@ -539,10 +533,6 @@
     const coverageBeforeLayer = map.getLayer('dealett-road-major')
       ? 'dealett-road-major'
       : undefined;
-    const buildingBeforeLayer = map.getLayer('dealett-road-labels')
-      ? 'dealett-road-labels'
-      : undefined;
-
     if (!map.getSource('dealett-coverage-placeholder')) {
       // Replace this source with real operator coverage GeoJSON later.
       // Keep the operator and network_* properties if the existing filters should continue to work.
@@ -579,43 +569,6 @@
       }, coverageBeforeLayer);
     }
 
-    if (!map.getLayer('dealett-building-extrusion')) {
-      map.addLayer({
-        id: 'dealett-building-extrusion',
-        type: 'fill-extrusion',
-        source: 'openmaptiles',
-        'source-layer': 'building',
-        minzoom: 13,
-        paint: {
-          'fill-extrusion-color': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            13,
-            '#7f837d',
-            14.5,
-            '#aca99f',
-            17,
-            '#d2cec1',
-          ],
-          'fill-extrusion-height': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            13,
-            0,
-            14,
-            ['*', ['coalesce', ['to-number', ['get', 'render_height']], ['to-number', ['get', 'height']], 18], 0.72],
-            16,
-            ['coalesce', ['to-number', ['get', 'render_height']], ['to-number', ['get', 'height']], 18],
-          ],
-          'fill-extrusion-base': ['coalesce', ['to-number', ['get', 'render_min_height']], ['to-number', ['get', 'min_height']], 0],
-          'fill-extrusion-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0.18, 14, 0.48, 16, 0.68],
-          'fill-extrusion-vertical-gradient': true,
-        },
-      }, buildingBeforeLayer);
-    }
-
     applyMapTheme();
   };
 
@@ -632,7 +585,7 @@
     renderWorldCopies: false,
     attributionControl: true,
     antialias: true,
-    maxPitch: 45,
+    maxPitch: 25,
     cooperativeGestures: true,
   });
 
@@ -764,7 +717,7 @@
       map.flyTo({
         center,
         zoom: result.bbox ? 11 : 13,
-        pitch: 38,
+        pitch: 18,
         bearing: map.getBearing(),
         duration: 1500,
         essential: true,
@@ -819,7 +772,7 @@
         map.flyTo({
           center: coordinates,
           zoom: 13,
-          pitch: 38,
+          pitch: 18,
           bearing: map.getBearing(),
           duration: 1500,
           essential: true,

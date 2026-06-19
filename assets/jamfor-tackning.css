@@ -207,7 +207,7 @@
   font-weight: 700;
 }
 
-.jamfor-page .coverage-main {
+.jamfor-page .coverage-main:not(.coverage-maplibre-section) {
   padding-top: 66px;
 }
 

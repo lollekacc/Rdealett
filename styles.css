@@ -2860,10 +2860,11 @@ img {
 }
 
 .coverage-maplibre-search {
+  --coverage-search-transform: translateX(-50%);
   z-index: 5;
   top: clamp(24px, 3.2vw, 32px);
   left: 50%;
-  transform: translateX(-50%);
+  transform: var(--coverage-search-transform);
   width: min(420px, 33vw);
   min-height: 46px;
   display: block;
@@ -2874,6 +2875,73 @@ img {
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 18px 40px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(18px);
+  transition: background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.coverage-maplibre-search:focus-within {
+  border-color: rgba(239, 130, 20, 0.52);
+  background: rgba(14, 24, 33, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 0 4px rgba(239, 130, 20, 0.14),
+    0 24px 54px rgba(0, 0, 0, 0.34);
+}
+
+.coverage-maplibre-search.is-searching {
+  border-color: rgba(239, 130, 20, 0.62);
+  background:
+    linear-gradient(90deg, rgba(239, 130, 20, 0.16), rgba(255, 255, 255, 0.04), rgba(239, 130, 20, 0.16)),
+    rgba(14, 24, 33, 0.9);
+  background-size: 220% 100%;
+  animation: coverage-search-sheen 1.4s linear infinite;
+}
+
+.coverage-maplibre-search.is-selected {
+  border-color: rgba(98, 210, 139, 0.68);
+  background: rgba(18, 54, 39, 0.84);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 0 0 4px rgba(98, 210, 139, 0.16),
+    0 22px 48px rgba(0, 0, 0, 0.3);
+}
+
+.coverage-maplibre-search.is-invalid {
+  border-color: rgba(255, 111, 111, 0.76);
+  background: rgba(72, 24, 29, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.11),
+    0 0 0 4px rgba(255, 111, 111, 0.16),
+    0 22px 48px rgba(0, 0, 0, 0.3);
+  animation: coverage-search-shake 0.34s ease;
+}
+
+@keyframes coverage-search-sheen {
+  from {
+    background-position: 120% 0;
+  }
+
+  to {
+    background-position: -120% 0;
+  }
+}
+
+@keyframes coverage-search-shake {
+  0%,
+  100% {
+    transform: var(--coverage-search-transform);
+  }
+
+  25% {
+    transform: var(--coverage-search-transform) translateX(-7px);
+  }
+
+  50% {
+    transform: var(--coverage-search-transform) translateX(6px);
+  }
+
+  75% {
+    transform: var(--coverage-search-transform) translateX(-3px);
+  }
 }
 
 .coverage-maplibre-search .maplibregl-ctrl-geocoder {
@@ -2917,26 +2985,70 @@ img {
   color: rgba(255, 255, 255, 0.58);
 }
 
+.coverage-maplibre-search__feedback {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: calc(100% + 8px);
+  min-height: 16px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-family: 'Roboto', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, color 0.18s ease;
+  pointer-events: none;
+  text-shadow: 0 8px 22px rgba(0, 0, 0, 0.36);
+}
+
+.coverage-maplibre-search.is-selected .coverage-maplibre-search__feedback,
+.coverage-maplibre-search.is-invalid .coverage-maplibre-search__feedback {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.coverage-maplibre-search.is-selected .coverage-maplibre-search__feedback {
+  color: #b9f5cc;
+}
+
+.coverage-maplibre-search.is-invalid .coverage-maplibre-search__feedback {
+  color: #ffc9c9;
+}
+
 .coverage-maplibre-search .suggestions-wrapper {
   position: relative;
   z-index: 6;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 14px;
 }
 
 .coverage-maplibre-search .suggestions {
   margin-top: 8px;
-  overflow: hidden;
+  overflow: auto;
+  max-height: 320px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 14px;
-  background: rgba(8, 18, 29, 0.94);
-  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.26);
+  background: rgba(8, 18, 29, 0.96);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.32);
   backdrop-filter: blur(16px);
 }
 
 .coverage-maplibre-search .suggestions > li > a {
+  display: block;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   color: rgba(255, 255, 255, 0.88);
   font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.coverage-maplibre-search .suggestions > li:last-child > a {
+  border-bottom: 0;
 }
 
 .coverage-maplibre-search .suggestions > .active > a,
@@ -3237,6 +3349,7 @@ img {
   }
 
   .coverage-maplibre-search {
+    --coverage-search-transform: none;
     left: 42px;
     top: 228px;
     transform: none;
@@ -3295,6 +3408,7 @@ img {
   }
 
   .coverage-maplibre-search {
+    --coverage-search-transform: none;
     left: 18px;
     right: 164px;
     top: 218px;

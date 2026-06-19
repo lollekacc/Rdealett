@@ -1384,6 +1384,31 @@
       return;
     }
 
+    const searchFeedback = document.createElement('p');
+    searchFeedback.className = 'coverage-maplibre-search__feedback';
+    searchFeedback.setAttribute('aria-live', 'polite');
+    geocoderElement.append(searchFeedback);
+
+    let invalidStateTimer = null;
+
+    const setSearchState = (stateName, message = '') => {
+      window.clearTimeout(invalidStateTimer);
+      geocoderElement.classList.remove('is-searching', 'is-selected', 'is-invalid');
+
+      if (stateName) {
+        geocoderElement.classList.add(`is-${stateName}`);
+      }
+
+      searchFeedback.textContent = message;
+    };
+
+    const setInvalidSearchState = (message = 'Felaktig adress. Kontrollera stavning eller prova med postnummer/stad.') => {
+      setSearchState('invalid', message);
+      invalidStateTimer = window.setTimeout(() => {
+        geocoderElement.classList.remove('is-invalid');
+      }, 900);
+    };
+
     const getSearchResultZoom = (result) => {
       const properties = result.properties || {};
       const resultType = String(properties.addresstype || properties.type || properties.class || '').toLowerCase();
@@ -1436,10 +1461,12 @@
       const center = result.center || result.geometry?.coordinates;
 
       if (!center) {
+        setInvalidSearchState();
         return;
       }
 
       setSelectedPlace(result.place_name || result.text, center);
+      setSearchState('selected', 'Adress vald');
       map.flyTo({
         center,
         zoom: getSearchResultZoom(result),
@@ -1450,38 +1477,120 @@
       });
     };
 
+    const hasPostalCode = (query) => /\b\d{3}\s?\d{2}\b/.test(query);
+    const hasHouseNumber = (query) => /\b\d+[a-z]?\b/i.test(query);
+
+    const createNominatimParams = (query, overrides = {}) => new URLSearchParams({
+      format: 'geojson',
+      addressdetails: '1',
+      namedetails: '1',
+      dedupe: '1',
+      limit: '12',
+      countrycodes: 'se',
+      viewbox: `${swedenBounds[0]},${swedenBounds[3]},${swedenBounds[2]},${swedenBounds[1]}`,
+      bounded: '0',
+      'accept-language': 'sv',
+      ...overrides,
+      ...(overrides.q || overrides.street ? {} : { q: query }),
+    });
+
+    const fetchNominatimFeatures = async (params) => {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error(`Nominatim returned ${response.status}`);
+      }
+
+      const geojson = await response.json();
+      return Array.isArray(geojson.features) ? geojson.features : [];
+    };
+
+    const getAddressPart = (address = {}, names) => {
+      const key = names.find((name) => address[name]);
+      return key ? address[key] : '';
+    };
+
+    const formatSearchLabel = (feature) => {
+      const address = feature.properties.address || {};
+      const road = getAddressPart(address, ['road', 'pedestrian', 'residential', 'footway', 'cycleway', 'path']);
+      const houseNumber = address.house_number ? ` ${address.house_number}` : '';
+      const postcode = address.postcode || '';
+      const city = getAddressPart(address, ['city', 'town', 'village', 'municipality', 'county']);
+      const place = getAddressPart(address, ['suburb', 'neighbourhood', 'quarter', 'hamlet']);
+      const primary = road ? `${road}${houseNumber}` : (feature.properties.name || feature.properties.display_name);
+      const details = [postcode, city || place].filter(Boolean).join(' ');
+
+      return details && primary ? `${primary}, ${details}` : feature.properties.display_name;
+    };
+
+    const sortSearchFeatures = (features) => {
+      const typeScore = {
+        house: 0,
+        building: 1,
+        address: 1,
+        road: 2,
+        residential: 2,
+        pedestrian: 2,
+        service: 3,
+        suburb: 4,
+        neighbourhood: 4,
+        quarter: 4,
+        city: 5,
+        town: 5,
+        village: 5,
+        municipality: 6,
+      };
+
+      return features.sort((a, b) => {
+        const aType = String(a.properties.addresstype || a.properties.type || '').toLowerCase();
+        const bType = String(b.properties.addresstype || b.properties.type || '').toLowerCase();
+        return (typeScore[aType] ?? 8) - (typeScore[bType] ?? 8);
+      });
+    };
+
     const geocoderApi = {
       forwardGeocode: async (config) => {
         const query = config.query.trim();
 
         if (!query) {
+          setSearchState('');
           return { features: [] };
         }
 
-        const params = new URLSearchParams({
-          q: query,
-          format: 'geojson',
-          addressdetails: '1',
-          limit: '6',
-          countrycodes: 'se',
-          viewbox: `${swedenBounds[0]},${swedenBounds[3]},${swedenBounds[2]},${swedenBounds[1]}`,
-          bounded: '0',
-          'accept-language': 'sv',
-        });
-
         try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`);
+          setSearchState('searching');
+          const requests = [
+            fetchNominatimFeatures(createNominatimParams(query, { q: query })),
+          ];
 
-          if (!response.ok) {
-            throw new Error(`Nominatim returned ${response.status}`);
+          if (!hasPostalCode(query)) {
+            requests.push(fetchNominatimFeatures(createNominatimParams(query, { street: query, country: 'Sverige' })));
           }
 
-          const geojson = await response.json();
-          const features = geojson.features.map((feature) => {
+          if (!hasHouseNumber(query) && !hasPostalCode(query)) {
+            requests.push(fetchNominatimFeatures(createNominatimParams(query, { q: `${query} gata Sverige` })));
+          }
+
+          const rawFeatures = (await Promise.allSettled(requests))
+            .flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
+          const seen = new Set();
+          const dedupedFeatures = rawFeatures.filter((feature) => {
+            const key = feature.properties?.osm_id || feature.properties?.display_name;
+
+            if (!key || seen.has(key)) {
+              return false;
+            }
+
+            seen.add(key);
+            return true;
+          });
+
+          const features = sortSearchFeatures(dedupedFeatures).slice(0, 12).map((feature) => {
             const bbox = feature.bbox?.map(Number);
             const center = bbox
               ? [bbox[0] + (bbox[2] - bbox[0]) / 2, bbox[1] + (bbox[3] - bbox[1]) / 2]
               : feature.geometry.coordinates.map(Number);
+            const label = formatSearchLabel(feature);
 
             return {
               type: 'Feature',
@@ -1489,18 +1598,21 @@
                 type: 'Point',
                 coordinates: center,
               },
-              place_name: feature.properties.display_name,
+              place_name: label,
               properties: feature.properties,
-              text: feature.properties.display_name,
+              text: label,
               place_type: [feature.properties.type || 'place'],
               center,
               bbox,
             };
           });
 
+          setSearchState('');
+
           return { features };
         } catch (error) {
           console.error(`Failed to geocode with Nominatim: ${error.message}`);
+          setInvalidSearchState('Kunde inte s\u00f6ka just nu. F\u00f6rs\u00f6k igen om en stund.');
           return { features: [] };
         }
       },
@@ -1534,9 +1646,21 @@
       if (selectedPlace) {
         selectedPlace.textContent = 'Ingen plats vald';
       }
+
+      setSearchState('');
     });
 
     const geocoderInput = geocoderElement.querySelector('input');
+
+    geocoderInput?.addEventListener('input', () => {
+      if (geocoderInput.value.trim().length < 2) {
+        setSearchState('');
+        return;
+      }
+
+      geocoderElement.classList.remove('is-selected', 'is-invalid');
+      searchFeedback.textContent = '';
+    });
 
     geocoderInput?.addEventListener('keydown', async (event) => {
       if (event.key !== 'Enter') {
@@ -1550,11 +1674,14 @@
       }
 
       event.preventDefault();
+      setSearchState('searching');
       const results = await geocoderApi.forwardGeocode({ query });
       const firstResult = results.features[0];
 
       if (firstResult) {
         selectSearchResult(firstResult);
+      } else {
+        setInvalidSearchState();
       }
     });
   };

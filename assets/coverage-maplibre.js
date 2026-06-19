@@ -1572,8 +1572,25 @@
       ...(overrides.q || overrides.street ? {} : { q: query }),
     });
 
-    const fetchNominatimFeatures = async (params) => {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`);
+    const geocodeCache = new Map();
+    let activeAutocompleteController = null;
+
+    const fetchNominatimFeatures = async (params, options = {}) => {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 8000);
+
+      if (options.signal) {
+        options.signal.addEventListener('abort', () => controller.abort(), { once: true });
+      }
+
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/geo+json, application/json',
+        },
+      }).finally(() => {
+        window.clearTimeout(timeout);
+      });
 
       if (!response.ok) {
         throw new Error(`Nominatim returned ${response.status}`);
@@ -1662,76 +1679,142 @@
       });
     };
 
+    const createRequestParamsForMode = (query, queryProfile, mode) => {
+      if (mode === 'live') {
+        return [
+          queryProfile.isStreetLike
+            ? createNominatimParams(query, { street: query, country: 'Sverige' })
+            : createNominatimParams(query, { q: `${query} Sverige` }),
+        ];
+      }
+
+      const params = [
+        createNominatimParams(query, { q: query }),
+      ];
+
+      if (queryProfile.compactQuery.length >= 3) {
+        params.push(createNominatimParams(query, { q: `${query} Sverige` }));
+      }
+
+      if (!hasPostalCode(query)) {
+        params.push(createNominatimParams(query, { street: query, country: 'Sverige' }));
+      }
+
+      if (!hasHouseNumber(query) && !hasPostalCode(query)) {
+        params.push(createNominatimParams(query, { q: `${query} gata Sverige` }));
+      }
+
+      return params;
+    };
+
+    const runGeocodeSearch = async (query, options = {}) => {
+      const mode = options.mode || 'commit';
+      const cacheKey = `${mode}:${normalizeSearchText(query)}`;
+
+      if (geocodeCache.has(cacheKey)) {
+        return geocodeCache.get(cacheKey);
+      }
+
+      const queryProfile = createQueryProfile(query);
+      const requestParams = createRequestParamsForMode(query, queryProfile, mode);
+      const settledResults = await Promise.allSettled(requestParams.map((params) => (
+        fetchNominatimFeatures(params, { signal: options.signal })
+      )));
+      const fulfilledResults = settledResults.filter((result) => result.status === 'fulfilled');
+
+      if (!fulfilledResults.length) {
+        const abortError = settledResults.find((result) => result.reason?.name === 'AbortError')?.reason;
+
+        if (abortError) {
+          throw abortError;
+        }
+      }
+
+      const rawFeatures = fulfilledResults.flatMap((result) => result.value);
+      const seen = new Set();
+      const dedupedFeatures = rawFeatures.filter((feature) => {
+        const key = feature.properties?.osm_id || feature.properties?.display_name;
+
+        if (!key || seen.has(key)) {
+          return false;
+        }
+
+        seen.add(key);
+        return true;
+      }).filter((feature) => doesFeatureMatchSearchCategory(feature, queryProfile));
+
+      const features = sortSearchFeatures(dedupedFeatures).slice(0, 12).map((feature) => {
+        const bbox = feature.bbox?.map(Number);
+        const center = bbox
+          ? [bbox[0] + (bbox[2] - bbox[0]) / 2, bbox[1] + (bbox[3] - bbox[1]) / 2]
+          : feature.geometry.coordinates.map(Number);
+        const label = formatSearchLabel(feature);
+
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: center,
+          },
+          place_name: label,
+          properties: feature.properties,
+          text: label,
+          place_type: [feature.properties.type || 'place'],
+          center,
+          bbox,
+        };
+      });
+
+      if (fulfilledResults.length) {
+        geocodeCache.set(cacheKey, features);
+      }
+
+      if (geocodeCache.size > 80) {
+        geocodeCache.delete(geocodeCache.keys().next().value);
+      }
+
+      return features;
+    };
+
     const geocoderApi = {
       forwardGeocode: async (config) => {
         const query = config.query.trim();
+        const shouldUpdateState = config.updateState !== false;
 
         if (!query) {
-          setSearchState('');
+          if (shouldUpdateState) {
+            setSearchState('');
+          }
+
           return { features: [] };
         }
 
         try {
-          setSearchState('searching');
-          const queryProfile = createQueryProfile(query);
-          const requests = [
-            fetchNominatimFeatures(createNominatimParams(query, { q: query })),
-          ];
-
-          if (queryProfile.compactQuery.length >= 3) {
-            requests.push(fetchNominatimFeatures(createNominatimParams(query, { q: `${query} Sverige` })));
+          if (shouldUpdateState) {
+            setSearchState('searching');
           }
 
-          if (!hasPostalCode(query)) {
-            requests.push(fetchNominatimFeatures(createNominatimParams(query, { street: query, country: 'Sverige' })));
-          }
-
-          if (!hasHouseNumber(query) && !hasPostalCode(query)) {
-            requests.push(fetchNominatimFeatures(createNominatimParams(query, { q: `${query} gata Sverige` })));
-          }
-
-          const rawFeatures = (await Promise.allSettled(requests))
-            .flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
-          const seen = new Set();
-          const dedupedFeatures = rawFeatures.filter((feature) => {
-            const key = feature.properties?.osm_id || feature.properties?.display_name;
-
-            if (!key || seen.has(key)) {
-              return false;
-            }
-
-            seen.add(key);
-            return true;
-          }).filter((feature) => doesFeatureMatchSearchCategory(feature, queryProfile));
-
-          const features = sortSearchFeatures(dedupedFeatures).slice(0, 12).map((feature) => {
-            const bbox = feature.bbox?.map(Number);
-            const center = bbox
-              ? [bbox[0] + (bbox[2] - bbox[0]) / 2, bbox[1] + (bbox[3] - bbox[1]) / 2]
-              : feature.geometry.coordinates.map(Number);
-            const label = formatSearchLabel(feature);
-
-            return {
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: center,
-              },
-              place_name: label,
-              properties: feature.properties,
-              text: label,
-              place_type: [feature.properties.type || 'place'],
-              center,
-              bbox,
-            };
+          const features = await runGeocodeSearch(query, {
+            mode: config.mode || 'commit',
+            signal: config.signal,
           });
 
-          setSearchState('');
+          if (shouldUpdateState) {
+            setSearchState('');
+          }
 
           return { features };
         } catch (error) {
+          if (error.name === 'AbortError') {
+            return { features: [] };
+          }
+
           console.error(`Failed to geocode with Nominatim: ${error.message}`);
-          setInvalidSearchState('Kunde inte s\u00f6ka just nu. F\u00f6rs\u00f6k igen om en stund.');
+
+          if (shouldUpdateState) {
+            setInvalidSearchState('Kunde inte s\u00f6ka just nu. F\u00f6rs\u00f6k igen om en stund.');
+          }
+
           return { features: [] };
         }
       },
@@ -1819,6 +1902,8 @@
       window.clearTimeout(autocompleteTimer);
 
       if (normalizeSearchText(query).length < 3) {
+        activeAutocompleteController?.abort();
+        activeAutocompleteController = null;
         latestLiveResults = [];
         latestLiveQuery = '';
         clearLiveSuggestions();
@@ -1832,16 +1917,23 @@
       renderLiveLoading();
 
       autocompleteTimer = window.setTimeout(async () => {
+        activeAutocompleteController?.abort();
+        activeAutocompleteController = new AbortController();
         const requestId = autocompleteRequestId + 1;
         autocompleteRequestId = requestId;
-        const results = await geocoderApi.forwardGeocode({ query });
+        const results = await geocoderApi.forwardGeocode({
+          query,
+          mode: 'live',
+          signal: activeAutocompleteController.signal,
+          updateState: false,
+        });
 
         if (requestId !== autocompleteRequestId || geocoderInput.value.trim() !== query) {
           return;
         }
 
         renderLiveSuggestions(results.features, query);
-      }, 180);
+      }, 320);
     };
 
     geocoder.on('result', (event) => {
@@ -1883,6 +1975,8 @@
       event.preventDefault();
       event.stopPropagation();
       window.clearTimeout(autocompleteTimer);
+      activeAutocompleteController?.abort();
+      activeAutocompleteController = null;
       setSearchState('searching');
       const canUseLiveResult = latestLiveQuery === query && latestLiveResults.length;
       const firstResult = canUseLiveResult

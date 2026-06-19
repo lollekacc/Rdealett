@@ -1409,6 +1409,14 @@
       }, 900);
     };
 
+    const closeSearchSuggestions = () => {
+      geocoderElement.classList.add('is-committed');
+    };
+
+    const openSearchSuggestions = () => {
+      geocoderElement.classList.remove('is-committed');
+    };
+
     const getSearchResultZoom = (result) => {
       const properties = result.properties || {};
       const resultType = String(properties.addresstype || properties.type || properties.class || '').toLowerCase();
@@ -1467,6 +1475,7 @@
 
       setSelectedPlace(result.place_name || result.text, center);
       setSearchState('selected', 'Adress vald');
+      closeSearchSuggestions();
       map.flyTo({
         center,
         zoom: getSearchResultZoom(result),
@@ -1479,6 +1488,70 @@
 
     const hasPostalCode = (query) => /\b\d{3}\s?\d{2}\b/.test(query);
     const hasHouseNumber = (query) => /\b\d+[a-z]?\b/i.test(query);
+    const streetSuffixPattern = /(allen|backe|backen|gata|gatan|grand|granden|kaj|kajen|led|leden|stig|stigen|strak|straket|torg|torget|vag|vagen)$/;
+    const ignoredQueryWords = new Set(['sverige', 'sweden', 'kommun', 'lan', 'county']);
+
+    const normalizeSearchText = (value = '') => value
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const compactSearchText = (value = '') => normalizeSearchText(value).replace(/\s/g, '');
+
+    const tokenizeSearchText = (value = '') => normalizeSearchText(value)
+      .split(' ')
+      .filter((token) => token && !ignoredQueryWords.has(token));
+
+    const createQueryProfile = (query) => {
+      const withoutPostalCode = query.replace(/\b\d{3}\s?\d{2}\b/g, ' ');
+      const tokens = tokenizeSearchText(withoutPostalCode);
+      const textTokens = tokens.filter((token) => !/^\d+[a-z]?$/.test(token));
+      const roadCandidates = [];
+
+      textTokens.forEach((token, index) => {
+        if (!streetSuffixPattern.test(token)) {
+          return;
+        }
+
+        roadCandidates.push(token);
+
+        if (index > 0) {
+          roadCandidates.push(textTokens.slice(Math.max(0, index - 2), index + 1).join(''));
+        }
+      });
+
+      return {
+        compactQuery: compactSearchText(textTokens.join(' ')),
+        hasHouseNumber: hasHouseNumber(query),
+        hasPostalCode: hasPostalCode(query),
+        houseNumber: tokens.find((token) => /^\d+[a-z]?$/.test(token)) || '',
+        isStreetLike: roadCandidates.length > 0 || hasHouseNumber(query),
+        roadCandidates: Array.from(new Set(roadCandidates.filter(Boolean))),
+      };
+    };
+
+    const doesNameMatchQuery = (name, queryProfile) => {
+      const compactName = compactSearchText(name);
+
+      if (!compactName || !queryProfile.compactQuery) {
+        return false;
+      }
+
+      const candidates = queryProfile.roadCandidates.length
+        ? queryProfile.roadCandidates
+        : [queryProfile.compactQuery];
+
+      return candidates.some((candidate) => (
+        compactName === candidate
+        || compactName.startsWith(candidate)
+        || candidate.startsWith(compactName)
+        || compactName.includes(candidate)
+      ));
+    };
 
     const createNominatimParams = (query, overrides = {}) => new URLSearchParams({
       format: 'geojson',
@@ -1510,9 +1583,45 @@
       return key ? address[key] : '';
     };
 
+    const getFeatureRoadName = (feature) => {
+      const address = feature.properties.address || {};
+      return getAddressPart(address, ['road', 'pedestrian', 'residential', 'footway', 'cycleway', 'path']);
+    };
+
+    const getFeatureDisplayName = (feature) => {
+      const names = feature.properties.namedetails || {};
+      return feature.properties.name
+        || names.name
+        || feature.properties.display_name?.split(',')[0]
+        || '';
+    };
+
+    const doesFeatureMatchSearchCategory = (feature, queryProfile) => {
+      const properties = feature.properties || {};
+      const address = properties.address || {};
+      const resultType = String(properties.addresstype || properties.type || properties.class || '').toLowerCase();
+      const road = getFeatureRoadName(feature);
+      const isRoadOrAddress = Boolean(road) || ['house', 'building', 'address', 'road', 'street', 'residential', 'pedestrian', 'service'].includes(resultType);
+      const roadMatches = road ? doesNameMatchQuery(road, queryProfile) : false;
+
+      if (queryProfile.isStreetLike || isRoadOrAddress) {
+        if (!roadMatches) {
+          return false;
+        }
+
+        if (queryProfile.houseNumber && address.house_number) {
+          return compactSearchText(address.house_number) === queryProfile.houseNumber;
+        }
+
+        return true;
+      }
+
+      return doesNameMatchQuery(getFeatureDisplayName(feature), queryProfile);
+    };
+
     const formatSearchLabel = (feature) => {
       const address = feature.properties.address || {};
-      const road = getAddressPart(address, ['road', 'pedestrian', 'residential', 'footway', 'cycleway', 'path']);
+      const road = getFeatureRoadName(feature);
       const houseNumber = address.house_number ? ` ${address.house_number}` : '';
       const postcode = address.postcode || '';
       const city = getAddressPart(address, ['city', 'town', 'village', 'municipality', 'county']);
@@ -1559,6 +1668,7 @@
 
         try {
           setSearchState('searching');
+          const queryProfile = createQueryProfile(query);
           const requests = [
             fetchNominatimFeatures(createNominatimParams(query, { q: query })),
           ];
@@ -1583,7 +1693,7 @@
 
             seen.add(key);
             return true;
-          });
+          }).filter((feature) => doesFeatureMatchSearchCategory(feature, queryProfile));
 
           const features = sortSearchFeatures(dedupedFeatures).slice(0, 12).map((feature) => {
             const bbox = feature.bbox?.map(Number);
@@ -1647,12 +1757,15 @@
         selectedPlace.textContent = 'Ingen plats vald';
       }
 
+      openSearchSuggestions();
       setSearchState('');
     });
 
     const geocoderInput = geocoderElement.querySelector('input');
 
     geocoderInput?.addEventListener('input', () => {
+      openSearchSuggestions();
+
       if (geocoderInput.value.trim().length < 2) {
         setSearchState('');
         return;
@@ -1674,14 +1787,17 @@
       }
 
       event.preventDefault();
+      event.stopPropagation();
       setSearchState('searching');
       const results = await geocoderApi.forwardGeocode({ query });
       const firstResult = results.features[0];
 
       if (firstResult) {
         selectSearchResult(firstResult);
+        geocoderInput.blur();
       } else {
         setInvalidSearchState();
+        closeSearchSuggestions();
       }
     });
   };

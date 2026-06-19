@@ -3025,6 +3025,10 @@ img {
   border-radius: 14px;
 }
 
+.coverage-maplibre-search.is-committed .suggestions-wrapper {
+  display: none;
+}
+
 .coverage-maplibre-search .suggestions {
   margin-top: 8px;
   overflow: auto;

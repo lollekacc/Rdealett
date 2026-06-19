@@ -1417,6 +1417,11 @@
       geocoderElement.classList.remove('is-committed');
     };
 
+    const clearLiveSuggestions = () => {
+      geocoderElement.querySelector('.coverage-maplibre-live-suggestions .suggestions')?.replaceChildren();
+      geocoderElement.classList.remove('has-live-suggestions');
+    };
+
     const getSearchResultZoom = (result) => {
       const properties = result.properties || {};
       const resultType = String(properties.addresstype || properties.type || properties.class || '').toLowerCase();
@@ -1673,6 +1678,10 @@
             fetchNominatimFeatures(createNominatimParams(query, { q: query })),
           ];
 
+          if (queryProfile.compactQuery.length >= 3) {
+            requests.push(fetchNominatimFeatures(createNominatimParams(query, { q: `${query} Sverige` })));
+          }
+
           if (!hasPostalCode(query)) {
             requests.push(fetchNominatimFeatures(createNominatimParams(query, { street: query, country: 'Sverige' })));
           }
@@ -1736,13 +1745,105 @@
       clearAndBlurOnEsc: true,
       clearOnBlur: false,
       limit: 6,
-      minLength: 2,
+      minLength: 100,
       placeholder: 'S\u00f6k adress eller plats',
       countries: 'se',
       bbox: swedenBounds,
     });
 
     geocoder.addTo(geocoderElement);
+    const liveSuggestions = document.createElement('div');
+    liveSuggestions.className = 'coverage-maplibre-live-suggestions suggestions-wrapper';
+    liveSuggestions.innerHTML = '<ul class="suggestions" role="listbox" aria-label="S&ouml;kf&ouml;rslag"></ul>';
+    geocoderElement.append(liveSuggestions);
+
+    const liveSuggestionsList = liveSuggestions.querySelector('.suggestions');
+    let autocompleteTimer = null;
+    let autocompleteRequestId = 0;
+    let latestLiveResults = [];
+    let latestLiveQuery = '';
+
+    const renderLiveSuggestions = (features, query) => {
+      latestLiveResults = features;
+      latestLiveQuery = query;
+      liveSuggestionsList.replaceChildren();
+
+      if (!features.length) {
+        geocoderElement.classList.remove('has-live-suggestions');
+        return;
+      }
+
+      features.slice(0, 8).forEach((feature, index) => {
+        const item = document.createElement('li');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('role', 'option');
+        button.textContent = feature.place_name || feature.text;
+        button.addEventListener('mousedown', (event) => {
+          event.preventDefault();
+        });
+        button.addEventListener('click', () => {
+          geocoderInput.value = feature.place_name || feature.text || '';
+          selectSearchResult(feature);
+          geocoderInput.blur();
+        });
+
+        if (index === 0) {
+          item.classList.add('active');
+        }
+
+        item.append(button);
+        liveSuggestionsList.append(item);
+      });
+
+      geocoderElement.classList.add('has-live-suggestions');
+    };
+
+    const renderLiveLoading = () => {
+      latestLiveResults = [];
+      latestLiveQuery = '';
+      liveSuggestionsList.replaceChildren();
+
+      const item = document.createElement('li');
+      item.className = 'is-loading';
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.disabled = true;
+      button.textContent = 'S\u00f6ker...';
+      item.append(button);
+      liveSuggestionsList.append(item);
+      geocoderElement.classList.add('has-live-suggestions');
+    };
+
+    const queueLiveAutocomplete = (query) => {
+      window.clearTimeout(autocompleteTimer);
+
+      if (normalizeSearchText(query).length < 3) {
+        latestLiveResults = [];
+        latestLiveQuery = '';
+        clearLiveSuggestions();
+        setSearchState('');
+        return;
+      }
+
+      openSearchSuggestions();
+      geocoderElement.classList.remove('is-selected', 'is-invalid');
+      searchFeedback.textContent = '';
+      renderLiveLoading();
+
+      autocompleteTimer = window.setTimeout(async () => {
+        const requestId = autocompleteRequestId + 1;
+        autocompleteRequestId = requestId;
+        const results = await geocoderApi.forwardGeocode({ query });
+
+        if (requestId !== autocompleteRequestId || geocoderInput.value.trim() !== query) {
+          return;
+        }
+
+        renderLiveSuggestions(results.features, query);
+      }, 180);
+    };
+
     geocoder.on('result', (event) => {
       selectSearchResult(event.result);
     });
@@ -1758,21 +1859,14 @@
       }
 
       openSearchSuggestions();
+      clearLiveSuggestions();
       setSearchState('');
     });
 
     const geocoderInput = geocoderElement.querySelector('input');
 
     geocoderInput?.addEventListener('input', () => {
-      openSearchSuggestions();
-
-      if (geocoderInput.value.trim().length < 2) {
-        setSearchState('');
-        return;
-      }
-
-      geocoderElement.classList.remove('is-selected', 'is-invalid');
-      searchFeedback.textContent = '';
+      queueLiveAutocomplete(geocoderInput.value.trim());
     });
 
     geocoderInput?.addEventListener('keydown', async (event) => {
@@ -1788,15 +1882,21 @@
 
       event.preventDefault();
       event.stopPropagation();
+      window.clearTimeout(autocompleteTimer);
       setSearchState('searching');
-      const results = await geocoderApi.forwardGeocode({ query });
-      const firstResult = results.features[0];
+      const canUseLiveResult = latestLiveQuery === query && latestLiveResults.length;
+      const firstResult = canUseLiveResult
+        ? latestLiveResults[0]
+        : (await geocoderApi.forwardGeocode({ query })).features[0];
 
       if (firstResult) {
+        geocoderInput.value = firstResult.place_name || firstResult.text || query;
         selectSearchResult(firstResult);
+        clearLiveSuggestions();
         geocoderInput.blur();
       } else {
         setInvalidSearchState();
+        clearLiveSuggestions();
         closeSearchSuggestions();
       }
     });

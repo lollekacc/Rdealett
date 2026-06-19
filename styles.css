@@ -3025,6 +3025,10 @@ img {
   border-radius: 14px;
 }
 
+.coverage-maplibre-search .maplibregl-ctrl-geocoder .suggestions-wrapper {
+  display: none;
+}
+
 .coverage-maplibre-search.is-committed .suggestions-wrapper {
   display: none;
 }
@@ -3040,25 +3044,42 @@ img {
   backdrop-filter: blur(16px);
 }
 
-.coverage-maplibre-search .suggestions > li > a {
+.coverage-maplibre-search .suggestions > li > a,
+.coverage-maplibre-search .suggestions > li > button {
   display: block;
+  width: 100%;
   padding: 12px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  background: transparent;
   color: rgba(255, 255, 255, 0.88);
   font-family: 'Roboto', sans-serif;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
 }
 
-.coverage-maplibre-search .suggestions > li:last-child > a {
+.coverage-maplibre-search .suggestions > li:last-child > a,
+.coverage-maplibre-search .suggestions > li:last-child > button {
   border-bottom: 0;
 }
 
 .coverage-maplibre-search .suggestions > .active > a,
-.coverage-maplibre-search .suggestions > li > a:hover {
+.coverage-maplibre-search .suggestions > .active > button,
+.coverage-maplibre-search .suggestions > li > a:hover,
+.coverage-maplibre-search .suggestions > li > button:hover {
   background: rgba(239, 130, 20, 0.18);
   color: #fff;
+}
+
+.coverage-maplibre-search .suggestions > li.is-loading > button,
+.coverage-maplibre-search .suggestions > li > button:disabled {
+  color: rgba(255, 255, 255, 0.58);
+  cursor: wait;
 }
 
 .coverage-maplibre-place {

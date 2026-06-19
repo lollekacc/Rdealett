@@ -13,14 +13,41 @@
 <body class="business-page">
   <div data-include="header"></div>
 
-  <main>
+  <main class="business-main">
     <section class="business-hero">
-      <img src="images/hero-wide.png" alt="F&ouml;retagsabonnemang" />
-      <div class="business-hero-overlay"></div>
-      <div class="business-hero-content">
-        <span class="business-kicker">F&ouml;retagsl&ouml;sningar</span>
-        <h1>Mobilabonnemang f&ouml;r f&ouml;retag</h1>
-        <p>Smarta mobilabonnemang anpassade f&ouml;r f&ouml;retag i alla storlekar med trygg 5G-uppkoppling och f&ouml;ruts&auml;gbara kostnader.</p>
+      <img class="business-hero-image" src="images/hero-wide.png" alt="F&ouml;retagsabonnemang" />
+      <div class="business-hero-inner">
+        <div class="business-hero-copy">
+          <span class="business-kicker">F&ouml;retagsl&ouml;sningar</span>
+          <h1>Mobilabonnemang f&ouml;r f&ouml;retag</h1>
+          <p>Smarta mobilabonnemang anpassade f&ouml;r f&ouml;retag i alla storlekar med trygg 5G-uppkoppling och f&ouml;ruts&auml;gbara kostnader.</p>
+          <div class="business-hero-actions">
+            <a class="business-action business-action--primary" href="#businessPlans">J&auml;mf&ouml;r planer</a>
+            <a class="business-action business-action--secondary" href="kontakt.html">Prata med oss</a>
+          </div>
+          <ul class="business-hero-points" aria-label="F&ouml;rdelar">
+            <li><i class="fa-solid fa-signal"></i><span>5G fr&aring;n ledande operat&ouml;rer</span></li>
+            <li><i class="fa-solid fa-receipt"></i><span>Tydliga kostnader per anv&auml;ndare</span></li>
+            <li><i class="fa-solid fa-headset"></i><span>Hj&auml;lp att v&auml;lja r&auml;tt uppl&auml;gg</span></li>
+          </ul>
+        </div>
+        <aside class="business-hero-panel" aria-label="F&ouml;retags&ouml;versikt">
+          <div class="business-stat-card">
+            <span>F&ouml;r team</span>
+            <strong>1-100+</strong>
+            <p>V&auml;lj storlek och j&auml;mf&ouml;r abonnemang som passar hur ni jobbar.</p>
+          </div>
+          <div class="business-mini-grid">
+            <div class="business-mini-card">
+              <span>Uppkoppling</span>
+              <strong>5G</strong>
+            </div>
+            <div class="business-mini-card">
+              <span>Operat&ouml;rer</span>
+              <strong>4 st</strong>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -31,14 +58,14 @@
           <h2>Hur stort &auml;r f&ouml;retaget?</h2>
         </div>
         <div class="business-size-grid">
-          <button class="business-size" data-size="small" type="button">1-10 personer</button>
-          <button class="business-size" data-size="medium" type="button">10-100 personer</button>
-          <button class="business-size" data-size="large" type="button">100+ personer</button>
+          <button class="business-size" data-size="small" type="button"><i class="fa-solid fa-user"></i><span>1-10 personer</span></button>
+          <button class="business-size" data-size="medium" type="button"><i class="fa-solid fa-users"></i><span>10-100 personer</span></button>
+          <button class="business-size" data-size="large" type="button"><i class="fa-solid fa-building"></i><span>100+ personer</span></button>
         </div>
       </div>
     </section>
 
-    <section class="business-plans-section">
+    <section class="business-plans-section" id="businessPlans">
       <div class="business-shell">
         <div class="section-head center">
           <span class="section-kicker">J&auml;mf&ouml;r planer</span>

@@ -1372,9 +1372,10 @@ img {
   justify-content: center;
   width: 100%;
   min-height: 60px;
-  color: var(--text);
+  color: #22253F;
   padding: 0 22px;
   font-size: 16px;
+  font-weight: 600;
   font-family: 'din-next-w01-light', sans-serif;
   letter-spacing: normal;
   background: transparent;

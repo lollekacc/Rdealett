@@ -127,6 +127,122 @@ const buildFamilyPlanOffer = (basePlan, addonPlan, offer, answers) => {
   };
 };
 
+const getFamilyCustomerStatusLabel = (answers) => {
+  if (answers.customerStatus === 'none') return 'Alla blir nya kunder';
+  if (answers.customerStatus === 'all') return 'Alla har redan abonnemang';
+  return `${Number(answers.newCustomers) || 0} blir nya kunder`;
+};
+
+const getFamilyAnswerSummary = (answers) => [
+  {
+    label: 'Antal abonnemang',
+    value: `${Number(answers.persons) || 1} abonnemang`,
+  },
+  {
+    label: 'Kundstatus',
+    value: getFamilyCustomerStatusLabel(answers),
+  },
+];
+
+const getFamilyAnswerFacts = (answers = {}) => getFamilyAnswerSummary(answers)
+  .filter((item) => item.value)
+  .map((item) => ({ label: item.label, value: item.value }));
+
+const createCompareButton = (item) => {
+  const button = createElement('button', 'offer-compare-button offer-compare-button--icon');
+  button.type = 'button';
+  button.setAttribute('aria-label', 'J\u00e4mf\u00f6r');
+  if (window.DealettOfferCompare) {
+    window.DealettOfferCompare.bindButton(button, item);
+  } else {
+    button.innerHTML = '<img src="images/jamfor2.png" alt="" class="offer-compare-button__image" loading="lazy" decoding="async" aria-hidden="true">';
+  }
+  return button;
+};
+
+const buildBaseCompareItem = (offer) => ({
+  id: `family-operator-${offer.provider}`,
+  title: offer.label,
+  operator: offer.provider,
+  type: 'Familjepaket',
+  logo: offer.logo,
+  accent: offer.accent,
+  facts: [
+    { label: 'Typ', value: 'Familjabonnemang' },
+    { label: 'Antal abonnemang', value: offer.members },
+    { label: 'Surf', value: offer.surf },
+    { label: 'Samtal & SMS', value: 'Fria samtal och SMS' },
+    { label: 'Presentkort', value: `${formatCurrency(offer.reward)} kr` },
+  ],
+});
+
+const buildFamilyCompareItem = (selectedPlan, plan, answers) => ({
+  id: `family-plan-${selectedPlan.operator}-${plan.id || selectedPlan.title}-${Number(answers.persons) || 1}`,
+  title: selectedPlan.title,
+  operator: selectedPlan.operator,
+  type: 'Familjepaket',
+  logo: selectedPlan.logo,
+  accent: selectedPlan.accent,
+  facts: [
+    { label: 'Typ', value: 'Familjabonnemang' },
+    { label: 'Antal abonnemang', value: selectedPlan.members },
+    { label: 'Surf', value: selectedPlan.surf },
+    { label: 'Pris', value: `${formatCurrency(selectedPlan.price)} kr/m\u00e5n totalt` },
+    { label: 'Pris per person', value: `${formatCurrency(selectedPlan.pricePerPerson)} kr/person` },
+    { label: 'Extra abonnemang', value: selectedPlan.addonPrice ? `${formatCurrency(selectedPlan.addonPrice)} kr/st` : '-' },
+    { label: 'Presentkort', value: `${formatCurrency(selectedPlan.reward)} kr` },
+    ...getFamilyAnswerFacts(answers),
+  ],
+});
+
+const renderAnswerSummary = (offer, panel, answers, sourceCard) => {
+  let questionBox = panel.querySelector('.offer-card-questions');
+
+  if (!questionBox) {
+    questionBox = createElement('div', 'offer-card-questions');
+    panel.append(questionBox);
+  }
+
+  const kicker = createElement('p', 'offer-question-kicker', 'Dina svar');
+  const heading = createElement('h4', '', `${offer.label} matchas med svaren nedan`);
+  const list = createElement('dl', 'offer-answer-list');
+  const editButton = createElement('button', 'offer-answer-edit', '\u00c4ndra svar');
+
+  getFamilyAnswerSummary(answers).forEach((item) => {
+    list.append(
+      createElement('dt', '', item.label),
+      createElement('dd', '', item.value)
+    );
+  });
+
+  editButton.type = 'button';
+  editButton.addEventListener('click', () => renderPersonQuestion(offer, sourceCard));
+
+  questionBox.replaceChildren(kicker, heading, list, editButton);
+};
+
+const getExpandedOfferPanel = (card) => {
+  offersContainer?.querySelectorAll('.offer-card-expanded-panel').forEach((panel) => {
+    panel.remove();
+  });
+
+  const panel = createElement('div', 'offer-card-expanded-panel');
+  panel.style.setProperty('--offer-accent', card.style.getPropertyValue('--offer-accent') || 'var(--accent)');
+  card.after(panel);
+  return panel;
+};
+
+const getPlanResultsBox = (panel) => {
+  let resultsBox = panel.querySelector('.offer-card-results');
+
+  if (!resultsBox) {
+    resultsBox = createElement('div', 'offer-card-results');
+    panel.append(resultsBox);
+  }
+
+  return resultsBox;
+};
+
 const updateRewardState = () => {
   if (!selectedOffer || !rewardGrid || !remainingSum || !rewardProgressFill || !rewardContinueBtn) {
     return;
@@ -173,11 +289,13 @@ const renderRewards = (offer) => {
 
 const selectOffer = (offer, card) => {
   selectedOffer = offer;
+  const selectedCard = card.closest?.('.offer-card') || card;
 
-  offersContainer?.querySelectorAll('.offer-card').forEach((item) => {
+  offersContainer?.querySelectorAll('.offer-card, .operator-plan-row').forEach((item) => {
     item.classList.remove('is-selected');
   });
 
+  selectedCard.classList.add('is-selected');
   card.classList.add('is-selected');
   rewardSection?.classList.remove('is-hidden');
   renderRewards(offer);
@@ -185,6 +303,10 @@ const selectOffer = (offer, card) => {
 };
 
 const resetOfferQuestions = () => {
+  offersContainer?.querySelectorAll('.offer-card-expanded-panel').forEach((panel) => {
+    panel.remove();
+  });
+
   offersContainer?.querySelectorAll('.offer-card').forEach((card) => {
     card.classList.remove('is-answering', 'is-selected');
     card.querySelector('.offer-card-questions')?.remove();
@@ -192,10 +314,19 @@ const resetOfferQuestions = () => {
   });
 };
 
-const renderPlanOffers = async (offer, answers) => {
-  if (!offersContainer) return;
+const renderPlanOffers = async (offer, answers, card) => {
+  if (!offersContainer || !card) return;
 
-  offersContainer.innerHTML = '<div class="offers-loading">H\u00e4mtar familjepaket...</div>';
+  card.classList.remove('is-answering');
+  card.classList.add('is-selected');
+  card.querySelector('.offer-card-details')?.classList.remove('is-hidden');
+  card.querySelector('.offer-card-questions')?.remove();
+
+  const panel = getExpandedOfferPanel(card);
+  renderAnswerSummary(offer, panel, answers, card);
+
+  const resultsBox = getPlanResultsBox(panel);
+  resultsBox.innerHTML = '<div class="offers-loading">H\u00e4mtar familjepaket...</div>';
 
   try {
     const plans = await loadPlans();
@@ -212,24 +343,16 @@ const renderPlanOffers = async (offer, answers) => {
 
     basePlans.forEach((plan) => {
       const selectedPlan = buildFamilyPlanOffer(plan, addonPlan, offer, answers);
-      const card = createElement('article', 'offer-card offer-card--plan');
-      card.style.setProperty('--offer-accent', selectedPlan.accent);
+      const row = createElement('div', 'operator-plan-row offer-card--plan');
+      row.style.setProperty('--offer-accent', selectedPlan.accent);
 
-      const logoWrap = createElement('div', 'offer-card-logo');
-      const logo = document.createElement('img');
-      logo.src = plan.logo;
-      logo.alt = plan.operator;
-      logo.loading = 'lazy';
-      logo.decoding = 'async';
-      logoWrap.append(logo);
-
-      const copy = createElement('div', 'offer-card-copy');
+      const copy = createElement('div', 'operator-plan-copy');
       copy.append(
         createElement('h3', '', plan.title),
         createElement('p', '', `${selectedPlan.members} | ${selectedPlan.surf}`)
       );
 
-      const meta = createElement('ul', 'offer-card-meta');
+      const meta = createElement('ul', 'offer-card-meta operator-plan-meta');
       [
         `${formatCurrency(selectedPlan.price)} kr/m\u00e5n totalt`,
         `${formatCurrency(selectedPlan.pricePerPerson)} kr/person`,
@@ -241,21 +364,30 @@ const renderPlanOffers = async (offer, answers) => {
 
       const button = createElement('button', 'offer-card-action', 'V\u00e4lj familjepaket');
       button.type = 'button';
-      button.addEventListener('click', () => selectOffer(selectedPlan, card));
+      button.addEventListener('click', () => selectOffer(selectedPlan, row));
 
-      card.append(logoWrap, copy, meta, button);
-      fragment.append(card);
+      const compareButton = createCompareButton(buildFamilyCompareItem(selectedPlan, plan, answers));
+
+      const actions = createElement('div', 'offer-card-actions');
+      actions.append(button);
+
+      row.append(compareButton, copy, meta, actions);
+      fragment.append(row);
     });
 
-    offersContainer.replaceChildren(fragment);
+    if (!fragment.childNodes.length) {
+      resultsBox.innerHTML = '<div class="offers-loading">Inga familjepaket hittades f\u00f6r den h\u00e4r operat\u00f6ren just nu.</div>';
+    } else {
+      resultsBox.replaceChildren(fragment);
+    }
   } catch {
-    offersContainer.innerHTML = '<div class="offers-loading">Kunde inte h\u00e4mta familjepaket just nu.</div>';
+    resultsBox.innerHTML = '<div class="offers-loading">Kunde inte h\u00e4mta familjepaket just nu.</div>';
   }
 };
 
-const finishOfferQuestions = (offer, answers) => {
+const finishOfferQuestions = (offer, answers, card) => {
   offer.answers = answers;
-  renderPlanOffers(offer, answers);
+  renderPlanOffers(offer, answers, card);
 };
 
 const renderCustomerQuestion = (offer, card, answers) => {
@@ -300,7 +432,7 @@ const renderCustomerQuestion = (offer, card, answers) => {
       }
 
       answers.newCustomers = answers.customerStatus === 'none' ? answers.persons : 0;
-      finishOfferQuestions(offer, answers);
+      finishOfferQuestions(offer, answers, card);
     });
   });
 
@@ -313,7 +445,7 @@ const renderCustomerQuestion = (offer, card, answers) => {
     }
 
     answers.newCustomers = value;
-    finishOfferQuestions(offer, answers);
+    finishOfferQuestions(offer, answers, card);
   });
 };
 
@@ -374,7 +506,7 @@ const renderOffers = () => {
     logo.alt = offer.label;
     logo.loading = 'lazy';
     logo.decoding = 'async';
-    logoWrap.append(logo);
+    logoWrap.append(logo, createCompareButton(buildBaseCompareItem(offer)));
 
     const details = createElement('div', 'offer-card-details');
     const copy = createElement('div');
@@ -389,7 +521,10 @@ const renderOffers = () => {
     button.type = 'button';
     button.addEventListener('click', () => renderPersonQuestion(offer, card));
 
-    details.append(copy, meta, button);
+    const actions = createElement('div', 'offer-card-actions');
+    actions.append(button);
+
+    details.append(copy, meta, actions);
     card.append(logoWrap, details);
     fragment.append(card);
   });

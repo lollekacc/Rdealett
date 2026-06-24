@@ -552,10 +552,17 @@ function createIndexQuiz() {
     const personIndex = Number(option.dataset.personIndex);
     if (!Number.isInteger(personIndex)) return;
 
-    state.operators[personIndex] = option.dataset.operator || null;
-
     const group = option.closest("[data-operator-group]");
-    setSelected(group || steps[1], "[data-operator]", option);
+    const isSelected = state.operators[personIndex] === option.dataset.operator;
+
+    if (isSelected) {
+      state.operators[personIndex] = null;
+      option.classList.remove("selected", "active");
+      option.setAttribute("aria-pressed", "false");
+    } else {
+      state.operators[personIndex] = option.dataset.operator || null;
+      setSelected(group || steps[1], "[data-operator]", option);
+    }
 
     state.selectedOperator = state.operators.find(Boolean) || null;
     maybeAdvanceFromOperatorQuestion();
@@ -1057,6 +1064,88 @@ function createIndexQuiz() {
       .replace(/'/g, "&#039;");
   }
 
+  function formatMoney(value) {
+    return `${new Intl.NumberFormat("sv-SE").format(Math.max(Number(value) || 0, 0))} kr`;
+  }
+
+  function createCompareButton(item) {
+    const button = document.createElement("button");
+    button.className = "offer-compare-button offer-compare-button--icon";
+    button.type = "button";
+    button.setAttribute("aria-label", "J\u00e4mf\u00f6r");
+
+    if (window.DealettOfferCompare) {
+      window.DealettOfferCompare.bindButton(button, item);
+    } else {
+      button.innerHTML = '<img src="images/jamfor2.png" alt="" class="offer-compare-button__image" loading="lazy" decoding="async" aria-hidden="true">';
+    }
+
+    return button;
+  }
+
+  function getAnswerCompareFacts() {
+    const persons = Number(state.persons) || 1;
+    const existingOperators = state.operators
+      .slice(0, Number(state.existingCustomers) || 0)
+      .filter(Boolean)
+      .join(", ");
+
+    return [
+      { label: "Antal abonnemang", value: `${persons} abonnemang` },
+      state.data ? { label: "Surfbehov", value: getDataNeedLabel(state.data) } : null,
+      state.price ? { label: "Prisniv\u00e5", value: getPriceNeedLabel(state.price) } : null,
+      existingOperators ? { label: "Nuvarande operat\u00f6r", value: existingOperators } : null,
+    ].filter(Boolean);
+  }
+
+  function getDataNeedLabel(value) {
+    if (value === "low") return "Mest wifi & sociala medier";
+    if (value === "medium") return "Streaming & video";
+    if (value === "high") return "Max surf";
+    return value;
+  }
+
+  function getPriceNeedLabel(value) {
+    if (value === "under300") return "Under 300 kr";
+    if (value === "300-400") return "300-400 kr";
+    if (value === "400-500") return "400 kr eller mer";
+    return value;
+  }
+
+  function buildRecommendationCompareItem(plan, index) {
+    const persons = Number(state.persons) || 1;
+    const isMulti = persons > 1;
+    const dataText = plan.dataAmount >= 999 ? "Obegr\u00e4nsad" : `${plan.dataAmount} GB`;
+    const finalPrice = Number(plan.finalPrice ?? plan.price) || 0;
+    const pricePerPerson = Number(plan.pricePerPerson) || finalPrice;
+    const rewardTotal = Number(plan.rewardTotal) || 4000;
+    const contractMonths = Number(plan.offerCalculation?.contractMonths) || null;
+    const overlapCost = Number(plan.offerCalculation?.overlapCostKnown) || 0;
+    const savings = Number(plan.offerCalculation?.savingsVsStaying) || 0;
+
+    return {
+      id: `index-quiz-${plan.id || plan.title || plan.operator}-${persons}-${index}`,
+      title: plan.title || plan.data || "Mobilabonnemang",
+      operator: plan.operator,
+      type: isMulti ? "Familjepaket" : "Mobilabonnemang",
+      logo: plan.logo,
+      accent: "var(--accent)",
+      facts: [
+        { label: "Typ", value: isMulti ? "Familjabonnemang" : "Mobilabonnemang" },
+        { label: "Operat\u00f6r", value: plan.operator },
+        { label: "Antal abonnemang", value: `${persons} abonnemang` },
+        { label: "Surf", value: dataText },
+        { label: "Pris", value: isMulti ? `${formatMoney(pricePerPerson)}/person` : `${formatMoney(finalPrice)}/m\u00e5n` },
+        isMulti ? { label: "Totalpris", value: `${formatMoney(finalPrice)}/m\u00e5n` } : null,
+        { label: "Presentkort", value: `${formatMoney(rewardTotal)}` },
+        contractMonths ? { label: "Bindningstid", value: `${contractMonths} m\u00e5n` } : null,
+        overlapCost > 0 ? { label: "Dubbelkostnad", value: `ca ${formatMoney(overlapCost)}` } : null,
+        savings > 0 ? { label: "Uppskattad vinst", value: `${formatMoney(savings)}` } : null,
+        ...getAnswerCompareFacts(),
+      ].filter(Boolean),
+    };
+  }
+
   function buildRecommendationCard(plan, index) {
     const article = document.createElement("article");
     const providerClass = getProviderClass(plan.operator);
@@ -1107,6 +1196,9 @@ function createIndexQuiz() {
       event.preventDefault();
       saveRecommendationAndNavigate(plan);
     });
+
+    const compareButton = createCompareButton(buildRecommendationCompareItem(plan, index));
+    article.querySelector(".offer-card__head")?.append(compareButton);
 
     return article;
   }

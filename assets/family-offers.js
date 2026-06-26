@@ -20,15 +20,6 @@ const offers = [
     reward: 5000,
   },
   {
-    provider: 'Halebop',
-    label: 'Halebop Familj',
-    logo: 'images/halebop.webp',
-    accent: '#C8175C',
-    members: '3 abonnemang',
-    surf: '100 GB att dela',
-    reward: 3500,
-  },
-  {
     provider: 'Telenor',
     label: 'Telenor Familj',
     logo: 'images/telenor.jpg',

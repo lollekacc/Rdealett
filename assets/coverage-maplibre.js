@@ -6,7 +6,7 @@
     return;
   }
 
-  const operators = ['telia', 'tele2', 'telenor', 'tre', 'halebop'];
+  const operators = ['telia', 'tele2', 'telenor', 'tre'];
   const networks = ['2G', '3G', '4G', '4G+', '5G', '5G+'];
   const mapThemeStorageKey = 'dealettCoverageMapTheme';
   const operatorLabels = {
@@ -14,7 +14,6 @@
     tele2: 'Tele2',
     telenor: 'Telenor',
     tre: 'Tre',
-    halebop: 'Halebop',
   };
   const networkPropertyKeys = {
     '2G': 'network_2g',
@@ -453,12 +452,6 @@
       networks: ['4G', '5G', '5G+'],
       coordinates: [[[11.8, 55.4], [18.9, 55.7], [18.9, 60.0], [16.2, 60.3], [12.2, 58.4], [11.8, 55.4]]],
     },
-    {
-      id: 'halebop-shared',
-      operator: 'halebop',
-      networks: ['2G', '4G', '5G'],
-      coordinates: [[[13.0, 56.2], [19.2, 56.4], [19.4, 61.0], [14.1, 61.2], [12.2, 58.4], [13.0, 56.2]]],
-    },
   ];
 
   const placeholderCoverageGeoJson = {
@@ -794,7 +787,6 @@
     tele2: { density: 0.92, urbanBias: 0.36, northReliability: 0.7, salt: 203 },
     telenor: { density: 0.96, urbanBias: 0.28, northReliability: 0.76, salt: 307 },
     tre: { density: 0.8, urbanBias: 0.72, northReliability: 0.5, salt: 409 },
-    halebop: { density: 1, urbanBias: 0.18, northReliability: 0.9, salt: 503 },
   };
 
   const networkCoverageProfiles = {

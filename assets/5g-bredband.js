@@ -10,7 +10,6 @@ const providerLogos = {
   Tele2: 'images/tele2.png',
   Tre: 'images/tre.jpg',
   Telenor: 'images/telenor.jpg',
-  Halebop: 'images/halebop.webp',
 };
 
 const providerAccents = {
@@ -18,7 +17,6 @@ const providerAccents = {
   Tele2: '#003A6E',
   Tre: '#E65C00',
   Telenor: '#00437E',
-  Halebop: '#C8175C',
 };
 
 const channelLogos = {

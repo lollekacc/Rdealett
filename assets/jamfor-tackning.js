@@ -44,10 +44,6 @@
       label: 'Tre',
       theme: '#E65C00',
     },
-    halebop: {
-      label: 'Halebop',
-      theme: '#C8175C',
-    },
   };
 
   const map = L.map('map', {
@@ -111,14 +107,6 @@
         services: 'NR3500_DATASA,NR_DATANSA,LTE_DATA',
         qualities: '1,2,3',
         serviceGroup: 'mobile_broadband',
-        format: 'image/png',
-        transparent: true,
-        opacity: 0.78,
-      }
-    ),
-    halebop: L.tileLayer.wms(
-      'https://coverage.ddc.teliasonera.net/coverageportal_se/map/tile',
-      {
         format: 'image/png',
         transparent: true,
         opacity: 0.78,

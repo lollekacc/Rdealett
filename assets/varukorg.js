@@ -27,7 +27,6 @@
 
   const providerAccents = {
     telia: '#6E2380',
-    halebop: '#C8175C',
     telenor: '#00437E',
     tre: '#E65C00',
     tele2: '#003A6E'
@@ -38,11 +37,6 @@
       offerId: 'telia-home-unlimited-4',
       operator: 'Telia',
       logo: 'images/telia.png'
-    },
-    'halebop-home-unlimited-4': {
-      offerId: 'halebop-home-unlimited-4',
-      operator: 'Halebop',
-      logo: 'images/halebop.webp'
     },
     'telenor-home-unlimited-4': {
       offerId: 'telenor-home-unlimited-4',

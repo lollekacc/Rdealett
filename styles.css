@@ -3766,17 +3766,12 @@ img {
 }
 
 .provider-card--telia { --provider-accent: #6E2380; }
-.provider-card--halebop { --provider-accent: #C8175C; }
 .provider-card--telenor { --provider-accent: #00437E; }
 .provider-card--tre { --provider-accent: #E65C00; }
 .provider-card--tele2 { --provider-accent: #003A6E; }
 
 .provider-card--telia .provider-card__media {
   background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(110, 35, 128, 0.1));
-}
-
-.provider-card--halebop .provider-card__media {
-  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(200, 23, 92, 0.1));
 }
 
 .provider-card--telenor .provider-card__media {
@@ -6830,10 +6825,6 @@ body.cart-drawer-open {
 
 .offer-card.provider-card--telia .offer-card__head {
   background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(110, 35, 128, 0.1));
-}
-
-.offer-card.provider-card--halebop .offer-card__head {
-  background-image: linear-gradient(135deg, rgba(246, 244, 240, 0.9), rgba(200, 23, 92, 0.1));
 }
 
 .offer-card.provider-card--telenor .offer-card__head {

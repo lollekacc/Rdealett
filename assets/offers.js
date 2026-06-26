@@ -17,12 +17,6 @@ const offers = [
     reward: 4000,
   },
   {
-    provider: 'Halebop',
-    logo: 'images/halebop.webp',
-    accent: '#C8175C',
-    reward: 4000,
-  },
-  {
     provider: 'Telenor',
     logo: 'images/telenor.jpg',
     accent: '#00437E',

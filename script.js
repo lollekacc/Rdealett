@@ -1196,7 +1196,7 @@
         { test: /300.?400/i, patch: { priceRange: '300-400' } },
         { test: /400.?500/i, patch: { priceRange: '400-500' } },
       ];
-      const operator = ['Telia', 'Tele2', 'Telenor', 'Tre', 'Halebop']
+      const operator = ['Telia', 'Tele2', 'Telenor', 'Tre']
         .find((item) => item.toLowerCase() === normalized);
 
       if (operator) {

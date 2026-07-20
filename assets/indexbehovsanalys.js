@@ -66,6 +66,13 @@ function createIndexQuiz() {
       event.preventDefault();
       startQuiz({ inHero: true });
     });
+    document.querySelectorAll("[data-home-quiz-link]").forEach(link => {
+      link.addEventListener("click", event => {
+        event.preventDefault();
+        startQuiz({ inHero: true });
+        dom.hero?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
     dom.familyOfferGrid?.addEventListener("click", handleFamilyOfferClick);
     dom.wrapper.addEventListener("click", handleWrapperClick);
     dom.wrapper.addEventListener("change", handleWrapperChange);

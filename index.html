@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://unpkg.com/@maplibre/maplibre-gl-geocoder@1.5.0/dist/maplibre-gl-geocoder.css" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="styles-redesign.css" />
   </head>
   <body>
     <div data-include="header"></div>
@@ -16,13 +17,32 @@
     <main>
       <section class="hero">
         <div class="hero-content">
-          <h1 class="hero-title-nowrap">Få Personlig rådgivning</h1>
-          <h1>Få rätt prisplan</h1>
-          <h1>Få ett presentkort</h1>
-          <p>Tar mindre än 2 minuter, ingen registrering.</p>
+          <p class="hero-eyebrow"><span></span> Oberoende jämförelse, på riktigt</p>
+          <h1>Din bästa deal.<br /><em>Helt enkelt.</em></h1>
+          <p class="hero-lead">Vi jämför mobilabonnemang, familjeplaner och 5G-bredband — och visar vad som faktiskt passar dig.</p>
           <div class="hero-actions">
-            <a href="#quiz-steps-wrapper" id="hero-start-analysis" class="button button--primary">Se om du kan spara</a>
+            <a href="#quiz-steps-wrapper" id="hero-start-analysis" class="button button--primary">Hitta min deal <span aria-hidden="true">→</span></a>
+            <a href="mobilabonnemang.html" class="hero-text-link">Se alla abonnemang <span aria-hidden="true">↗</span></a>
           </div>
+          <div class="hero-proof" aria-label="Fördelar med Dealett">
+            <span><i class="fa-solid fa-check" aria-hidden="true"></i> Gratis</span>
+            <span><i class="fa-solid fa-check" aria-hidden="true"></i> Under 2 minuter</span>
+            <span><i class="fa-solid fa-check" aria-hidden="true"></i> Ingen registrering</span>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-orbit hero-orbit--one"></div>
+          <div class="hero-orbit hero-orbit--two"></div>
+          <div class="hero-deal-card">
+            <span class="hero-deal-label">Din match</span>
+            <strong>Obegränsad surf</strong>
+            <div class="hero-deal-price"><b>299</b><span>kr<br />/ mån</span></div>
+            <div class="hero-deal-row"><span>5G ingår</span><span>Ingen bindningstid</span></div>
+          </div>
+          <div class="hero-float hero-float--gift"><i class="fa-solid fa-gift"></i><span>Presentkort<br /><b>på köpet</b></span></div>
+          <div class="hero-float hero-float--saving"><small>Du sparar</small><strong>1 560 kr</strong><span>per år</span></div>
+          <div class="hero-badge"><span>4</span><small>operatörer<br />jämförda</small></div>
         </div>
 
         <div id="hero-quiz-mount" class="hero-quiz-mount" aria-live="polite">
@@ -319,7 +339,49 @@
         </div>
       </section>
 
+      <section class="home-marquee" aria-label="Dealett i korthet">
+        <div>
+          <span>Jämför smartare</span><i>✦</i><span>Betala mindre</span><i>✦</i><span>Behåll ditt nummer</span><i>✦</i><span>Få en belöning</span><i>✦</i><span>Jämför smartare</span>
+        </div>
+      </section>
 
+      <section class="home-intro section-space">
+        <div class="home-intro__head">
+          <p class="section-label">Ett enklare val</p>
+          <h2>Allt du behöver.<br />Inget du inte behöver.</h2>
+        </div>
+        <div class="home-intro__grid">
+          <a class="home-service-card home-service-card--orange" href="mobilabonnemang.html">
+            <span class="home-service-card__number">01</span>
+            <div><p>För dig</p><h3>Mobilabonnemang</h3></div>
+            <span class="home-service-card__arrow">↗</span>
+          </a>
+          <a class="home-service-card home-service-card--blue" href="familjabonnemang.html">
+            <span class="home-service-card__number">02</span>
+            <div><p>För hela gänget</p><h3>Familjeabonnemang</h3></div>
+            <span class="home-service-card__arrow">↗</span>
+          </a>
+          <a class="home-service-card home-service-card--lime" href="5g-bredband.html">
+            <span class="home-service-card__number">03</span>
+            <div><p>För hemmet</p><h3>5G-bredband</h3></div>
+            <span class="home-service-card__arrow">↗</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="home-how section-space">
+        <div class="home-how__copy">
+          <p class="section-label">Så fungerar det</p>
+          <h2>Från frågor till färdig deal.</h2>
+          <p>Svara på några enkla frågor. Vi räknar, jämför och lyfter fram alternativen som ger mest värde för just dig.</p>
+          <a href="#quiz-steps-wrapper" class="button button--primary" data-home-quiz-link>Starta jämförelsen <span>→</span></a>
+        </div>
+        <ol class="home-how__steps">
+          <li><span>01</span><div><h3>Berätta vad du behöver</h3><p>Surf, antal personer och ungefärlig budget.</p></div></li>
+          <li><span>02</span><div><h3>Vi jämför åt dig</h3><p>Pris, villkor, täckning och värdet på bonusen.</p></div></li>
+          <li><span>03</span><div><h3>Välj din bästa match</h3><p>Se allt tydligt och byt när det passar dig.</p></div></li>
+        </ol>
+      </section>
 
       <section class="gift-card-section section-space">
         <div class="page-shell">

@@ -1,48 +1,33 @@
 <header class="site-header">
-  <div class="header-topbar" aria-label="Snabbl&auml;nkar">
-    <div class="header-topbar-inner">
-      <div class="header-topbar-group">
-        <a class="header-topbar-link" href="index.html" data-topbar-link="private">Privat</a>
-        <a class="header-topbar-link" href="foretag.html" data-topbar-link="business">F&ouml;retag</a>
-      </div>
-      <div class="header-topbar-group header-topbar-group--right">
-        <label class="language-switcher" for="site-language">
-          <span class="visually-hidden">Språk</span>
-          <select id="site-language" data-language-switcher aria-label="Språk">
-            <option value="sv">Svenska</option>
-            <option value="en">English</option>
-            <option value="ar">العربية</option>
-            <option value="so">Soomaali</option>
-            <option value="fa">فارسی</option>
-          </select>
-        </label>
-        <a class="header-topbar-link header-cart-link" href="varukorg.html" data-topbar-link="cart">
-          Varukorg
-          <span class="header-cart-count is-hidden" data-cart-count aria-label="0 varor i varukorgen">0</span>
-        </a>
-        <a class="header-topbar-link" href="account.html" data-topbar-link="account">Mina sidor</a>
-      </div>
-    </div>
-  </div>
   <div class="header-inner">
     <a href="index.html" class="brand brand--with-tagline">
       <span>Dealett</span>
-      <small>b&auml;ttre deals, helt enkelt.</small>
+      <small>j&auml;mf&ouml;r. v&auml;lj. klart.</small>
     </a>
-    <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav-menu" aria-label="&Ouml;ppna meny">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
     <nav class="site-nav" aria-label="Hemsida">
       <ul class="nav-menu" id="site-nav-menu">
-        <li class="nav-item nav-item--start"><a class="nav-link" href="index.html">Start</a></li>
-        <li class="nav-item nav-item--service"><a class="nav-link" href="mobilabonnemang.html">Mobilabonnemang</a></li>
-        <li class="nav-item nav-item--service"><a class="nav-link" href="familjabonnemang.html">Familjabonnemang</a></li>
-        <li class="nav-item nav-item--service"><a class="nav-link" href="5g-bredband.html">5G-Bredband</a></li>
+        <li class="nav-item nav-item--start"><a class="nav-link" href="index.html">Hem</a></li>
+        <li class="nav-item nav-item--service"><a class="nav-link" href="mobilabonnemang.html">Mobil</a></li>
+        <li class="nav-item nav-item--service"><a class="nav-link" href="familjabonnemang.html">Familj</a></li>
+        <li class="nav-item nav-item--service"><a class="nav-link" href="5g-bredband.html">Bredband</a></li>
         <li class="nav-item nav-item--career"><a class="nav-link" href="jamfor-tackning.html">J&auml;mf&ouml;r t&auml;ckning</a></li>
         <li class="nav-item nav-item--about"><a class="nav-link" href="om-oss.html">Om oss</a></li>
       </ul>
     </nav>
+    <div class="header-topbar-group header-topbar-group--right">
+      <label class="language-switcher" for="site-language">
+        <span class="visually-hidden">Språk</span>
+        <select id="site-language" data-language-switcher aria-label="Språk">
+          <option value="sv">SV</option><option value="en">EN</option><option value="ar">AR</option><option value="so">SO</option><option value="fa">FA</option>
+        </select>
+      </label>
+      <a class="header-topbar-link header-cart-link" href="varukorg.html" data-topbar-link="cart" aria-label="Varukorg">
+        <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i><span class="header-cart-count is-hidden" data-cart-count aria-label="0 varor i varukorgen">0</span>
+      </a>
+      <a class="header-topbar-link header-account-link" href="account.html" data-topbar-link="account">Mina sidor <span aria-hidden="true">↗</span></a>
+    </div>
+    <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav-menu" aria-label="&Ouml;ppna meny">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>

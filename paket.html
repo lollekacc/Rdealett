@@ -6,12 +6,58 @@
     <link rel="icon" href="./images/favicon.svg" type="image/svg+xml" />
     <title>Paket | Dealett</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="styles-redesign.css" />
   </head>
-  <body>
+  <body class="package-page">
     <div data-include="header"></div>
 
-    <main class="blank-page"></main>
+    <main class="package-main">
+      <section class="package-hero">
+        <div class="package-hero__copy">
+          <span class="section-kicker">Välj din väg</span>
+          <h1>En bättre deal börjar här.</h1>
+          <p>Jämför själv eller låt vår behovsanalys hitta ett upplägg som passar din vardag, ditt hushåll och din budget.</p>
+          <a class="primary-btn" href="index.html?start=quiz">Gör behovsanalysen <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="package-hero__art" aria-hidden="true">
+          <span>3</span>
+          <strong>smarta sätt<br />att spara</strong>
+        </div>
+      </section>
+
+      <section class="package-options">
+        <div class="package-options__head">
+          <span class="section-kicker">Våra kategorier</span>
+          <h2>Vad vill du jämföra?</h2>
+        </div>
+        <div class="package-grid">
+          <a class="package-card package-card--orange" href="mobilabonnemang.html">
+            <i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>
+            <span>01</span>
+            <h3>Mobil</h3>
+            <p>Abonnemang för en person, med rätt mängd surf.</p>
+            <b>Utforska <em>↗</em></b>
+          </a>
+          <a class="package-card package-card--blue" href="familjabonnemang.html">
+            <i class="fa-solid fa-people-roof" aria-hidden="true"></i>
+            <span>02</span>
+            <h3>Familj</h3>
+            <p>Samla flera personer och få bättre kontroll på kostnaden.</p>
+            <b>Utforska <em>↗</em></b>
+          </a>
+          <a class="package-card package-card--lime" href="5g-bredband.html">
+            <i class="fa-solid fa-wifi" aria-hidden="true"></i>
+            <span>03</span>
+            <h3>5G-bredband</h3>
+            <p>Snabb uppkoppling hemma utan krånglig installation.</p>
+            <b>Utforska <em>↗</em></b>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <div data-include="footer"></div>
 
     <script src="./assets/cart-helpers.js"></script>
     <script src="./assets/network-utils.js"></script>

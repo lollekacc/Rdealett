@@ -58,6 +58,10 @@ function createIndexQuiz() {
     updateStepState(0);
     syncProgress();
     syncStackHeight();
+
+    if (new URLSearchParams(window.location.search).get("start") === "quiz") {
+      requestAnimationFrame(() => startQuiz({ inHero: true }));
+    }
   }
 
   function bindEvents() {

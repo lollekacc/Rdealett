@@ -705,8 +705,8 @@ function createIndexQuiz() {
     if (!dom.customerOperatorQuestion) return;
 
     dom.customerOperatorQuestion.textContent = count === 1
-      ? "Vilken operatör har du?"
-      : "Vilka operatörer har ni?";
+      ? "Vilken operatör och bindningstid har du?"
+      : "Vilka operatörer och bindningstider har ni?";
   }
 
   function mountQuizInHero() {
@@ -738,6 +738,7 @@ function createIndexQuiz() {
 
     dom.intro?.classList.add("hidden");
     dom.wrapper?.classList.remove("hidden");
+    dom.wrapper?.classList.remove("opacity-0");
     document.getElementById("analys")?.classList.add("quiz-running");
 
     requestAnimationFrame(() => {
@@ -1088,7 +1089,7 @@ function createIndexQuiz() {
     if (window.DealettOfferCompare) {
       window.DealettOfferCompare.bindButton(button, item);
     } else {
-      button.innerHTML = '<img src="images/jamfor2.png" alt="" class="offer-compare-button__image" loading="lazy" decoding="async" aria-hidden="true">';
+      button.innerHTML = '<i class="fa-solid fa-code-compare" aria-hidden="true"></i><span data-compare-label>Jämför</span>';
     }
 
     return button;

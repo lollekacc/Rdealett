@@ -146,7 +146,7 @@ const createCompareButton = (item) => {
   if (window.DealettOfferCompare) {
     window.DealettOfferCompare.bindButton(button, item);
   } else {
-    button.innerHTML = '<img src="images/jamfor2.png" alt="" class="offer-compare-button__image" loading="lazy" decoding="async" aria-hidden="true">';
+    button.innerHTML = '<i class="fa-solid fa-code-compare" aria-hidden="true"></i><span data-compare-label>Jämför</span>';
   }
   return button;
 };

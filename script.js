@@ -1019,7 +1019,7 @@
     root.dataset.noTranslate = 'true';
     root.innerHTML = [
       `<button class="dealett-chat-toggle" type="button" aria-label="${text.open}" aria-expanded="false">`,
-      '  <img class="dealett-chat-toggle__image" src="images/chatbutton.png" alt="" decoding="async" loading="eager" />',
+      '  <i class="fa-solid fa-message" aria-hidden="true"></i>',
       '</button>',
       '<div class="dealett-chat-panel" role="dialog" aria-modal="false" aria-labelledby="dealettChatTitle" hidden>',
       '  <header class="dealett-chat-header">',

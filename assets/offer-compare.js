@@ -43,15 +43,11 @@ const makeIcon = (className) => {
   return icon;
 };
 
-const makeCompareImage = () => {
-  const image = document.createElement('img');
-  image.src = 'images/jamfor2.png';
-  image.alt = '';
-  image.loading = 'lazy';
-  image.decoding = 'async';
-  image.className = 'offer-compare-button__image';
-  image.setAttribute('aria-hidden', 'true');
-  return image;
+const makeCompareIcon = () => {
+  const icon = document.createElement('i');
+  icon.className = 'fa-solid fa-code-compare';
+  icon.setAttribute('aria-hidden', 'true');
+  return icon;
 };
 
 const getItemMeta = (item) => [item.type, item.operator].filter(Boolean).join(' | ');
@@ -290,7 +286,9 @@ const bindButton = (button, item) => {
   button.setAttribute('aria-pressed', String(selectedItems.has(normalized.id)));
   button.setAttribute('aria-label', selectedItems.has(normalized.id) ? 'Vald f\u00f6r j\u00e4mf\u00f6relse' : 'J\u00e4mf\u00f6r');
 
-  button.replaceChildren(makeCompareImage());
+  const label = createElement('span', '', 'Jämför');
+  label.dataset.compareLabel = '';
+  button.replaceChildren(makeCompareIcon(), label);
   button.addEventListener('click', () => toggle(normalized));
   updateButtons();
 };

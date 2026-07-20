@@ -555,7 +555,7 @@
   grid-template-columns: minmax(180px, 1.1fr) minmax(280px, 1.5fr) minmax(150px, 0.65fr);
   align-items: center;
   gap: 12px;
-  padding: 14px 64px 14px 14px;
+  padding: 14px;
   border: 1px solid rgba(39, 36, 67, 0.1);
   border-left: 4px solid var(--offer-accent, var(--accent));
   border-radius: 10px;
@@ -605,6 +605,8 @@
 }
 
 .operator-plan-row .offer-card-actions {
+  display: grid;
+  gap: 8px;
   margin-top: 0;
 }
 

@@ -623,6 +623,126 @@ input:focus,select:focus,textarea:focus,.bredband-input-wrap:focus-within { bord
 .hero.quiz-in-hero .offer-card__desc,
 .hero.quiz-in-hero .offer-card__stat-label,
 .hero.quiz-in-hero .offer-card__stat-sub { color:#666; }
+
+.abon-page .offer-compare-button {
+  min-height: 42px;
+  border: 1px solid rgba(39,36,67,.16);
+  border-radius: 8px;
+  background: #fff;
+  color: #272443;
+  box-shadow: none;
+  gap: 8px;
+  padding: 0 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.abon-page .offer-compare-button:hover {
+  border-color: var(--offer-accent,var(--accent));
+  background: #fff;
+  color: var(--offer-accent,var(--accent));
+  box-shadow: 0 8px 18px rgba(39,36,67,.08);
+  transform: translateY(-1px);
+}
+
+.abon-page .offer-compare-button.is-selected {
+  border-color: var(--offer-accent,var(--accent));
+  background: color-mix(in srgb, var(--offer-accent,var(--accent)) 10%, #fff);
+  color: var(--offer-accent,var(--accent));
+  box-shadow: inset 0 0 0 1px var(--offer-accent,var(--accent));
+  transform: none;
+}
+
+.abon-page .offer-compare-button--icon {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.abon-page .offer-compare-button--icon [data-compare-label] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.abon-page .operator-plan-row .offer-card-actions .offer-compare-button {
+  position: static;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 42px;
+}
+
+.abon-page .offer-question-actions button,
+.abon-page .family-person-grid button,
+.abon-page .family-status-options button,
+.abon-page .family-calc-options button,
+.abon-page .family-streaming-choice {
+  border: 1px solid color-mix(in srgb, var(--offer-accent,var(--accent)) 28%, #fff);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--offer-accent,var(--accent));
+  box-shadow: none;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 800;
+  transition: border-color .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.abon-page .offer-question-actions button:hover,
+.abon-page .family-person-grid button:hover,
+.abon-page .family-status-options button:hover,
+.abon-page .family-calc-options button:hover,
+.abon-page .family-streaming-choice:hover {
+  border-color: var(--offer-accent,var(--accent));
+  background: color-mix(in srgb, var(--offer-accent,var(--accent)) 10%, #fff);
+  color: var(--offer-accent,var(--accent));
+  box-shadow: 0 8px 18px rgba(39,36,67,.08);
+  transform: translateY(-1px);
+}
+
+.abon-page .family-person-grid .family-more-toggle,
+.abon-page .family-person-grid .family-more-toggle:hover {
+  color: var(--offer-accent,var(--accent));
+}
+
+.abon-page .family-person-grid .family-more-toggle.is-active,
+.abon-page .family-calc-options button.is-selected,
+.abon-page .family-streaming-choice.is-selected {
+  border-color: var(--offer-accent,var(--accent));
+  background: var(--offer-accent,var(--accent));
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
+.abon-page .family-streaming-choice.is-selected strong,
+.abon-page .family-streaming-choice.is-selected span,
+.abon-page .family-streaming-choice.is-selected small {
+  color: #fff;
+}
+
+.abon-page .offer-binding-date button {
+  border: 1px solid var(--offer-accent,var(--accent));
+  border-radius: 8px;
+  background: var(--offer-accent,var(--accent));
+  color: #fff;
+  box-shadow: none;
+}
+
+.abon-page .offer-binding-date button:hover {
+  background: color-mix(in srgb, var(--offer-accent,var(--accent)) 86%, #111);
+  color: #fff;
+  transform: translateY(-1px);
+}
 .hero.quiz-in-hero .offer-card__stats { gap:10px; margin-top:16px; }
 .hero.quiz-in-hero .offer-card__stat {
   padding:12px;

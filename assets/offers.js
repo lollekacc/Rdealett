@@ -140,8 +140,11 @@ const getMobileAnswerFacts = (offer, answers = {}) => getMobileAnswerSummary(off
   .filter((item) => item.value && item.value !== 'Vet ej')
   .map((item) => ({ label: item.label, value: item.value }));
 
-const createCompareButton = (item) => {
-  const button = createElement('button', 'offer-compare-button offer-compare-button--icon');
+const createCompareButton = (item, options = {}) => {
+  const button = createElement(
+    'button',
+    ['offer-compare-button', options.compact === false ? '' : 'offer-compare-button--icon'].filter(Boolean).join(' ')
+  );
   button.type = 'button';
   button.setAttribute('aria-label', 'J\u00e4mf\u00f6r');
   if (window.DealettOfferCompare) {
@@ -407,12 +410,12 @@ const renderPlanOffers = async (offer, answers, card) => {
       button.type = 'button';
       button.addEventListener('click', () => selectOffer(selectedPlan, row));
 
-      const compareButton = createCompareButton(buildPlanCompareItem(selectedPlan, plan, answers));
+      const compareButton = createCompareButton(buildPlanCompareItem(selectedPlan, plan, answers), { compact: false });
 
       const actions = createElement('div', 'offer-card-actions');
-      actions.append(button);
+      actions.append(compareButton, button);
 
-      row.append(compareButton, copy, meta, actions);
+      row.append(copy, meta, actions);
       fragment.append(row);
     });
 
@@ -440,12 +443,12 @@ const renderPlanOffers = async (offer, answers, card) => {
       button.dataset.addonButton = 'true';
       button.addEventListener('click', () => selectAddon(addonPlan, row));
 
-      const compareButton = createCompareButton(buildAddonCompareItem(addonPlan, offer));
+      const compareButton = createCompareButton(buildAddonCompareItem(addonPlan, offer), { compact: false });
 
       const actions = createElement('div', 'offer-card-actions');
-      actions.append(button);
+      actions.append(compareButton, button);
 
-      row.append(compareButton, copy, meta, actions);
+      row.append(copy, meta, actions);
       fragment.append(row);
     }
 

@@ -121,15 +121,46 @@ const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0
 
 const getTeliaStreamingOffer = (id) => teliaStreamingOffers.find((item) => item.id === id) || teliaStreamingOffers[0];
 
-const getStreamingServiceValue = (streamingOffer) => (streamingOffer?.services || [])
-  .reduce((sum, service) => sum + Math.max(Number(service.price) || 0, 0), 0);
+const getStreamingServiceName = (service) => {
+  if (typeof service === 'string') return service;
+  if (!service || typeof service !== 'object') return '';
+  return service.name || service.service || service.title || '';
+};
 
-const shouldUseTeliaStreamingPrice = (basePlan, offer, answers) => (
-  offer.provider === 'Telia' &&
-  answers.streamingPackage &&
-  answers.streamingPackage !== 'none' &&
-  (basePlan.tier === 'high' || Number(basePlan.dataAmount) >= 999)
-);
+const getStreamingServiceShortName = (service) => getStreamingServiceName(service)
+  .replace(/\s+Standard med reklam/gi, '')
+  .replace(/\s+Basic med reklam/gi, '')
+  .replace(/\s+Standard/gi, '')
+  .replace(/\s+med reklam/gi, '')
+  .trim();
+
+const getStreamingServicePrice = (service) => {
+  if (typeof service === 'number') return Math.max(service, 0);
+  if (!service || typeof service !== 'object') return 0;
+  const price = Number(service.price ?? service.monthlyPrice ?? service.monthlyValue ?? service.value);
+  return Number.isFinite(price) ? Math.max(price, 0) : 0;
+};
+
+const getStreamingServiceValue = (streamingOffer) => (streamingOffer?.services || [])
+  .reduce((sum, service) => sum + getStreamingServicePrice(service), 0);
+
+const getPlanStreamingOffer = (plan = {}) => {
+  const services = Array.isArray(plan.includedStreaming) ? plan.includedStreaming : [];
+  if (!services.length) return null;
+
+  return {
+    label: services.map(getStreamingServiceShortName).filter(Boolean).join(', '),
+    detail: services.map(getStreamingServiceName).filter(Boolean).join(', '),
+    monthlyPrice: Number(plan.price) || 0,
+    services,
+  };
+};
+
+const getStreamingPackageSummaryLabel = (answers = {}) => {
+  if (answers.streamingPackage === 'all') return 'Visa alla Telia-varianter';
+  if (answers.streamingPackage === 'none') return 'Ingen Telia-streaming';
+  return getTeliaStreamingOffer(answers.streamingPackage).label;
+};
 
 const createElement = (tag, className, text) => {
   const element = document.createElement(tag);
@@ -177,23 +208,19 @@ const buildFamilyPlanOffer = (basePlan, addonPlan, offer, answers) => {
   const persons = Number(answers.persons) || 1;
   const addonPrice = Number(addonPlan?.addonPrice ?? addonPlan?.price) || 0;
   const extraCount = Math.max(persons - 1, 0);
-  const streamingOffer = getTeliaStreamingOffer(answers.streamingPackage);
-  const hasTeliaStreaming = shouldUseTeliaStreamingPrice(basePlan, offer, answers);
-  const listedBasePrice = hasTeliaStreaming ? streamingOffer.monthlyPrice : Number(basePlan.price);
-  const includedServiceValue = hasTeliaStreaming && answers.streamingCalculation === 'include'
+  const streamingOffer = getPlanStreamingOffer(basePlan);
+  const listedBasePrice = Number(basePlan.price) || 0;
+  const includedServiceValue = streamingOffer && answers.streamingCalculation === 'include'
     ? getStreamingServiceValue(streamingOffer)
     : 0;
   const effectiveBasePrice = Math.max(listedBasePrice - includedServiceValue, 0);
   const totalMonthlyPrice = effectiveBasePrice + extraCount * addonPrice;
   const listedMonthlyPrice = listedBasePrice + extraCount * addonPrice;
-  const planTitle = hasTeliaStreaming
-    ? `Obegränsad Plus ${streamingOffer.label}`
-    : basePlan.title;
 
   return {
     provider: offer.label,
     operator: offer.provider,
-    title: planTitle,
+    title: basePlan.title,
     data: getPlanDataLabel(basePlan),
     members: `${persons} abonnemang`,
     surf: `${getPlanDataLabel(basePlan)} surf`,
@@ -201,7 +228,7 @@ const buildFamilyPlanOffer = (basePlan, addonPlan, offer, answers) => {
     listedMonthlyPrice,
     effectiveBasePrice,
     includedServiceValue,
-    streamingOffer: hasTeliaStreaming ? streamingOffer : null,
+    streamingOffer,
     streamingCalculation: answers.streamingCalculation || 'unknown',
     internationalTravel: answers.internationalTravel || 'none',
     pricePerPerson: Math.round(totalMonthlyPrice / persons),
@@ -240,7 +267,7 @@ const getFamilyPlanReason = (selectedPlan) => {
   ];
 
   if (selectedPlan.streamingOffer) {
-    reasons.push(`${selectedPlan.streamingOffer.label} valdes för Telia`);
+    reasons.push(`${selectedPlan.streamingOffer.label} ingår`);
   }
 
   if (selectedPlan.includedServiceValue > 0) {
@@ -262,9 +289,7 @@ const getFamilyAnswerSummary = (answers) => [
   answers.streamingPackage
     ? {
       label: 'Streaming',
-      value: answers.streamingPackage === 'none'
-        ? 'Ingen Telia-streaming'
-        : getTeliaStreamingOffer(answers.streamingPackage).label,
+      value: getStreamingPackageSummaryLabel(answers),
     }
     : null,
   {
@@ -476,14 +501,10 @@ const renderPlanOffers = async (offer, answers, card) => {
     const plans = await loadPlans();
     const basePlans = plans
       .filter((plan) => isMobilePlan(plan) && !plan.isFamilyPlan && plan.operator === offer.provider)
-      .filter((plan) => (
-        offer.provider !== 'Telia' ||
-        !answers.streamingPackage ||
-        answers.streamingPackage === 'none' ||
-        plan.tier === 'high' ||
-        Number(plan.dataAmount) >= 999
-      ))
-      .sort((left, right) => (left.dataAmount || 0) - (right.dataAmount || 0));
+      .sort((left, right) => (
+        (left.dataAmount || 0) - (right.dataAmount || 0) ||
+        (left.price || 0) - (right.price || 0)
+      ));
     const addonPlan = plans.find((plan) =>
       isMobilePlan(plan) &&
       plan.isFamilyPlan &&
@@ -577,24 +598,21 @@ const renderStreamingQuestion = (offer, card, answers) => {
   if (!questionBox) return;
 
   const isTelia = offer.provider === 'Telia';
-  const streamingChoices = isTelia
+  const streamingSummary = isTelia
     ? [
-      '<div class="family-streaming-grid">',
-      teliaStreamingOffers.map((item) => [
-        `<button type="button" class="family-streaming-choice" data-streaming-package="${item.id}">`,
-        `  <strong>${item.label}</strong>`,
-        `  <span>${formatCurrency(item.monthlyPrice)} kr/mån huvudabonnemang</span>`,
-        `  <small>${item.detail}</small>`,
-        '</button>',
-      ].join('')).join(''),
+      '<p class="family-streaming-note">Vi visar Telias obegr&auml;nsade val i resultatet, s&aring; ni slipper v&auml;lja streamingpaket h&auml;r.</p>',
+      '<div class="family-streaming-summary" aria-label="Telia-varianter som visas">',
+      ['Obegränsad', 'Obegränsad Plus', 'Plus Netflix', 'Plus Netflix, HBO Max, Disney+']
+        .map((label) => `<span>${label}</span>`)
+        .join(''),
       '</div>',
     ].join('')
     : '<p class="family-streaming-note">Den här operatören har inga separata streamingval i vår familjekalkyl just nu.</p>';
 
   questionBox.innerHTML = [
     '<p class="offer-question-kicker">Fr&aring;ga 3 av 4</p>',
-    '<h4>Vill ni r&auml;kna med streaming i kalkylen?</h4>',
-    streamingChoices,
+    '<h4>Ska streaming r&auml;knas in?</h4>',
+    streamingSummary,
     '<div class="family-calc-options">',
     '  <button type="button" data-streaming-calc="none">Visa totalpris</button>',
     '  <button type="button" data-streaming-calc="include">R&auml;kna av streamingv&auml;rde</button>',
@@ -603,17 +621,7 @@ const renderStreamingQuestion = (offer, card, answers) => {
     '<button class="offer-card-action family-question-next" type="button" data-next-streaming>Forts&auml;tt</button>',
   ].join('');
 
-  if (!isTelia) {
-    answers.streamingPackage = 'none';
-  }
-
-  questionBox.querySelectorAll('[data-streaming-package]').forEach((button) => {
-    button.addEventListener('click', () => {
-      answers.streamingPackage = button.dataset.streamingPackage || 'none';
-      questionBox.querySelectorAll('[data-streaming-package]').forEach((item) => item.classList.remove('is-selected'));
-      button.classList.add('is-selected');
-    });
-  });
+  answers.streamingPackage = isTelia ? 'all' : 'none';
 
   questionBox.querySelectorAll('[data-streaming-calc]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -624,11 +632,6 @@ const renderStreamingQuestion = (offer, card, answers) => {
   });
 
   questionBox.querySelector('[data-next-streaming]')?.addEventListener('click', () => {
-    if (isTelia && !answers.streamingPackage) {
-      questionBox.querySelector('[data-streaming-package]')?.focus();
-      return;
-    }
-
     if (!answers.streamingCalculation) {
       questionBox.querySelector('[data-streaming-calc]')?.focus();
       return;

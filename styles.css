@@ -3241,10 +3241,15 @@ img {
 }
 
 .coverage-maplibre-network.is-active {
-  border-color: var(--accent);
-  background: var(--accent);
-  box-shadow: 0 0 20px rgba(239, 130, 20, 0.28);
+  border-color: var(--network-color, var(--accent));
+  background: var(--network-color, var(--accent));
+  box-shadow: 0 0 20px color-mix(in srgb, var(--network-color, var(--accent)) 42%, transparent);
 }
+
+.coverage-maplibre-network[data-network="4G"] { --network-color: #23b26d; }
+.coverage-maplibre-network[data-network="4G+"] { --network-color: #2f80ed; }
+.coverage-maplibre-network[data-network="5G"] { --network-color: #a855f7; }
+.coverage-maplibre-network[data-network="5G+"] { --network-color: #ff7a45; }
 
 .coverage-maplibre-marker {
   display: grid;

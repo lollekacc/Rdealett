@@ -1259,7 +1259,8 @@ function createIndexQuiz() {
       providerClass ? `provider-card--${providerClass}` : ""
     ].filter(Boolean).join(" ");
 
-    const topLabel = index === 0 ? "Bäst match" : `Alternativ ${index + 1}`;
+    const resultLabels = ["Lägst pris", "Mest värde", "Starkast match"];
+    const topLabel = resultLabels[index] || `Rekommendation ${index + 1}`;
     const isMulti = state.persons && state.persons > 1;
     const priceMain = isMulti ? `${plan.pricePerPerson} kr/p` : `${plan.finalPrice} kr/mån`;
     const priceSub  = isMulti ? `${plan.finalPrice} kr totalt` : null;

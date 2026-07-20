@@ -7,7 +7,7 @@
   }
 
   const operators = ['telia', 'tele2', 'telenor', 'tre'];
-  const networks = ['2G', '3G', '4G', '4G+', '5G', '5G+'];
+  const networks = ['4G', '4G+', '5G', '5G+'];
   const mapThemeStorageKey = 'dealettCoverageMapTheme';
   const operatorLabels = {
     telia: 'Telia',
@@ -16,17 +16,22 @@
     tre: 'Tre',
   };
   const networkPropertyKeys = {
-    '2G': 'network_2g',
-    '3G': 'network_3g',
     '4G': 'network_4g',
     '4G+': 'network_4g_plus',
     '5G': 'network_5g',
     '5G+': 'network_5g_plus',
   };
+  const networkCoverageColors = {
+    '4G': '#23b26d',
+    '4G+': '#2f80ed',
+    '5G': '#a855f7',
+    '5G+': '#ff7a45',
+  };
 
   const swedenBounds = [10.4, 55.0, 24.5, 69.3];
   const swedenFitBounds = [[10.4, 55.0], [24.5, 69.3]];
   const swedenMaxBounds = [[-8.0, 48.0], [39.0, 76.5]];
+  const swedenBoundaryUrl = 'assets/geo/sweden-boundary.geojson';
   const swedenCameraBase = {
     pitch: 18,
     bearing: -6,
@@ -57,10 +62,8 @@
       localLabel: '#42494e',
       roadLabel: '#30363b',
       halo: '#f7f4eb',
-      coverageFill: '#d7edf4',
-      coverageFillOpacity: 0,
-      coverageLine: '#edf8fb',
-      coverageLineOpacity: 0,
+      coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.22, 8, 0.3, 13, 0.34],
+      coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.38, 10, 0.54, 15, 0.66],
       coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.08, 7, 0.16, 10, 0.08, 13, 0],
       coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.08, 8, 0.18, 12, 0.26, 16, 0.12],
       nightRoadLineOpacity: 0,
@@ -88,10 +91,8 @@
       localLabel: '#d7d1c6',
       roadLabel: '#e9e3d7',
       halo: '#071018',
-      coverageFill: '#d7edf4',
-      coverageFillOpacity: 0,
-      coverageLine: '#edf8fb',
-      coverageLineOpacity: 0,
+      coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.26, 8, 0.34, 13, 0.4],
+      coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.44, 10, 0.62, 15, 0.74],
       coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.14, 7, 0.26, 10, 0.16, 13, 0],
       coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.1, 8, 0.22, 12, 0.3, 16, 0.14],
       nightRoadLineOpacity: ['interpolate', ['linear'], ['zoom'], 5, 0, 7, 0.1, 9, 0.16, 11.5, 0.08, 13.5, 0],
@@ -405,52 +406,52 @@
 
   const placeholderCoverageZones = [
     {
-      id: 'telia-central',
+      id: 'telia-mainland',
       operator: 'telia',
-      networks: ['2G', '4G', '5G'],
-      coordinates: [[[14.1, 58.0], [18.5, 58.1], [18.8, 60.5], [15.0, 60.8], [13.6, 59.4], [14.1, 58.0]]],
+      networks: ['4G'],
+      coordinates: [[[11.0, 55.3], [12.9, 55.35], [14.7, 56.0], [16.4, 57.25], [18.4, 58.75], [19.6, 60.0], [18.7, 61.45], [20.6, 63.25], [22.7, 65.55], [23.6, 67.45], [21.7, 68.55], [19.6, 68.2], [17.8, 66.75], [16.6, 64.75], [15.2, 63.0], [13.9, 61.25], [12.75, 59.45], [11.6, 57.65], [11.0, 55.3]]],
     },
     {
-      id: 'telia-south',
+      id: 'telia-5g-spine',
       operator: 'telia',
-      networks: ['3G', '4G', '5G+'],
-      coordinates: [[[11.8, 55.1], [14.9, 55.1], [15.2, 57.0], [12.0, 57.5], [10.9, 56.3], [11.8, 55.1]]],
+      networks: ['5G'],
+      coordinates: [[[11.4, 55.55], [13.2, 55.55], [15.5, 56.45], [18.2, 58.75], [18.8, 59.95], [17.4, 60.35], [15.3, 59.25], [13.0, 57.5], [11.5, 56.25], [11.4, 55.55]]],
     },
     {
-      id: 'telia-north',
+      id: 'telia-5g-plus-cities',
       operator: 'telia',
-      networks: ['2G', '4G'],
-      coordinates: [[[16.3, 62.0], [22.2, 62.2], [22.4, 66.2], [17.1, 66.4], [15.6, 64.2], [16.3, 62.0]]],
+      networks: ['5G+'],
+      coordinates: [[[11.75, 55.45], [13.8, 55.55], [17.95, 58.75], [19.0, 59.45], [18.0, 60.0], [15.2, 58.65], [12.35, 57.15], [11.75, 55.45]]],
     },
     {
-      id: 'tele2-urban',
+      id: 'tele2-mainland',
       operator: 'tele2',
-      networks: ['4G', '5G'],
-      coordinates: [[[11.5, 57.3], [12.6, 57.4], [12.6, 58.2], [11.3, 58.1], [11.5, 57.3]]],
+      networks: ['4G'],
+      coordinates: [[[11.1, 55.35], [12.8, 55.4], [14.4, 56.05], [16.1, 57.1], [18.0, 58.5], [19.1, 59.8], [18.0, 61.1], [19.6, 62.85], [21.8, 65.0], [22.7, 66.55], [21.1, 67.4], [19.1, 67.05], [17.4, 65.7], [16.2, 63.85], [14.9, 62.2], [13.65, 60.6], [12.55, 58.85], [11.45, 57.2], [11.1, 55.35]]],
     },
     {
-      id: 'tele2-east',
+      id: 'tele2-fast-band',
       operator: 'tele2',
-      networks: ['3G', '4G', '5G+'],
-      coordinates: [[[17.2, 58.8], [19.0, 58.9], [19.1, 60.0], [17.3, 60.1], [17.2, 58.8]]],
+      networks: ['4G+', '5G'],
+      coordinates: [[[11.55, 55.65], [13.1, 55.7], [15.5, 56.55], [18.3, 58.9], [18.7, 60.0], [17.2, 60.25], [14.5, 58.6], [12.2, 56.95], [11.55, 55.65]]],
     },
     {
-      id: 'telenor-west',
+      id: 'telenor-mainland',
       operator: 'telenor',
-      networks: ['2G', '4G', '5G'],
-      coordinates: [[[10.9, 56.9], [13.7, 56.9], [14.2, 59.2], [11.2, 59.6], [10.9, 56.9]]],
+      networks: ['4G'],
+      coordinates: [[[11.05, 55.35], [12.8, 55.45], [14.2, 56.1], [15.8, 57.3], [17.5, 58.6], [18.6, 59.9], [17.7, 61.05], [19.3, 62.9], [21.2, 65.15], [22.2, 66.75], [20.8, 67.7], [18.9, 67.25], [17.2, 65.85], [16.0, 63.85], [14.6, 62.1], [13.35, 60.25], [12.15, 58.4], [11.2, 56.65], [11.05, 55.35]]],
     },
     {
-      id: 'telenor-capital',
+      id: 'telenor-5g-corridor',
       operator: 'telenor',
-      networks: ['4G', '5G+'],
-      coordinates: [[[17.4, 59.0], [18.9, 59.0], [18.9, 59.8], [17.5, 59.9], [17.4, 59.0]]],
+      networks: ['4G+', '5G', '5G+'],
+      coordinates: [[[11.25, 56.0], [13.35, 56.05], [15.65, 57.0], [18.55, 59.05], [18.85, 60.0], [17.45, 60.3], [14.85, 58.85], [12.25, 57.65], [11.25, 56.0]]],
     },
     {
-      id: 'tre-city-band',
+      id: 'tre-south-central',
       operator: 'tre',
-      networks: ['4G', '5G', '5G+'],
-      coordinates: [[[11.8, 55.4], [18.9, 55.7], [18.9, 60.0], [16.2, 60.3], [12.2, 58.4], [11.8, 55.4]]],
+      networks: ['4G', '4G+', '5G', '5G+'],
+      coordinates: [[[11.15, 55.35], [12.95, 55.4], [15.6, 56.35], [18.75, 58.75], [18.9, 60.0], [17.2, 60.45], [14.6, 59.0], [12.2, 57.45], [11.15, 55.35]]],
     },
   ];
 
@@ -533,7 +534,7 @@
 
   const state = {
     activeOperator: 'telia',
-    activeNetworks: new Set(['2G', '4G', '5G']),
+    activeNetworks: new Set(['4G']),
     mapTheme: getStoredMapTheme(),
     isPerspectiveMode: true,
     coverageSignature: '',
@@ -620,10 +621,10 @@
     setPaintIfLayerExists('dealett-place-city-labels', 'text-halo-color', paint.halo);
     setPaintIfLayerExists('dealett-place-local-labels', 'text-color', paint.localLabel);
     setPaintIfLayerExists('dealett-place-local-labels', 'text-halo-color', paint.halo);
-    setPaintIfLayerExists('dealett-coverage-placeholder-fill', 'fill-color', paint.coverageFill);
-    setPaintIfLayerExists('dealett-coverage-placeholder-fill', 'fill-opacity', paint.coverageFillOpacity);
-    setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-color', paint.coverageLine);
-    setPaintIfLayerExists('dealett-coverage-placeholder-outline', 'line-opacity', paint.coverageLineOpacity);
+    networks.forEach((network) => {
+      setPaintIfLayerExists(`dealett-coverage-placeholder-${networkPropertyKeys[network]}-fill`, 'fill-opacity', paint.coverageFillOpacity);
+      setPaintIfLayerExists(`dealett-coverage-placeholder-${networkPropertyKeys[network]}-outline`, 'line-opacity', paint.coverageLineOpacity);
+    });
     setPaintIfLayerExists('dealett-night-road-points', 'circle-opacity', paint.nightRoadPointOpacity);
     setPaintIfLayerExists('dealett-night-car-points', 'circle-opacity', paint.nightCarPointOpacity);
     setPaintIfLayerExists('dealett-night-building-points', 'circle-opacity', paint.nightBuildingPointOpacity);
@@ -693,8 +694,16 @@
     return longitude >= west && longitude <= east && latitude >= south && latitude <= north;
   };
 
-  const buildCoverageFilter = () => {
-    const networkFilters = Array.from(state.activeNetworks).map((network) => ['==', ['get', networkPropertyKeys[network]], true]);
+  const buildCoverageFilter = (network) => {
+    if (network && !state.activeNetworks.has(network)) {
+      return ['==', ['get', 'operator'], '__none__'];
+    }
+
+    if (network) {
+      return ['all', ['==', ['get', 'operator'], state.activeOperator], ['==', ['get', networkPropertyKeys[network]], true]];
+    }
+
+    const networkFilters = Array.from(state.activeNetworks).map((activeNetwork) => ['==', ['get', networkPropertyKeys[activeNetwork]], true]);
 
     if (!networkFilters.length) {
       return ['==', ['get', 'operator'], '__none__'];
@@ -710,16 +719,20 @@
 
     const selectedNetworks = Array.from(state.activeNetworks);
     const networkText = selectedNetworks.length ? selectedNetworks.join(', ') : 'inga valda n&auml;t';
-    layerStatus.innerHTML = `${operatorLabels[state.activeOperator]} valt: ${networkText}. T&auml;ckningsytorna &auml;r subtila platsh&aring;llare tills verklig operat&ouml;rsdata kopplas in. <a href="jamfor-tackning.html">L&auml;s mer &rarr;</a>`;
+    layerStatus.innerHTML = `${operatorLabels[state.activeOperator]} valt: ${networkText}. F&auml;rgerna visar demo-t&auml;ckning f&ouml;r valda n&auml;t tills verklig operat&ouml;rsdata kopplas in. <a href="jamfor-tackning.html">L&auml;s mer &rarr;</a>`;
   };
 
   const updateCoverageFilter = () => {
-    const coverageFilter = buildCoverageFilter();
-
-    ['dealett-coverage-placeholder-fill', 'dealett-coverage-placeholder-outline'].forEach((layerId) => {
-      if (map.getLayer(layerId)) {
-        map.setFilter(layerId, coverageFilter);
-      }
+    networks.forEach((network) => {
+      const isVisible = state.activeNetworks.has(network);
+      [
+        `dealett-coverage-placeholder-${networkPropertyKeys[network]}-fill`,
+        `dealett-coverage-placeholder-${networkPropertyKeys[network]}-outline`,
+      ].forEach((layerId) => {
+        if (map.getLayer(layerId)) {
+          map.setLayoutProperty(layerId, 'visibility', isVisible ? 'visible' : 'none');
+        }
+      });
     });
 
     state.coverageSignature = '';
@@ -790,8 +803,6 @@
   };
 
   const networkCoverageProfiles = {
-    '2G': { density: 0.72, urbanBoost: 0.04, remotePenalty: 0.08, salt: 2 },
-    '3G': { density: 0.66, urbanBoost: 0.12, remotePenalty: 0.16, salt: 3 },
     '4G': { density: 0.95, urbanBoost: 0.18, remotePenalty: 0.12, salt: 4 },
     '4G+': { density: 0.86, urbanBoost: 0.32, remotePenalty: 0.22, salt: 44 },
     '5G': { density: 0.64, urbanBoost: 0.62, remotePenalty: 0.46, salt: 5 },
@@ -1275,41 +1286,50 @@
       }, coverageBeforeLayer);
     }
 
-    if (!map.getSource('dealett-coverage-placeholder')) {
-      // Replace this source with real operator coverage GeoJSON later.
-      // Keep the operator and network_* properties if the existing filters should continue to work.
-      map.addSource('dealett-coverage-placeholder', {
+    if (!map.getSource('dealett-sweden-boundary')) {
+      map.addSource('dealett-sweden-boundary', {
         type: 'geojson',
-        data: placeholderCoverageGeoJson,
+        data: swedenBoundaryUrl,
       });
     }
 
-    if (!map.getLayer('dealett-coverage-placeholder-fill')) {
-      map.addLayer({
-        id: 'dealett-coverage-placeholder-fill',
-        type: 'fill',
-        source: 'dealett-coverage-placeholder',
-        filter: buildCoverageFilter(),
-        paint: {
-          'fill-color': '#d7edf4',
-          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.025, 8, 0.04, 13, 0.055],
-        },
-      }, coverageBeforeLayer);
-    }
+    networks.forEach((network) => {
+      const propertyKey = networkPropertyKeys[network];
+      const color = networkCoverageColors[network];
+      const fillLayerId = `dealett-coverage-placeholder-${propertyKey}-fill`;
+      const outlineLayerId = `dealett-coverage-placeholder-${propertyKey}-outline`;
 
-    if (!map.getLayer('dealett-coverage-placeholder-outline')) {
-      map.addLayer({
-        id: 'dealett-coverage-placeholder-outline',
-        type: 'line',
-        source: 'dealett-coverage-placeholder',
-        filter: buildCoverageFilter(),
-        paint: {
-          'line-color': '#edf8fb',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.35, 11, 0.7, 15, 1],
-          'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.035, 11, 0.065, 15, 0.1],
-        },
-      }, coverageBeforeLayer);
-    }
+      if (!map.getLayer(fillLayerId)) {
+        map.addLayer({
+          id: fillLayerId,
+          type: 'fill',
+          source: 'dealett-sweden-boundary',
+          layout: {
+            visibility: state.activeNetworks.has(network) ? 'visible' : 'none',
+          },
+          paint: {
+            'fill-color': color,
+            'fill-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.08, 8, 0.12, 13, 0.14],
+          },
+        }, coverageBeforeLayer);
+      }
+
+      if (!map.getLayer(outlineLayerId)) {
+        map.addLayer({
+          id: outlineLayerId,
+          type: 'line',
+          source: 'dealett-sweden-boundary',
+          layout: {
+            visibility: state.activeNetworks.has(network) ? 'visible' : 'none',
+          },
+          paint: {
+            'line-color': color,
+            'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.45, 11, 0.9, 15, 1.25],
+            'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.2, 10, 0.32, 15, 0.44],
+          },
+        }, coverageBeforeLayer);
+      }
+    });
 
     applyMapTheme();
   };

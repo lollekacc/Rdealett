@@ -80,7 +80,7 @@
                       <h1 class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
                         Hur många abonnemang?
                       </h1>
-                      <h3 class="quiz-subtitle">Vi använder svaren för att hitta rätt abonnemang för er.</h3>
+                      <h3 class="quiz-subtitle">Fyll i hur många personer som ska ha abonnemang</h3>
 
                       <div class="quiz-person-grid mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
                         <button class="quiz-option rounded-2xl border border-slate-200 bg-white px-6 py-5 text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-persons="1" type="button">1</button>
@@ -177,7 +177,7 @@
                               <path d="M7 2v3M17 2v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
                             </svg>
                           </span>
-                          <span class="operator-date-label">Datum</span>
+                          <span class="operator-date-label">Har du bindningstid? När upphör den?</span>
                           <input type="date" data-operator-date />
                         </label>
 
@@ -225,13 +225,13 @@
                         </button>
 
                         <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-data="medium" type="button">
-                          <span class="block text-lg font-bold text-slate-900">Mellansurf</span>
+                          <span class="block text-lg font-bold text-slate-900">Lagom streaming</span>
                           <span class="mt-1 block text-sm text-slate-500">20 GB – 50 GB</span>
                         </button>
 
                         <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-data="high" type="button">
-                          <span class="block text-lg font-bold text-slate-900">Max surf</span>
-                          <span class="mt-1 block text-sm text-slate-500">100 GB – Obegränsad</span>
+                          <span class="block text-lg font-bold text-slate-900">Aldrig tänka på surf</span>
+                          <span class="mt-1 block text-sm text-slate-500">Obegränsad</span>
                         </button>
                       </div>
                     </div>
@@ -335,10 +335,52 @@
                           Nej
                         </button>
                         <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-travel="eu" type="button">
-                          Inom EU
+                          Ja, inom EU
                         </button>
                         <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-travel="outside_eu" type="button">
-                          Utanför EU
+                          Ja, utanför EU
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<div id="step4" class="quiz-step-card upcoming-card">
+                  <div class="quiz-card rounded-[2rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 shadow-card sm:p-8 lg:p-10 flex flex-col">
+                    <div class="quiz-card-toolbar mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <button
+                        type="button"
+                        class="quiz-back-inline inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 active:scale-[0.99]"
+                      >
+                        <span class="text-base leading-none">←</span>
+                        Tillbaka
+                      </button>
+
+                      <div class="quiz-progress-row flex items-center gap-4">
+                        <div class="quiz-progress-track h-2 w-28 overflow-hidden rounded-full bg-slate-200 sm:w-36">
+                          <div class="quiz-progress-inline h-full w-1/4 rounded-full bg-emerald-600 transition-all duration-300"></div>
+                        </div>
+
+                        <div class="quiz-step-count text-sm font-bold text-slate-800">
+                          Steg <span class="quiz-step-current">1</span> / <span class="quiz-step-total">5</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="quiz-card-body mx-auto w-full max-w-3xl text-center">
+                      <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
+                        Ringer du lokala samtal eller bara surfar utaför EU?
+                      </p>
+                      <h3 class="quiz-subtitle">bla bla bla bla</h3>
+
+                      <div class="quiz-option-list mt-8 flex flex-col gap-4">
+                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-travel="none" type="button">
+                          Lokala samtal
+                        </button>
+                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-travel="eu" type="button">
+                          Surfar
+                        </button>
+                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-travel="outside_eu" type="button">
+                          Ja, utanför EU
                         </button>
                       </div>
                     </div>

@@ -18,6 +18,7 @@ function createIndexQuiz() {
     price: null,
     binding: null,
     streamingCalculation: null,
+    streamingServices: [],
     internationalTravel: null
   };
 
@@ -111,6 +112,13 @@ function createIndexQuiz() {
     const noBindingOption = event.target.closest("[data-no-binding]");
     if (noBindingOption) {
       handleOperatorNoBinding(noBindingOption);
+      return;
+    }
+
+    const streamingNext = event.target.closest("[data-streaming-next]");
+    if (streamingNext) {
+      const step = streamingNext.closest(".quiz-step-card");
+      if (step) handleStreamingStep(step);
       return;
     }
 
@@ -230,6 +238,7 @@ function createIndexQuiz() {
         operatorNoBinding: state.operatorNoBinding,
         binding: state.binding,
         streamingCalculation: state.streamingCalculation,
+        streamingServices: state.streamingServices,
         internationalTravel: state.internationalTravel
       },
       operatorsByPerson: state.operators.length ? state.operators : Array.from({ length: item.persons }, () => "Andra / Ingen"),
@@ -380,6 +389,7 @@ function createIndexQuiz() {
         operatorNoBinding: state.operatorNoBinding,
         binding: state.binding,
         streamingCalculation: state.streamingCalculation,
+        streamingServices: state.streamingServices,
         internationalTravel: state.internationalTravel
       },
       features: [
@@ -424,9 +434,6 @@ function createIndexQuiz() {
         });
         break;
       case 3:
-        handleSingleChoiceStep(step, "[data-streaming]", option, () => {
-          state.streamingCalculation = option.dataset.streaming || null;
-        });
         break;
       case 4:
         handleSingleChoiceStep(step, "[data-travel]", option, () => {
@@ -656,6 +663,15 @@ function createIndexQuiz() {
 
     const nextIndex = Math.min(state.currentStep + 1, resultStepIndex);
     showStep(nextIndex);
+  }
+
+  function handleStreamingStep(step) {
+    state.streamingServices = Array.from(step.querySelectorAll("[data-streaming-service]:checked"))
+      .map(input => input.value)
+      .filter(Boolean);
+    state.streamingCalculation = state.streamingServices.length ? "include" : "none";
+
+    showStep(Math.min(state.currentStep + 1, resultStepIndex));
   }
 
   function setSelected(scope, selector, activeOption) {
@@ -1007,6 +1023,7 @@ function createIndexQuiz() {
       mobileUsage: state.data || null,
       priceRange: state.price || null,
       streamingCalculation: state.streamingCalculation || null,
+      streamingServices: state.streamingServices,
       internationalTravel: state.internationalTravel || null,
       exactMonthlyPrice: null,
       exactMonthlyPrices: [],
@@ -1131,6 +1148,7 @@ function createIndexQuiz() {
       { label: "Antal abonnemang", value: `${persons} abonnemang` },
       state.data ? { label: "Surfbehov", value: getDataNeedLabel(state.data) } : null,
       state.streamingCalculation ? { label: "Streaming", value: getStreamingCalculationLabel(state.streamingCalculation) } : null,
+      state.streamingServices.length ? { label: "Betalar f\u00f6r", value: getStreamingServicesLabel(state.streamingServices) } : null,
       state.internationalTravel ? { label: "Utlandsresor", value: getTravelLabel(state.internationalTravel) } : null,
       state.price ? { label: "Prisniv\u00e5", value: getPriceNeedLabel(state.price) } : null,
       existingOperators ? { label: "Nuvarande operat\u00f6r", value: existingOperators } : null,
@@ -1145,10 +1163,23 @@ function createIndexQuiz() {
   }
 
   function getStreamingCalculationLabel(value) {
-    if (value === "include") return "Räkna av streamingvärde";
+    if (value === "include") return "Räkna av valda streamingtjänster";
     if (value === "none") return "Bara abonnemang";
     if (value === "unknown") return "Vet inte";
     return value;
+  }
+
+  function getStreamingServiceLabel(value) {
+    if (value === "netflix") return "Netflix";
+    if (value === "hbo") return "HBO Max";
+    if (value === "disney") return "Disney+";
+    if (value === "amazon") return "Amazon Prime";
+    if (value === "tv4") return "TV4 Play";
+    return value;
+  }
+
+  function getStreamingServicesLabel(values = []) {
+    return values.map(getStreamingServiceLabel).filter(Boolean).join(", ");
   }
 
   function getTravelLabel(value) {

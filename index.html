@@ -263,26 +263,40 @@
 
                     <div class="quiz-card-body mx-auto w-full max-w-3xl text-center">
                       <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
-                        Ska vi räkna in streaming?
+                        Betalar ni för streamingtjänster idag?
                       </p>
-                      <h3 class="quiz-subtitle">Om streaming ingår i ett abonnemang räknar vi av tjänsternas värde från abonnemangsjämförelsen.</h3>
+                      <h3 class="quiz-subtitle">Välj de tjänster ni redan betalar för. Om de ingår i ett abonnemang räknar vi av deras värde från jämförelsen.</h3>
 
-                      <div class="quiz-option-list mt-8 flex flex-col gap-4">
-                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-streaming="none" type="button">
-                          <span class="block text-lg font-bold text-slate-900">Nej, bara abonnemanget</span>
-                          <span class="mt-1 block text-sm text-slate-500">Jämför endast mobilpriset.</span>
-                        </button>
+                      <div class="streaming-checkbox-grid mt-8" aria-label="Streamingtjänster">
+                        <label class="streaming-checkbox">
+                          <input type="checkbox" value="netflix" data-streaming-service />
+                          <span>Netflix</span>
+                        </label>
 
-                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-streaming="include" type="button">
-                          <span class="block text-lg font-bold text-slate-900">Ja, räkna av streaming</span>
-                          <span class="mt-1 block text-sm text-slate-500">Totalpris minus tjänsternas pris visar effektivt abonnemangspris.</span>
-                        </button>
+                        <label class="streaming-checkbox">
+                          <input type="checkbox" value="hbo" data-streaming-service />
+                          <span>HBO Max</span>
+                        </label>
 
-                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-streaming="unknown" type="button">
-                          <span class="block text-lg font-bold text-slate-900">Vet inte</span>
-                          <span class="mt-1 block text-sm text-slate-500">Vi visar ändå bästa match utifrån övriga svar.</span>
-                        </button>
+                        <label class="streaming-checkbox">
+                          <input type="checkbox" value="disney" data-streaming-service />
+                          <span>Disney+</span>
+                        </label>
+
+                        <label class="streaming-checkbox">
+                          <input type="checkbox" value="amazon" data-streaming-service />
+                          <span>Amazon Prime</span>
+                        </label>
+
+                        <label class="streaming-checkbox">
+                          <input type="checkbox" value="tv4" data-streaming-service />
+                          <span>TV4 Play</span>
+                        </label>
                       </div>
+
+                      <button class="quiz-next-button mt-8" type="button" data-streaming-next>
+                        Fortsätt
+                      </button>
                     </div>
                   </div>
                 </div>

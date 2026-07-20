@@ -3246,10 +3246,10 @@ img {
   box-shadow: 0 0 20px color-mix(in srgb, var(--network-color, var(--accent)) 42%, transparent);
 }
 
-.coverage-maplibre-network[data-network="4G"] { --network-color: #23b26d; }
-.coverage-maplibre-network[data-network="4G+"] { --network-color: #2f80ed; }
-.coverage-maplibre-network[data-network="5G"] { --network-color: #a855f7; }
-.coverage-maplibre-network[data-network="5G+"] { --network-color: #ff7a45; }
+.coverage-maplibre-network[data-network="4G"] { --network-color: #22c875; }
+.coverage-maplibre-network[data-network="4G+"] { --network-color: #264655; }
+.coverage-maplibre-network[data-network="5G"] { --network-color: #a847ed; }
+.coverage-maplibre-network[data-network="5G+"] { --network-color: #263d49; }
 
 .coverage-maplibre-marker {
   display: grid;

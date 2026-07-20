@@ -8,6 +8,18 @@
 
   const operators = ['telia', 'tele2', 'telenor', 'tre'];
   const networks = ['4G', '4G+', '5G', '5G+'];
+  const networkKeys = {
+    '4G': '4g',
+    '4G+': '4gPlus',
+    '5G': '5g',
+    '5G+': '5gPlus',
+  };
+  const networkLabelsByKey = {
+    '4g': '4G',
+    '4gPlus': '4G+',
+    '5g': '5G',
+    '5gPlus': '5G+',
+  };
   const mapThemeStorageKey = 'dealettCoverageMapTheme';
   const operatorLabels = {
     telia: 'Telia',
@@ -15,23 +27,20 @@
     telenor: 'Telenor',
     tre: 'Tre',
   };
-  const networkPropertyKeys = {
-    '4G': 'network_4g',
-    '4G+': 'network_4g_plus',
-    '5G': 'network_5g',
-    '5G+': 'network_5g_plus',
-  };
-  const networkCoverageColors = {
-    '4G': '#23b26d',
-    '4G+': '#2f80ed',
-    '5G': '#a855f7',
-    '5G+': '#ff7a45',
+  const networkStyles = {
+    '4g': { fill: '#22c875', opacity: 0.42 },
+    '4gPlus': { fill: '#264655', opacity: 0.46 },
+    '5g': { fill: '#a847ed', opacity: 0.48 },
+    '5gPlus': { fill: '#263d49', opacity: 0.52 },
   };
 
   const swedenBounds = [10.4, 55.0, 24.5, 69.3];
   const swedenFitBounds = [[10.4, 55.0], [24.5, 69.3]];
   const swedenMaxBounds = [[-8.0, 48.0], [39.0, 76.5]];
   const swedenBoundaryUrl = 'assets/geo/sweden-boundary.geojson';
+  const emptyFeatureCollection = { type: 'FeatureCollection', features: [] };
+  let swedenBoundaryFeature = null;
+  let coverageData = null;
   const swedenCameraBase = {
     pitch: 18,
     bearing: -6,
@@ -62,8 +71,6 @@
       localLabel: '#42494e',
       roadLabel: '#30363b',
       halo: '#f7f4eb',
-      coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.22, 8, 0.3, 13, 0.34],
-      coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.38, 10, 0.54, 15, 0.66],
       coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.08, 7, 0.16, 10, 0.08, 13, 0],
       coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.08, 8, 0.18, 12, 0.26, 16, 0.12],
       nightRoadLineOpacity: 0,
@@ -91,8 +98,6 @@
       localLabel: '#d7d1c6',
       roadLabel: '#e9e3d7',
       halo: '#071018',
-      coverageFillOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.26, 8, 0.34, 13, 0.4],
-      coverageLineOpacity: ['interpolate', ['linear'], ['zoom'], 4, 0.44, 10, 0.62, 15, 0.74],
       coverageVeinOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.14, 7, 0.26, 10, 0.16, 13, 0],
       coveragePointOpacity: ['interpolate', ['linear'], ['zoom'], 3.4, 0.1, 8, 0.22, 12, 0.3, 16, 0.14],
       nightRoadLineOpacity: ['interpolate', ['linear'], ['zoom'], 5, 0, 7, 0.1, 9, 0.16, 11.5, 0.08, 13.5, 0],
@@ -404,74 +409,210 @@
     ],
   };
 
-  const placeholderCoverageZones = [
-    {
-      id: 'telia-mainland',
-      operator: 'telia',
-      networks: ['4G'],
-      coordinates: [[[11.0, 55.3], [12.9, 55.35], [14.7, 56.0], [16.4, 57.25], [18.4, 58.75], [19.6, 60.0], [18.7, 61.45], [20.6, 63.25], [22.7, 65.55], [23.6, 67.45], [21.7, 68.55], [19.6, 68.2], [17.8, 66.75], [16.6, 64.75], [15.2, 63.0], [13.9, 61.25], [12.75, 59.45], [11.6, 57.65], [11.0, 55.3]]],
-    },
-    {
-      id: 'telia-5g-spine',
-      operator: 'telia',
-      networks: ['5G'],
-      coordinates: [[[11.4, 55.55], [13.2, 55.55], [15.5, 56.45], [18.2, 58.75], [18.8, 59.95], [17.4, 60.35], [15.3, 59.25], [13.0, 57.5], [11.5, 56.25], [11.4, 55.55]]],
-    },
-    {
-      id: 'telia-5g-plus-cities',
-      operator: 'telia',
-      networks: ['5G+'],
-      coordinates: [[[11.75, 55.45], [13.8, 55.55], [17.95, 58.75], [19.0, 59.45], [18.0, 60.0], [15.2, 58.65], [12.35, 57.15], [11.75, 55.45]]],
-    },
-    {
-      id: 'tele2-mainland',
-      operator: 'tele2',
-      networks: ['4G'],
-      coordinates: [[[11.1, 55.35], [12.8, 55.4], [14.4, 56.05], [16.1, 57.1], [18.0, 58.5], [19.1, 59.8], [18.0, 61.1], [19.6, 62.85], [21.8, 65.0], [22.7, 66.55], [21.1, 67.4], [19.1, 67.05], [17.4, 65.7], [16.2, 63.85], [14.9, 62.2], [13.65, 60.6], [12.55, 58.85], [11.45, 57.2], [11.1, 55.35]]],
-    },
-    {
-      id: 'tele2-fast-band',
-      operator: 'tele2',
-      networks: ['4G+', '5G'],
-      coordinates: [[[11.55, 55.65], [13.1, 55.7], [15.5, 56.55], [18.3, 58.9], [18.7, 60.0], [17.2, 60.25], [14.5, 58.6], [12.2, 56.95], [11.55, 55.65]]],
-    },
-    {
-      id: 'telenor-mainland',
-      operator: 'telenor',
-      networks: ['4G'],
-      coordinates: [[[11.05, 55.35], [12.8, 55.45], [14.2, 56.1], [15.8, 57.3], [17.5, 58.6], [18.6, 59.9], [17.7, 61.05], [19.3, 62.9], [21.2, 65.15], [22.2, 66.75], [20.8, 67.7], [18.9, 67.25], [17.2, 65.85], [16.0, 63.85], [14.6, 62.1], [13.35, 60.25], [12.15, 58.4], [11.2, 56.65], [11.05, 55.35]]],
-    },
-    {
-      id: 'telenor-5g-corridor',
-      operator: 'telenor',
-      networks: ['4G+', '5G', '5G+'],
-      coordinates: [[[11.25, 56.0], [13.35, 56.05], [15.65, 57.0], [18.55, 59.05], [18.85, 60.0], [17.45, 60.3], [14.85, 58.85], [12.25, 57.65], [11.25, 56.0]]],
-    },
-    {
-      id: 'tre-south-central',
-      operator: 'tre',
-      networks: ['4G', '4G+', '5G', '5G+'],
-      coordinates: [[[11.15, 55.35], [12.95, 55.4], [15.6, 56.35], [18.75, 58.75], [18.9, 60.0], [17.2, 60.45], [14.6, 59.0], [12.2, 57.45], [11.15, 55.35]]],
-    },
+  const normalizeBoundaryFeature = (geojson) => {
+    const feature = geojson?.type === 'FeatureCollection' ? geojson.features?.[0] : geojson;
+    const geometry = feature?.type === 'Feature' ? feature.geometry : feature;
+
+    if (!geometry || !['Polygon', 'MultiPolygon'].includes(geometry.type)) {
+      return null;
+    }
+
+    return {
+      type: 'Feature',
+      properties: { id: 'sweden' },
+      geometry: geometry.type === 'MultiPolygon'
+        ? geometry
+        : { type: 'MultiPolygon', coordinates: [geometry.coordinates] },
+    };
+  };
+
+  const ringContainsPoint = (ring, point) => {
+    const [x, y] = point;
+    let inside = false;
+
+    for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index, index += 1) {
+      const [xi, yi] = ring[index];
+      const [xj, yj] = ring[previous];
+      const intersects = ((yi > y) !== (yj > y)) && x < ((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON) + xi;
+
+      if (intersects) {
+        inside = !inside;
+      }
+    }
+
+    return inside;
+  };
+
+  const isPointInSweden = (point) => {
+    const polygons = swedenBoundaryFeature?.geometry?.coordinates || [];
+
+    return polygons.some((polygon) => {
+      const [outerRing, ...holes] = polygon;
+
+      if (!ringContainsPoint(outerRing, point)) {
+        return false;
+      }
+
+      return !holes.some((hole) => ringContainsPoint(hole, point));
+    });
+  };
+
+  const createSeededRandom = (seedText) => {
+    let seed = 2166136261;
+
+    for (let index = 0; index < seedText.length; index += 1) {
+      seed ^= seedText.charCodeAt(index);
+      seed = Math.imul(seed, 16777619);
+    }
+
+    return () => {
+      seed += 0x6D2B79F5;
+      let value = seed;
+      value = Math.imul(value ^ (value >>> 15), value | 1);
+      value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+      return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+  };
+
+  const weightedCitySeeds = [
+    [18.0686, 59.3293, 1.35], [11.9746, 57.7089, 1.18], [13.0038, 55.605, 1.16],
+    [17.6389, 59.8586, 0.9], [16.5448, 59.6099, 0.74], [15.2134, 59.2753, 0.74],
+    [15.6214, 58.4108, 0.72], [14.1618, 57.7826, 0.68], [12.6945, 56.0465, 0.66],
+    [13.191, 55.7047, 0.66], [20.263, 63.8258, 0.7], [22.1567, 65.5848, 0.58],
+    [17.3069, 62.3908, 0.58], [17.1413, 60.6749, 0.58], [13.5115, 59.4022, 0.56],
+    [12.9401, 57.721, 0.54], [16.1924, 58.5877, 0.52], [18.2948, 57.6348, 0.46],
+    [20.2253, 67.8558, 0.34], [18.9553, 69.6492, 0.3], [14.6361, 63.1792, 0.38],
+    [21.4794, 65.3172, 0.38], [15.437, 60.4858, 0.36], [12.8568, 56.6745, 0.34],
   ];
 
-  const placeholderCoverageGeoJson = {
-    type: 'FeatureCollection',
-    features: placeholderCoverageZones.map((zone) => ({
+  const corridorPairs = [
+    [[13.0038, 55.605], [18.0686, 59.3293]],
+    [[11.9746, 57.7089], [18.0686, 59.3293]],
+    [[18.0686, 59.3293], [17.6389, 59.8586]],
+    [[18.0686, 59.3293], [17.3069, 62.3908]],
+    [[17.3069, 62.3908], [20.263, 63.8258]],
+    [[20.263, 63.8258], [22.1567, 65.5848]],
+    [[11.9746, 57.7089], [13.5115, 59.4022]],
+    [[13.0038, 55.605], [14.1618, 57.7826]],
+  ];
+
+  const operatorProfiles = {
+    telia: { seed: 'telia', extent: 1.08, north: 1.06, west: 0.95 },
+    tele2: { seed: 'tele2', extent: 0.96, north: 0.82, west: 1.04 },
+    telenor: { seed: 'telenor', extent: 0.98, north: 0.86, west: 1.1 },
+    tre: { seed: 'tre', extent: 0.82, north: 0.62, west: 0.92 },
+  };
+
+  const networkProfiles = {
+    '4g': { radius: 0.42, count: 10, corridorRadius: 0.22, corridorSteps: 11, northFactor: 0.92 },
+    '4gPlus': { radius: 0.28, count: 6, corridorRadius: 0.15, corridorSteps: 8, northFactor: 0.72 },
+    '5g': { radius: 0.23, count: 5, corridorRadius: 0.12, corridorSteps: 7, northFactor: 0.48 },
+    '5gPlus': { radius: 0.16, count: 3, corridorRadius: 0.08, corridorSteps: 4, northFactor: 0.28 },
+  };
+
+  const createIrregularBlob = (center, radius, random) => {
+    const pointCount = 13 + Math.floor(random() * 7);
+    const ring = [];
+    const latScale = Math.max(0.35, Math.cos(center[1] * Math.PI / 180));
+
+    for (let index = 0; index < pointCount; index += 1) {
+      const angle = (Math.PI * 2 * index) / pointCount;
+      const wobble = 0.62 + random() * 0.56;
+      const lng = center[0] + (Math.cos(angle) * radius * wobble) / latScale;
+      const lat = center[1] + Math.sin(angle) * radius * wobble;
+      ring.push([Number(lng.toFixed(5)), Number(lat.toFixed(5))]);
+    }
+
+    ring.push(ring[0]);
+
+    if (!ring.every((point) => isPointInSweden(point))) {
+      return null;
+    }
+
+    return {
       type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: zone.coordinates,
-      },
-      properties: networks.reduce((properties, network) => ({
-        ...properties,
-        [networkPropertyKeys[network]]: zone.networks.includes(network),
-      }), {
-        id: zone.id,
-        operator: zone.operator,
-        placeholder: true,
-      }),
-    })),
+      properties: {},
+      geometry: { type: 'Polygon', coordinates: [ring] },
+    };
+  };
+
+  const buildCoverageCollection = (operator, networkKey) => {
+    const operatorProfile = operatorProfiles[operator];
+    const networkProfile = networkProfiles[networkKey];
+    const random = createSeededRandom(`${operatorProfile.seed}-${networkKey}-coverage`);
+    const features = [];
+
+    weightedCitySeeds.forEach(([lng, lat, weight]) => {
+      const northPenalty = lat > 62 ? networkProfile.northFactor * operatorProfile.north : 1;
+      const count = Math.max(1, Math.round(networkProfile.count * weight * operatorProfile.extent * northPenalty));
+
+      for (let index = 0; index < count; index += 1) {
+        const offset = networkProfile.radius * (0.3 + random() * 1.05);
+        const angle = random() * Math.PI * 2;
+        const center = [lng + Math.cos(angle) * offset * 1.2, lat + Math.sin(angle) * offset * 0.82];
+        const radius = networkProfile.radius * (0.42 + random() * 0.78) * weight * operatorProfile.extent;
+
+        if (!isPointInSweden(center)) {
+          continue;
+        }
+
+        const blob = createIrregularBlob(center, radius, random);
+
+        if (blob) {
+          features.push(blob);
+        }
+      }
+    });
+
+    corridorPairs.forEach(([start, end]) => {
+      const steps = Math.round(networkProfile.corridorSteps * operatorProfile.extent);
+
+      for (let index = 1; index < steps; index += 1) {
+        if (random() < (networkKey === '5gPlus' ? 0.34 : 0.16)) {
+          continue;
+        }
+
+        const t = index / steps;
+        const lng = start[0] + (end[0] - start[0]) * t + (random() - 0.5) * 0.22;
+        const lat = start[1] + (end[1] - start[1]) * t + (random() - 0.5) * 0.18;
+
+        if (!isPointInSweden([lng, lat])) {
+          continue;
+        }
+
+        const blob = createIrregularBlob([lng, lat], networkProfile.corridorRadius * (0.72 + random() * 0.7), random);
+
+        if (blob) {
+          features.push(blob);
+        }
+      }
+    });
+
+    return { type: 'FeatureCollection', features };
+  };
+
+  const buildAllCoverageData = () => operators.reduce((operatorResult, operator) => ({
+    ...operatorResult,
+    [operator]: Object.keys(networkProfiles).reduce((networkResult, networkKey) => ({
+      ...networkResult,
+      [networkKey]: buildCoverageCollection(operator, networkKey),
+    }), {}),
+  }), {});
+
+  const loadSwedenBoundary = async () => {
+    const response = await fetch(swedenBoundaryUrl);
+
+    if (!response.ok) {
+      throw new Error(`Failed to load Sweden boundary: ${response.status}`);
+    }
+
+    swedenBoundaryFeature = normalizeBoundaryFeature(await response.json());
+
+    if (!swedenBoundaryFeature) {
+      throw new Error('Invalid Sweden boundary GeoJSON');
+    }
+
+    coverageData = buildAllCoverageData();
   };
 
   const getStoredMapTheme = () => {
@@ -534,7 +675,7 @@
 
   const state = {
     activeOperator: 'telia',
-    activeNetworks: new Set(['4G']),
+    selectedNetwork: '4g',
     mapTheme: getStoredMapTheme(),
     isPerspectiveMode: true,
     coverageSignature: '',
@@ -621,10 +762,6 @@
     setPaintIfLayerExists('dealett-place-city-labels', 'text-halo-color', paint.halo);
     setPaintIfLayerExists('dealett-place-local-labels', 'text-color', paint.localLabel);
     setPaintIfLayerExists('dealett-place-local-labels', 'text-halo-color', paint.halo);
-    networks.forEach((network) => {
-      setPaintIfLayerExists(`dealett-coverage-placeholder-${networkPropertyKeys[network]}-fill`, 'fill-opacity', paint.coverageFillOpacity);
-      setPaintIfLayerExists(`dealett-coverage-placeholder-${networkPropertyKeys[network]}-outline`, 'line-opacity', paint.coverageLineOpacity);
-    });
     setPaintIfLayerExists('dealett-night-road-points', 'circle-opacity', paint.nightRoadPointOpacity);
     setPaintIfLayerExists('dealett-night-car-points', 'circle-opacity', paint.nightCarPointOpacity);
     setPaintIfLayerExists('dealett-night-building-points', 'circle-opacity', paint.nightBuildingPointOpacity);
@@ -694,46 +831,31 @@
     return longitude >= west && longitude <= east && latitude >= south && latitude <= north;
   };
 
-  const buildCoverageFilter = (network) => {
-    if (network && !state.activeNetworks.has(network)) {
-      return ['==', ['get', 'operator'], '__none__'];
-    }
-
-    if (network) {
-      return ['all', ['==', ['get', 'operator'], state.activeOperator], ['==', ['get', networkPropertyKeys[network]], true]];
-    }
-
-    const networkFilters = Array.from(state.activeNetworks).map((activeNetwork) => ['==', ['get', networkPropertyKeys[activeNetwork]], true]);
-
-    if (!networkFilters.length) {
-      return ['==', ['get', 'operator'], '__none__'];
-    }
-
-    return ['all', ['==', ['get', 'operator'], state.activeOperator], ['any', ...networkFilters]];
-  };
-
   const updateLayerStatus = () => {
     if (!layerStatus) {
       return;
     }
 
-    const selectedNetworks = Array.from(state.activeNetworks);
-    const networkText = selectedNetworks.length ? selectedNetworks.join(', ') : 'inga valda n&auml;t';
+    const networkText = networkLabelsByKey[state.selectedNetwork] || '4G';
     layerStatus.innerHTML = `${operatorLabels[state.activeOperator]} valt: ${networkText}. F&auml;rgerna visar demo-t&auml;ckning f&ouml;r valda n&auml;t tills verklig operat&ouml;rsdata kopplas in. <a href="jamfor-tackning.html">L&auml;s mer &rarr;</a>`;
   };
 
-  const updateCoverageFilter = () => {
-    networks.forEach((network) => {
-      const isVisible = state.activeNetworks.has(network);
-      [
-        `dealett-coverage-placeholder-${networkPropertyKeys[network]}-fill`,
-        `dealett-coverage-placeholder-${networkPropertyKeys[network]}-outline`,
-      ].forEach((layerId) => {
-        if (map.getLayer(layerId)) {
-          map.setLayoutProperty(layerId, 'visibility', isVisible ? 'visible' : 'none');
-        }
-      });
-    });
+  const updateCoverageLayer = () => {
+    const source = map.getSource('mobile-coverage');
+    const style = networkStyles[state.selectedNetwork] || networkStyles['4g'];
+
+    if (source) {
+      source.setData(coverageData?.[state.activeOperator]?.[state.selectedNetwork] || emptyFeatureCollection);
+    }
+
+    if (map.getLayer('mobile-coverage-fill')) {
+      map.setPaintProperty('mobile-coverage-fill', 'fill-color', style.fill);
+      map.setPaintProperty('mobile-coverage-fill', 'fill-opacity', style.opacity);
+    }
+
+    if (map.getLayer('mobile-coverage-outline')) {
+      map.setPaintProperty('mobile-coverage-outline', 'line-color', style.fill);
+    }
 
     state.coverageSignature = '';
     window.requestAnimationFrame(updateCoverageMeasurements);
@@ -843,23 +965,13 @@
   }[roadClass] ?? 0.58);
 
   const getSelectedNetworkProfile = () => {
-    const selectedNetworks = Array.from(state.activeNetworks);
+    const networkProfile = networkCoverageProfiles[networkLabelsByKey[state.selectedNetwork]];
 
-    if (!selectedNetworks.length) {
+    if (!networkProfile) {
       return null;
     }
 
-    return selectedNetworks.reduce((profile, network) => {
-      const networkProfile = networkCoverageProfiles[network];
-
-      return {
-        density: profile.density + networkProfile.density,
-        urbanBoost: profile.urbanBoost + networkProfile.urbanBoost,
-        remotePenalty: profile.remotePenalty + networkProfile.remotePenalty,
-        salt: profile.salt + networkProfile.salt,
-        count: profile.count,
-      };
-    }, { density: 0, urbanBoost: 0, remotePenalty: 0, salt: 0, count: selectedNetworks.length });
+    return { ...networkProfile, count: 1 };
   };
 
   const getCoverageQuality = (score) => {
@@ -925,7 +1037,7 @@
           const longitude = segmentStart[0] + (point[0] - segmentStart[0]) * t;
           const latitude = segmentStart[1] + (point[1] - segmentStart[1]) * t;
 
-          if (!isInsideSwedenBounds([longitude, latitude])) {
+          if (!isPointInSweden([longitude, latitude])) {
             continue;
           }
 
@@ -960,13 +1072,12 @@
       return;
     }
 
-    const selectedNetworks = Array.from(state.activeNetworks);
     const networkProfile = getSelectedNetworkProfile();
     const zoom = map.getZoom();
     const bounds = map.getBounds();
     const signature = [
       state.activeOperator,
-      selectedNetworks.sort().join(','),
+      state.selectedNetwork,
       zoom.toFixed(1),
       bounds.getWest().toFixed(2),
       bounds.getSouth().toFixed(2),
@@ -1286,50 +1397,38 @@
       }, coverageBeforeLayer);
     }
 
-    if (!map.getSource('dealett-sweden-boundary')) {
-      map.addSource('dealett-sweden-boundary', {
+    if (!map.getSource('mobile-coverage')) {
+      map.addSource('mobile-coverage', {
         type: 'geojson',
-        data: swedenBoundaryUrl,
+        data: coverageData?.[state.activeOperator]?.[state.selectedNetwork] || emptyFeatureCollection,
       });
     }
 
-    networks.forEach((network) => {
-      const propertyKey = networkPropertyKeys[network];
-      const color = networkCoverageColors[network];
-      const fillLayerId = `dealett-coverage-placeholder-${propertyKey}-fill`;
-      const outlineLayerId = `dealett-coverage-placeholder-${propertyKey}-outline`;
+    if (!map.getLayer('mobile-coverage-fill')) {
+      map.addLayer({
+        id: 'mobile-coverage-fill',
+        type: 'fill',
+        source: 'mobile-coverage',
+        paint: {
+          'fill-color': networkStyles[state.selectedNetwork].fill,
+          'fill-opacity': networkStyles[state.selectedNetwork].opacity,
+          'fill-antialias': true,
+        },
+      }, coverageBeforeLayer);
+    }
 
-      if (!map.getLayer(fillLayerId)) {
-        map.addLayer({
-          id: fillLayerId,
-          type: 'fill',
-          source: 'dealett-sweden-boundary',
-          layout: {
-            visibility: state.activeNetworks.has(network) ? 'visible' : 'none',
-          },
-          paint: {
-            'fill-color': color,
-            'fill-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.08, 8, 0.12, 13, 0.14],
-          },
-        }, coverageBeforeLayer);
-      }
-
-      if (!map.getLayer(outlineLayerId)) {
-        map.addLayer({
-          id: outlineLayerId,
-          type: 'line',
-          source: 'dealett-sweden-boundary',
-          layout: {
-            visibility: state.activeNetworks.has(network) ? 'visible' : 'none',
-          },
-          paint: {
-            'line-color': color,
-            'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.45, 11, 0.9, 15, 1.25],
-            'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.2, 10, 0.32, 15, 0.44],
-          },
-        }, coverageBeforeLayer);
-      }
-    });
+    if (!map.getLayer('mobile-coverage-outline')) {
+      map.addLayer({
+        id: 'mobile-coverage-outline',
+        type: 'line',
+        source: 'mobile-coverage',
+        paint: {
+          'line-color': networkStyles[state.selectedNetwork].fill,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.18, 10, 0.36, 15, 0.58],
+          'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.2, 10, 0.28, 15, 0.34],
+        },
+      }, coverageBeforeLayer);
+    }
 
     applyMapTheme();
   };
@@ -2065,9 +2164,22 @@
     );
   };
 
-  map.on('load', () => {
+  map.on('load', async () => {
+    try {
+      await loadSwedenBoundary();
+    } catch (error) {
+      console.error(error);
+      coverageData = operators.reduce((operatorResult, operator) => ({
+        ...operatorResult,
+        [operator]: Object.keys(networkStyles).reduce((networkResult, networkKey) => ({
+          ...networkResult,
+          [networkKey]: emptyFeatureCollection,
+        }), {}),
+      }), {});
+    }
+
     addMapLayers(map);
-    updateLayerStatus();
+    updateCoverageLayer();
     setupGeocoder();
     map.resize();
     resetToSweden(false);
@@ -2158,7 +2270,7 @@
         operatorButton.classList.toggle('is-active', isActive);
         operatorButton.setAttribute('aria-pressed', String(isActive));
       });
-      updateCoverageFilter();
+      updateCoverageLayer();
     });
   });
 
@@ -2170,16 +2282,13 @@
         return;
       }
 
-      if (state.activeNetworks.has(network)) {
-        state.activeNetworks.delete(network);
-      } else {
-        state.activeNetworks.add(network);
-      }
-
-      const isActive = state.activeNetworks.has(network);
-      button.classList.toggle('is-active', isActive);
-      button.setAttribute('aria-pressed', String(isActive));
-      updateCoverageFilter();
+      state.selectedNetwork = networkKeys[network];
+      app.querySelectorAll('.coverage-maplibre-network').forEach((networkButton) => {
+        const isActive = networkButton === button;
+        networkButton.classList.toggle('is-active', isActive);
+        networkButton.setAttribute('aria-pressed', String(isActive));
+      });
+      updateCoverageLayer();
     });
   });
 
@@ -2200,7 +2309,7 @@
     resetToSweden,
     getActiveCoverageFilters: () => ({
       operator: state.activeOperator,
-      networks: Array.from(state.activeNetworks),
+      network: state.selectedNetwork,
     }),
   };
 })();

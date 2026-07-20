@@ -50,10 +50,86 @@ const offers = [
 
 const giftCards = ['Apollo', 'H&M', 'Hotel', 'ICA Maxi', 'Mio', 'Zalando', 'Elgiganten', 'Ticketmaster'];
 
+const streamingServicePrices = {
+  netflixStandard: 169,
+  hboMaxBasicAds: 89,
+  disneyStandardAds: 59,
+  amazonPrime: 59,
+  tv4PlayPlus: 69,
+};
+
+const teliaStreamingOffers = [
+  {
+    id: 'none',
+    label: 'Utan streaming',
+    detail: 'Obegränsad Plus utan extra streamingtjänst',
+    monthlyPrice: 569,
+    services: [],
+  },
+  {
+    id: 'disney',
+    label: 'Disney+',
+    detail: 'Disney+ Standard med reklam',
+    monthlyPrice: 599,
+    services: [{ name: 'Disney+ Standard med reklam', price: streamingServicePrices.disneyStandardAds }],
+  },
+  {
+    id: 'prime',
+    label: 'Amazon Prime',
+    detail: 'Amazon Prime med reklam',
+    monthlyPrice: 599,
+    services: [{ name: 'Amazon Prime', price: streamingServicePrices.amazonPrime }],
+  },
+  {
+    id: 'tv4',
+    label: 'TV4 Play Plus',
+    detail: 'TV4 Play Plus',
+    monthlyPrice: 599,
+    services: [{ name: 'TV4 Play Plus', price: streamingServicePrices.tv4PlayPlus }],
+  },
+  {
+    id: 'hbo',
+    label: 'HBO Max',
+    detail: 'HBO Max Basic med reklam',
+    monthlyPrice: 609,
+    services: [{ name: 'HBO Max Basic med reklam', price: streamingServicePrices.hboMaxBasicAds }],
+  },
+  {
+    id: 'netflix',
+    label: 'Netflix',
+    detail: 'Netflix Standard',
+    monthlyPrice: 629,
+    services: [{ name: 'Netflix Standard', price: streamingServicePrices.netflixStandard }],
+  },
+  {
+    id: 'netflix-hbo-disney',
+    label: 'Netflix, HBO Max och Disney+',
+    detail: 'Netflix Standard, HBO Max Basic med reklam och Disney+ Standard med reklam',
+    monthlyPrice: 699,
+    services: [
+      { name: 'Netflix Standard', price: streamingServicePrices.netflixStandard },
+      { name: 'HBO Max Basic med reklam', price: streamingServicePrices.hboMaxBasicAds },
+      { name: 'Disney+ Standard med reklam', price: streamingServicePrices.disneyStandardAds },
+    ],
+  },
+];
+
 let selectedOffer = null;
 let plansCache = null;
 
 const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
+
+const getTeliaStreamingOffer = (id) => teliaStreamingOffers.find((item) => item.id === id) || teliaStreamingOffers[0];
+
+const getStreamingServiceValue = (streamingOffer) => (streamingOffer?.services || [])
+  .reduce((sum, service) => sum + Math.max(Number(service.price) || 0, 0), 0);
+
+const shouldUseTeliaStreamingPrice = (basePlan, offer, answers) => (
+  offer.provider === 'Telia' &&
+  answers.streamingPackage &&
+  answers.streamingPackage !== 'none' &&
+  (basePlan.tier === 'high' || Number(basePlan.dataAmount) >= 999)
+);
 
 const createElement = (tag, className, text) => {
   const element = document.createElement(tag);
@@ -80,6 +156,8 @@ const getPlanDataLabel = (plan) => {
   return plan.title || 'Mobilabonnemang';
 };
 
+const isMobilePlan = (plan = {}) => ['mobil', 'mobile_subscription'].includes(plan.category);
+
 const loadPlans = async () => {
   if (plansCache) return plansCache;
 
@@ -99,16 +177,33 @@ const buildFamilyPlanOffer = (basePlan, addonPlan, offer, answers) => {
   const persons = Number(answers.persons) || 1;
   const addonPrice = Number(addonPlan?.addonPrice ?? addonPlan?.price) || 0;
   const extraCount = Math.max(persons - 1, 0);
-  const totalMonthlyPrice = Number(basePlan.price) + extraCount * addonPrice;
+  const streamingOffer = getTeliaStreamingOffer(answers.streamingPackage);
+  const hasTeliaStreaming = shouldUseTeliaStreamingPrice(basePlan, offer, answers);
+  const listedBasePrice = hasTeliaStreaming ? streamingOffer.monthlyPrice : Number(basePlan.price);
+  const includedServiceValue = hasTeliaStreaming && answers.streamingCalculation === 'include'
+    ? getStreamingServiceValue(streamingOffer)
+    : 0;
+  const effectiveBasePrice = Math.max(listedBasePrice - includedServiceValue, 0);
+  const totalMonthlyPrice = effectiveBasePrice + extraCount * addonPrice;
+  const listedMonthlyPrice = listedBasePrice + extraCount * addonPrice;
+  const planTitle = hasTeliaStreaming
+    ? `Obegränsad Plus ${streamingOffer.label}`
+    : basePlan.title;
 
   return {
     provider: offer.label,
     operator: offer.provider,
-    title: basePlan.title,
+    title: planTitle,
     data: getPlanDataLabel(basePlan),
     members: `${persons} abonnemang`,
     surf: `${getPlanDataLabel(basePlan)} surf`,
     price: totalMonthlyPrice,
+    listedMonthlyPrice,
+    effectiveBasePrice,
+    includedServiceValue,
+    streamingOffer: hasTeliaStreaming ? streamingOffer : null,
+    streamingCalculation: answers.streamingCalculation || 'unknown',
+    internationalTravel: answers.internationalTravel || 'none',
     pricePerPerson: Math.round(totalMonthlyPrice / persons),
     addonPrice,
     logo: basePlan.logo,
@@ -124,6 +219,37 @@ const getFamilyCustomerStatusLabel = (answers) => {
   return `${Number(answers.newCustomers) || 0} blir nya kunder`;
 };
 
+const getStreamingCalculationLabel = (value) => {
+  if (value === 'include') return 'Räkna av tjänstevärde';
+  if (value === 'none') return 'Räkna totalpris';
+  return 'Vet inte';
+};
+
+const getTravelLabel = (value) => {
+  if (value === 'eu') return 'Reser inom EU';
+  if (value === 'outside_eu') return 'Reser utanför EU';
+  return 'Reser inte mycket';
+};
+
+const getFamilyPlanReason = (selectedPlan) => {
+  const answers = selectedPlan.answers || {};
+  const reasons = [
+    `${Number(answers.persons) || 1} abonnemang`,
+    getFamilyCustomerStatusLabel(answers).toLowerCase(),
+    getTravelLabel(answers.internationalTravel).toLowerCase(),
+  ];
+
+  if (selectedPlan.streamingOffer) {
+    reasons.push(`${selectedPlan.streamingOffer.label} valdes för Telia`);
+  }
+
+  if (selectedPlan.includedServiceValue > 0) {
+    reasons.push(`streamingvärde ${formatCurrency(selectedPlan.includedServiceValue)} kr/mån är avräknat`);
+  }
+
+  return `Visas eftersom ni valde ${reasons.join(', ')}.`;
+};
+
 const getFamilyAnswerSummary = (answers) => [
   {
     label: 'Antal abonnemang',
@@ -133,14 +259,33 @@ const getFamilyAnswerSummary = (answers) => [
     label: 'Kundstatus',
     value: getFamilyCustomerStatusLabel(answers),
   },
-];
+  answers.streamingPackage
+    ? {
+      label: 'Streaming',
+      value: answers.streamingPackage === 'none'
+        ? 'Ingen Telia-streaming'
+        : getTeliaStreamingOffer(answers.streamingPackage).label,
+    }
+    : null,
+  {
+    label: 'Streamingkalkyl',
+    value: getStreamingCalculationLabel(answers.streamingCalculation),
+  },
+  {
+    label: 'Utlandsresor',
+    value: getTravelLabel(answers.internationalTravel),
+  },
+].filter(Boolean);
 
 const getFamilyAnswerFacts = (answers = {}) => getFamilyAnswerSummary(answers)
   .filter((item) => item.value)
   .map((item) => ({ label: item.label, value: item.value }));
 
-const createCompareButton = (item) => {
-  const button = createElement('button', 'offer-compare-button offer-compare-button--icon');
+const createCompareButton = (item, options = {}) => {
+  const button = createElement(
+    'button',
+    ['offer-compare-button', options.compact === false ? '' : 'offer-compare-button--icon'].filter(Boolean).join(' ')
+  );
   button.type = 'button';
   button.setAttribute('aria-label', 'J\u00e4mf\u00f6r');
   if (window.DealettOfferCompare) {
@@ -179,11 +324,19 @@ const buildFamilyCompareItem = (selectedPlan, plan, answers) => ({
     { label: 'Antal abonnemang', value: selectedPlan.members },
     { label: 'Surf', value: selectedPlan.surf },
     { label: 'Pris', value: `${formatCurrency(selectedPlan.price)} kr/m\u00e5n totalt` },
+    selectedPlan.listedMonthlyPrice && selectedPlan.listedMonthlyPrice !== selectedPlan.price
+      ? { label: 'Listpris', value: `${formatCurrency(selectedPlan.listedMonthlyPrice)} kr/mån totalt` }
+      : null,
     { label: 'Pris per person', value: `${formatCurrency(selectedPlan.pricePerPerson)} kr/person` },
     { label: 'Extra abonnemang', value: selectedPlan.addonPrice ? `${formatCurrency(selectedPlan.addonPrice)} kr/st` : '-' },
+    selectedPlan.streamingOffer ? { label: 'Streamingpaket', value: selectedPlan.streamingOffer.label } : null,
+    selectedPlan.includedServiceValue > 0
+      ? { label: 'Avräknat streamingvärde', value: `${formatCurrency(selectedPlan.includedServiceValue)} kr/mån` }
+      : null,
+    selectedPlan.internationalTravel ? { label: 'Utlandsresor', value: getTravelLabel(selectedPlan.internationalTravel) } : null,
     { label: 'Presentkort', value: `${formatCurrency(selectedPlan.reward)} kr` },
     ...getFamilyAnswerFacts(answers),
-  ],
+  ].filter(Boolean),
 });
 
 const renderAnswerSummary = (offer, panel, answers, sourceCard) => {
@@ -322,10 +475,17 @@ const renderPlanOffers = async (offer, answers, card) => {
   try {
     const plans = await loadPlans();
     const basePlans = plans
-      .filter((plan) => plan.category === 'mobil' && !plan.isFamilyPlan && plan.operator === offer.provider)
+      .filter((plan) => isMobilePlan(plan) && !plan.isFamilyPlan && plan.operator === offer.provider)
+      .filter((plan) => (
+        offer.provider !== 'Telia' ||
+        !answers.streamingPackage ||
+        answers.streamingPackage === 'none' ||
+        plan.tier === 'high' ||
+        Number(plan.dataAmount) >= 999
+      ))
       .sort((left, right) => (left.dataAmount || 0) - (right.dataAmount || 0));
     const addonPlan = plans.find((plan) =>
-      plan.category === 'mobil' &&
+      isMobilePlan(plan) &&
       plan.isFamilyPlan &&
       plan.familyPriceType === 'addon' &&
       plan.operator === offer.provider
@@ -346,23 +506,32 @@ const renderPlanOffers = async (offer, answers, card) => {
       const meta = createElement('ul', 'offer-card-meta operator-plan-meta');
       [
         `${formatCurrency(selectedPlan.price)} kr/m\u00e5n totalt`,
+        selectedPlan.listedMonthlyPrice !== selectedPlan.price
+          ? `Listpris: ${formatCurrency(selectedPlan.listedMonthlyPrice)} kr/mån`
+          : '',
         `${formatCurrency(selectedPlan.pricePerPerson)} kr/person`,
+        selectedPlan.streamingOffer ? `Streaming: ${selectedPlan.streamingOffer.label}` : '',
+        selectedPlan.includedServiceValue > 0
+          ? `Avräknat tjänstevärde: ${formatCurrency(selectedPlan.includedServiceValue)} kr/mån`
+          : '',
+        selectedPlan.internationalTravel ? getTravelLabel(selectedPlan.internationalTravel) : '',
         `${formatCurrency(selectedPlan.reward)} kr presentkort`,
         addonPlan ? `Extra: ${formatCurrency(selectedPlan.addonPrice)} kr/st` : '',
       ].filter(Boolean).forEach((item) => {
         meta.append(createElement('li', '', item));
       });
 
+      const reason = createElement('p', 'family-result-reason', getFamilyPlanReason(selectedPlan));
       const button = createElement('button', 'offer-card-action', 'V\u00e4lj familjepaket');
       button.type = 'button';
       button.addEventListener('click', () => selectOffer(selectedPlan, row));
 
-      const compareButton = createCompareButton(buildFamilyCompareItem(selectedPlan, plan, answers));
+      const compareButton = createCompareButton(buildFamilyCompareItem(selectedPlan, plan, answers), { compact: false });
 
       const actions = createElement('div', 'offer-card-actions');
-      actions.append(button);
+      actions.append(compareButton, button);
 
-      row.append(compareButton, copy, meta, actions);
+      row.append(copy, meta, reason, actions);
       fragment.append(row);
     });
 
@@ -381,12 +550,100 @@ const finishOfferQuestions = (offer, answers, card) => {
   renderPlanOffers(offer, answers, card);
 };
 
+const renderTravelQuestion = (offer, card, answers) => {
+  const questionBox = card.querySelector('.offer-card-questions');
+  if (!questionBox) return;
+
+  questionBox.innerHTML = [
+    '<p class="offer-question-kicker">Fr&aring;ga 4 av 4</p>',
+    '<h4>Reser ni mycket utomlands?</h4>',
+    '<div class="family-status-options">',
+    '  <button type="button" data-travel="none">Nej</button>',
+    '  <button type="button" data-travel="eu">Inom EU</button>',
+    '  <button type="button" data-travel="outside_eu">Utanf&ouml;r EU</button>',
+    '</div>',
+  ].join('');
+
+  questionBox.querySelectorAll('[data-travel]').forEach((button) => {
+    button.addEventListener('click', () => {
+      answers.internationalTravel = button.dataset.travel || 'none';
+      finishOfferQuestions(offer, answers, card);
+    });
+  });
+};
+
+const renderStreamingQuestion = (offer, card, answers) => {
+  const questionBox = card.querySelector('.offer-card-questions');
+  if (!questionBox) return;
+
+  const isTelia = offer.provider === 'Telia';
+  const streamingChoices = isTelia
+    ? [
+      '<div class="family-streaming-grid">',
+      teliaStreamingOffers.map((item) => [
+        `<button type="button" class="family-streaming-choice" data-streaming-package="${item.id}">`,
+        `  <strong>${item.label}</strong>`,
+        `  <span>${formatCurrency(item.monthlyPrice)} kr/mån huvudabonnemang</span>`,
+        `  <small>${item.detail}</small>`,
+        '</button>',
+      ].join('')).join(''),
+      '</div>',
+    ].join('')
+    : '<p class="family-streaming-note">Den här operatören har inga separata streamingval i vår familjekalkyl just nu.</p>';
+
+  questionBox.innerHTML = [
+    '<p class="offer-question-kicker">Fr&aring;ga 3 av 4</p>',
+    '<h4>Vill ni r&auml;kna med streaming i kalkylen?</h4>',
+    streamingChoices,
+    '<div class="family-calc-options">',
+    '  <button type="button" data-streaming-calc="none">Visa totalpris</button>',
+    '  <button type="button" data-streaming-calc="include">R&auml;kna av streamingv&auml;rde</button>',
+    '  <button type="button" data-streaming-calc="unknown">Vet inte</button>',
+    '</div>',
+    '<button class="offer-card-action family-question-next" type="button" data-next-streaming>Forts&auml;tt</button>',
+  ].join('');
+
+  if (!isTelia) {
+    answers.streamingPackage = 'none';
+  }
+
+  questionBox.querySelectorAll('[data-streaming-package]').forEach((button) => {
+    button.addEventListener('click', () => {
+      answers.streamingPackage = button.dataset.streamingPackage || 'none';
+      questionBox.querySelectorAll('[data-streaming-package]').forEach((item) => item.classList.remove('is-selected'));
+      button.classList.add('is-selected');
+    });
+  });
+
+  questionBox.querySelectorAll('[data-streaming-calc]').forEach((button) => {
+    button.addEventListener('click', () => {
+      answers.streamingCalculation = button.dataset.streamingCalc || 'unknown';
+      questionBox.querySelectorAll('[data-streaming-calc]').forEach((item) => item.classList.remove('is-selected'));
+      button.classList.add('is-selected');
+    });
+  });
+
+  questionBox.querySelector('[data-next-streaming]')?.addEventListener('click', () => {
+    if (isTelia && !answers.streamingPackage) {
+      questionBox.querySelector('[data-streaming-package]')?.focus();
+      return;
+    }
+
+    if (!answers.streamingCalculation) {
+      questionBox.querySelector('[data-streaming-calc]')?.focus();
+      return;
+    }
+
+    renderTravelQuestion(offer, card, answers);
+  });
+};
+
 const renderCustomerQuestion = (offer, card, answers) => {
   const questionBox = card.querySelector('.offer-card-questions');
   if (!questionBox) return;
 
   questionBox.innerHTML = [
-    '<p class="offer-question-kicker">Fr&aring;ga 2 av 2</p>',
+    '<p class="offer-question-kicker">Fr&aring;ga 2 av 4</p>',
     '<h4>Har n&aring;gon av er redan abonnemang hos denna operat&ouml;r idag?</h4>',
     '<div class="family-status-options">',
     '  <button type="button" data-customer-status="none">Nej, alla blir nya kunder</button>',
@@ -423,7 +680,7 @@ const renderCustomerQuestion = (offer, card, answers) => {
       }
 
       answers.newCustomers = answers.customerStatus === 'none' ? answers.persons : 0;
-      finishOfferQuestions(offer, answers, card);
+      renderStreamingQuestion(offer, card, answers);
     });
   });
 
@@ -436,7 +693,7 @@ const renderCustomerQuestion = (offer, card, answers) => {
     }
 
     answers.newCustomers = value;
-    finishOfferQuestions(offer, answers, card);
+    renderStreamingQuestion(offer, card, answers);
   });
 };
 
@@ -448,7 +705,7 @@ const renderPersonQuestion = (offer, card) => {
   const answers = {};
   const questionBox = createElement('div', 'offer-card-questions');
   questionBox.innerHTML = [
-    '<p class="offer-question-kicker">Fr&aring;ga 1 av 2</p>',
+    '<p class="offer-question-kicker">Fr&aring;ga 1 av 4</p>',
     '<h4>Hur m&aring;nga abonnemang vill ni ha?</h4>',
     '<div class="family-person-grid">',
     [1, 2, 3, 4, 5].map((count) => `<button type="button" data-persons="${count}">${count}</button>`).join(''),
@@ -557,10 +814,17 @@ rewardContinueBtn?.addEventListener('click', () => {
     rewardMixLabel: `Presentkort ${formatCurrency(selectedOffer.reward)} kr`,
     rewards,
     answers: selectedOffer.answers || {},
+    streamingOffer: selectedOffer.streamingOffer || null,
+    listedMonthlyPrice: selectedOffer.listedMonthlyPrice || selectedOffer.price || 0,
+    includedServiceValue: selectedOffer.includedServiceValue || 0,
+    internationalTravel: selectedOffer.internationalTravel || selectedOffer.answers?.internationalTravel || 'none',
     features: [
       selectedOffer.members,
       'Samlad faktura',
       'Fria samtal och sms',
+      selectedOffer.streamingOffer ? `Streaming: ${selectedOffer.streamingOffer.label}` : '',
+      selectedOffer.includedServiceValue ? `Streamingvärde avräknat ${formatCurrency(selectedOffer.includedServiceValue)} kr/mån` : '',
+      selectedOffer.internationalTravel ? getTravelLabel(selectedOffer.internationalTravel) : '',
       selectedOffer.addonPrice ? `Extra abonnemang ${formatCurrency(selectedOffer.addonPrice)} kr/st` : '',
     ].filter(Boolean),
   };

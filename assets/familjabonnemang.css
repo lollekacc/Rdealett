@@ -132,10 +132,108 @@
   gap: 10px;
 }
 
+.family-streaming-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
 .family-status-options button {
   min-height: 44px;
   padding: 0 12px;
   text-align: left;
+}
+
+.family-streaming-choice,
+.family-calc-options button {
+  border: 1px solid rgba(47, 125, 106, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.family-streaming-choice {
+  display: grid;
+  gap: 5px;
+  min-height: 112px;
+  padding: 12px;
+}
+
+.family-streaming-choice strong,
+.family-streaming-choice span,
+.family-streaming-choice small {
+  display: block;
+}
+
+.family-streaming-choice strong {
+  color: var(--offer-accent, var(--family-green));
+  font-family: 'Roboto', sans-serif;
+  font-size: 15px;
+}
+
+.family-streaming-choice span {
+  color: #17142b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.family-streaming-choice small,
+.family-streaming-note {
+  color: rgba(39, 36, 67, 0.68);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.family-calc-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.family-calc-options button {
+  min-height: 42px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.family-streaming-choice:hover,
+.family-calc-options button:hover,
+.family-streaming-choice.is-selected,
+.family-calc-options button.is-selected {
+  border-color: var(--offer-accent, var(--family-green));
+  background: rgba(47, 125, 106, 0.08);
+  box-shadow: 0 10px 22px rgba(39, 36, 67, 0.08);
+}
+
+.family-question-next {
+  margin-top: 12px;
+}
+
+.family-page .operator-plan-row {
+  grid-template-columns: minmax(160px, 1fr) minmax(230px, 1.25fr) minmax(190px, 0.95fr) minmax(150px, 0.75fr);
+  padding-right: 14px;
+}
+
+.family-result-reason {
+  margin: 0;
+  border-left: 3px solid var(--offer-accent, var(--family-green));
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: rgba(47, 125, 106, 0.08);
+  color: rgba(39, 36, 67, 0.74);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.family-page .operator-plan-row .offer-card-actions {
+  display: grid;
+  gap: 8px;
 }
 
 .family-new-customers label {
@@ -163,6 +261,10 @@
   .family-page .shop-hero-image {
     object-position: 66% center;
   }
+
+  .family-page .operator-plan-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 680px) {
@@ -178,5 +280,9 @@
   .family-hero-stack div {
     min-height: 0;
     padding: 15px 16px;
+  }
+
+  .family-calc-options {
+    grid-template-columns: 1fr;
   }
 }

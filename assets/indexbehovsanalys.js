@@ -16,7 +16,9 @@ function createIndexQuiz() {
     newCustomers: null,
     data: null,
     price: null,
-    binding: null
+    binding: null,
+    streamingCalculation: null,
+    internationalTravel: null
   };
 
   const dom = {
@@ -81,6 +83,7 @@ function createIndexQuiz() {
     dom.wrapper.addEventListener("click", handleWrapperClick);
     dom.wrapper.addEventListener("change", handleWrapperChange);
     window.addEventListener("resize", syncStackHeight);
+    bindNewsletterForm();
     bindStaticOfferCards();
 
     steps.forEach((step, index) => {
@@ -225,7 +228,9 @@ function createIndexQuiz() {
         currentOperator: state.selectedOperator,
         operatorDates: state.operatorDates,
         operatorNoBinding: state.operatorNoBinding,
-        binding: state.binding
+        binding: state.binding,
+        streamingCalculation: state.streamingCalculation,
+        internationalTravel: state.internationalTravel
       },
       operatorsByPerson: state.operators.length ? state.operators : Array.from({ length: item.persons }, () => "Andra / Ingen"),
       bindingsByPerson: Array.from({ length: item.persons }, () => state.binding || null),
@@ -373,11 +378,16 @@ function createIndexQuiz() {
         currentOperator: state.selectedOperator,
         operatorDates: state.operatorDates,
         operatorNoBinding: state.operatorNoBinding,
-        binding: state.binding
+        binding: state.binding,
+        streamingCalculation: state.streamingCalculation,
+        internationalTravel: state.internationalTravel
       },
       features: [
         persons > 1 ? `${persons} abonnemang` : "1 abonnemang",
         plan.offerCalculation ? `${plan.offerCalculation.contractMonths} mån bindningstid` : "",
+        plan.offerCalculation?.includedServiceMonthlyValue > 0
+          ? `Streamingvärde avräknat ${new Intl.NumberFormat("sv-SE").format(plan.offerCalculation.includedServiceMonthlyValue)} kr/mån`
+          : "",
         plan.offerCalculation?.overlapCostKnown > 0 ? `Dubbelkostnad ca ${new Intl.NumberFormat("sv-SE").format(plan.offerCalculation.overlapCostKnown)} kr` : "",
         plan.offerCalculation ? `Uppskattad vinst ${new Intl.NumberFormat("sv-SE").format(plan.offerCalculation.savingsVsStaying)} kr` : "",
         "Fria samtal och sms",
@@ -414,6 +424,16 @@ function createIndexQuiz() {
         });
         break;
       case 3:
+        handleSingleChoiceStep(step, "[data-streaming]", option, () => {
+          state.streamingCalculation = option.dataset.streaming || null;
+        });
+        break;
+      case 4:
+        handleSingleChoiceStep(step, "[data-travel]", option, () => {
+          state.internationalTravel = option.dataset.travel || null;
+        });
+        break;
+      case 5:
         handleSingleChoiceStep(step, "[data-price]", option, () => {
           state.price = option.dataset.price || null;
         });
@@ -986,6 +1006,8 @@ function createIndexQuiz() {
       bindingEnds,
       mobileUsage: state.data || null,
       priceRange: state.price || null,
+      streamingCalculation: state.streamingCalculation || null,
+      internationalTravel: state.internationalTravel || null,
       exactMonthlyPrice: null,
       exactMonthlyPrices: [],
       readyForOffer: missingFields.length === 0,
@@ -1080,9 +1102,12 @@ function createIndexQuiz() {
     return `${new Intl.NumberFormat("sv-SE").format(Math.max(Number(value) || 0, 0))} kr`;
   }
 
-  function createCompareButton(item) {
+  function createCompareButton(item, options = {}) {
     const button = document.createElement("button");
-    button.className = "offer-compare-button offer-compare-button--icon";
+    button.className = [
+      "offer-compare-button",
+      options.compact === false ? "" : "offer-compare-button--icon"
+    ].filter(Boolean).join(" ");
     button.type = "button";
     button.setAttribute("aria-label", "J\u00e4mf\u00f6r");
 
@@ -1105,6 +1130,8 @@ function createIndexQuiz() {
     return [
       { label: "Antal abonnemang", value: `${persons} abonnemang` },
       state.data ? { label: "Surfbehov", value: getDataNeedLabel(state.data) } : null,
+      state.streamingCalculation ? { label: "Streaming", value: getStreamingCalculationLabel(state.streamingCalculation) } : null,
+      state.internationalTravel ? { label: "Utlandsresor", value: getTravelLabel(state.internationalTravel) } : null,
       state.price ? { label: "Prisniv\u00e5", value: getPriceNeedLabel(state.price) } : null,
       existingOperators ? { label: "Nuvarande operat\u00f6r", value: existingOperators } : null,
     ].filter(Boolean);
@@ -1112,8 +1139,22 @@ function createIndexQuiz() {
 
   function getDataNeedLabel(value) {
     if (value === "low") return "Mest wifi & sociala medier";
-    if (value === "medium") return "Streaming & video";
+    if (value === "medium") return "Mellansurf, 20-50 GB";
     if (value === "high") return "Max surf";
+    return value;
+  }
+
+  function getStreamingCalculationLabel(value) {
+    if (value === "include") return "Räkna av streamingvärde";
+    if (value === "none") return "Bara abonnemang";
+    if (value === "unknown") return "Vet inte";
+    return value;
+  }
+
+  function getTravelLabel(value) {
+    if (value === "none") return "Reser inte mycket";
+    if (value === "eu") return "Mest inom EU";
+    if (value === "outside_eu") return "Även utanför EU";
     return value;
   }
 
@@ -1134,6 +1175,7 @@ function createIndexQuiz() {
     const contractMonths = Number(plan.offerCalculation?.contractMonths) || null;
     const overlapCost = Number(plan.offerCalculation?.overlapCostKnown) || 0;
     const savings = Number(plan.offerCalculation?.savingsVsStaying) || 0;
+    const includedServiceValue = Number(plan.offerCalculation?.includedServiceMonthlyValue) || 0;
 
     return {
       id: `index-quiz-${plan.id || plan.title || plan.operator}-${persons}-${index}`,
@@ -1151,11 +1193,30 @@ function createIndexQuiz() {
         isMulti ? { label: "Totalpris", value: `${formatMoney(finalPrice)}/m\u00e5n` } : null,
         { label: "Presentkort", value: `${formatMoney(rewardTotal)}` },
         contractMonths ? { label: "Bindningstid", value: `${contractMonths} m\u00e5n` } : null,
+        includedServiceValue > 0 ? { label: "Streamingvärde", value: `${formatMoney(includedServiceValue)}/mån` } : null,
         overlapCost > 0 ? { label: "Dubbelkostnad", value: `ca ${formatMoney(overlapCost)}` } : null,
         savings > 0 ? { label: "Uppskattad vinst", value: `${formatMoney(savings)}` } : null,
         ...getAnswerCompareFacts(),
       ].filter(Boolean),
     };
+  }
+
+  function buildRecommendationReason(plan) {
+    const reasons = [];
+    const savings = Number(plan.offerCalculation?.savingsVsStaying) || 0;
+    const includedServiceValue = Number(plan.offerCalculation?.includedServiceMonthlyValue) || 0;
+
+    if (state.data) reasons.push(getDataNeedLabel(state.data).toLowerCase());
+    if (state.price) reasons.push(getPriceNeedLabel(state.price).toLowerCase());
+    if (state.internationalTravel) reasons.push(getTravelLabel(state.internationalTravel).toLowerCase());
+    if (includedServiceValue > 0) {
+      reasons.push(`Telias streamingvärde (${formatMoney(includedServiceValue)}/mån) är avräknat`);
+    }
+    if (savings > 0) reasons.push(`uppskattad vinst ${formatMoney(savings)}`);
+
+    return reasons.length
+      ? `Visas eftersom du valde ${reasons.join(", ")}.`
+      : "Visas eftersom den matchar svaren du gav i analysen.";
   }
 
   function buildRecommendationCard(plan, index) {
@@ -1172,6 +1233,7 @@ function createIndexQuiz() {
     const priceMain = isMulti ? `${plan.pricePerPerson} kr/p` : `${plan.finalPrice} kr/mån`;
     const priceSub  = isMulti ? `${plan.finalPrice} kr totalt` : null;
     const dataText  = plan.dataAmount >= 999 ? "Obegränsad" : `${plan.dataAmount} GB`;
+    const reasonText = buildRecommendationReason(plan);
 
     article.innerHTML = [
       '<div class="offer-card__accent"></div>',
@@ -1200,6 +1262,8 @@ function createIndexQuiz() {
       '      </div>',
       '    </div>',
       '  </div>',
+      `  <p class="offer-card__reason">${escapeHtml(reasonText)}</p>`,
+      '  <div class="offer-card__actions"></div>',
       '  <a href="varukorg.html" class="offer-card__cta" data-recommendation-cart>Till varukorg <i class="fa-solid fa-cart-shopping"></i></a>',
       '</div>'
     ].join("\n");
@@ -1209,10 +1273,56 @@ function createIndexQuiz() {
       saveRecommendationAndNavigate(plan);
     });
 
-    const compareButton = createCompareButton(buildRecommendationCompareItem(plan, index));
-    article.querySelector(".offer-card__head")?.append(compareButton);
+    const compareButton = createCompareButton(buildRecommendationCompareItem(plan, index), { compact: false });
+    article.querySelector(".offer-card__actions")?.append(compareButton);
 
     return article;
+  }
+
+  function bindNewsletterForm() {
+    const form = document.querySelector("[data-newsletter-form]");
+    const status = document.querySelector("[data-newsletter-status]");
+    if (!form) return;
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const email = String(new FormData(form).get("email") || "").trim().toLowerCase();
+      if (!email) return;
+
+      const submitButton = form.querySelector("button[type='submit']");
+      if (submitButton) submitButton.disabled = true;
+      if (status) status.textContent = "Registrerar...";
+
+      try {
+        await window.DealettNetwork.fetchJson("/api/newsletter", {
+          label: "Nyhetsbrev",
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, source: "homepage" }),
+        });
+      } catch {
+        saveNewsletterFallback(email);
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
+
+      form.reset();
+      if (status) status.textContent = "Klart, du är registrerad.";
+    });
+  }
+
+  function saveNewsletterFallback(email) {
+    try {
+      const saved = JSON.parse(localStorage.getItem("dealettNewsletterSubscribers") || "[]");
+      const list = Array.isArray(saved) ? saved : [];
+      if (!list.some(item => item.email === email)) {
+        list.push({ email, source: "homepage", createdAt: new Date().toISOString() });
+      }
+      localStorage.setItem("dealettNewsletterSubscribers", JSON.stringify(list));
+    } catch {
+      // Private browsing or storage limits can block fallback persistence.
+    }
   }
 
   function getProviderClass(operator) {

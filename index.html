@@ -78,7 +78,7 @@
 
                     <div class="quiz-card-body mx-auto w-full max-w-3xl text-center">
                       <h1 class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
-                        Hur många abonnemang <span class="quiz-title-nowrap">vill ni ha?</span>
+                        Hur många abonnemang?
                       </h1>
                       <h3 class="quiz-subtitle">Vi använder svaren för att hitta rätt abonnemang för er.</h3>
 
@@ -225,7 +225,7 @@
                         </button>
 
                         <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-data="medium" type="button">
-                          <span class="block text-lg font-bold text-slate-900">Streaming & video</span>
+                          <span class="block text-lg font-bold text-slate-900">Mellansurf</span>
                           <span class="mt-1 block text-sm text-slate-500">20 GB – 50 GB</span>
                         </button>
 
@@ -240,6 +240,99 @@
 
                 <!-- STEP 3 -->
                 <div id="step3" class="quiz-step-card upcoming-card">
+                  <div class="quiz-card rounded-[2rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 shadow-card sm:p-8 lg:p-10 flex flex-col">
+                    <div class="quiz-card-toolbar mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <button
+                        type="button"
+                        class="quiz-back-inline inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 active:scale-[0.99]"
+                      >
+                        <span class="text-base leading-none">←</span>
+                        Tillbaka
+                      </button>
+
+                      <div class="quiz-progress-row flex items-center gap-4">
+                        <div class="quiz-progress-track h-2 w-28 overflow-hidden rounded-full bg-slate-200 sm:w-36">
+                          <div class="quiz-progress-inline h-full w-1/4 rounded-full bg-emerald-600 transition-all duration-300"></div>
+                        </div>
+
+                        <div class="quiz-step-count text-sm font-bold text-slate-800">
+                          Steg <span class="quiz-step-current">1</span> / <span class="quiz-step-total">5</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="quiz-card-body mx-auto w-full max-w-3xl text-center">
+                      <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
+                        Ska vi räkna in streaming?
+                      </p>
+                      <h3 class="quiz-subtitle">Om streaming ingår i ett abonnemang räknar vi av tjänsternas värde från abonnemangsjämförelsen.</h3>
+
+                      <div class="quiz-option-list mt-8 flex flex-col gap-4">
+                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-streaming="none" type="button">
+                          <span class="block text-lg font-bold text-slate-900">Nej, bara abonnemanget</span>
+                          <span class="mt-1 block text-sm text-slate-500">Jämför endast mobilpriset.</span>
+                        </button>
+
+                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-streaming="include" type="button">
+                          <span class="block text-lg font-bold text-slate-900">Ja, räkna av streaming</span>
+                          <span class="mt-1 block text-sm text-slate-500">Totalpris minus tjänsternas pris visar effektivt abonnemangspris.</span>
+                        </button>
+
+                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-streaming="unknown" type="button">
+                          <span class="block text-lg font-bold text-slate-900">Vet inte</span>
+                          <span class="mt-1 block text-sm text-slate-500">Vi visar ändå bästa match utifrån övriga svar.</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 4 -->
+                <div id="step4" class="quiz-step-card upcoming-card">
+                  <div class="quiz-card rounded-[2rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 shadow-card sm:p-8 lg:p-10 flex flex-col">
+                    <div class="quiz-card-toolbar mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <button
+                        type="button"
+                        class="quiz-back-inline inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 active:scale-[0.99]"
+                      >
+                        <span class="text-base leading-none">←</span>
+                        Tillbaka
+                      </button>
+
+                      <div class="quiz-progress-row flex items-center gap-4">
+                        <div class="quiz-progress-track h-2 w-28 overflow-hidden rounded-full bg-slate-200 sm:w-36">
+                          <div class="quiz-progress-inline h-full w-1/4 rounded-full bg-emerald-600 transition-all duration-300"></div>
+                        </div>
+
+                        <div class="quiz-step-count text-sm font-bold text-slate-800">
+                          Steg <span class="quiz-step-current">1</span> / <span class="quiz-step-total">5</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="quiz-card-body mx-auto w-full max-w-3xl text-center">
+                      <p class="quiz-title mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
+                        Reser du mycket utomlands?
+                      </p>
+                      <h3 class="quiz-subtitle">Det hjälper oss väga in roaming och utlandsbehov.</h3>
+
+                      <div class="quiz-option-list mt-8 flex flex-col gap-4">
+                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-travel="none" type="button">
+                          Nej
+                        </button>
+                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-travel="eu" type="button">
+                          Inom EU
+                        </button>
+                        <button class="quiz-option rounded-[1.5rem] border border-slate-200 bg-white px-6 py-5 text-left text-lg font-bold text-slate-900 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md" data-travel="outside_eu" type="button">
+                          Utanför EU
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 5 -->
+                <div id="step5" class="quiz-step-card upcoming-card">
                   <div class="quiz-card rounded-[2rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 shadow-card sm:p-8 lg:p-10 flex flex-col">
                     <div class="quiz-card-toolbar mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <button
@@ -310,8 +403,8 @@
                   </div>
                 </div>
 
-                <!-- STEP 4 -->
-                <div id="step4" class="quiz-step-card upcoming-card">
+                <!-- STEP 6 -->
+                <div id="step6" class="quiz-step-card upcoming-card">
                   <div class="quiz-card rounded-[2rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 shadow-card sm:p-8 lg:p-10 flex flex-col">
                     <div class="quiz-card-toolbar mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <button
@@ -408,6 +501,25 @@
               <div class="gift-logo gift-logo--ticket">Ticketmaster</div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="newsletter-section section-space" aria-labelledby="newsletterTitle">
+        <div class="newsletter-panel">
+          <div class="newsletter-copy">
+            <p class="section-label">Nyhetsbrev</p>
+            <h2 id="newsletterTitle">Få nya deals först.</h2>
+            <p>Registrera din mejl så skickar vi smarta tips, nya kampanjer och korta jämförelser när något faktiskt är värt att titta på.</p>
+          </div>
+
+          <form class="newsletter-form" data-newsletter-form>
+            <label for="newsletterEmail">
+              <span>Mejladress</span>
+              <input id="newsletterEmail" name="email" type="email" placeholder="din@email.se" autocomplete="email" required />
+            </label>
+            <button class="button button--primary" type="submit">Registrera mig <span aria-hidden="true">→</span></button>
+            <p class="newsletter-status" data-newsletter-status role="status" aria-live="polite"></p>
+          </form>
         </div>
       </section>
 

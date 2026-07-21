@@ -1904,6 +1904,104 @@
     });
   };
 
+  const initHomePremiumMotion = () => {
+    const homeIntro = document.querySelector('.home-intro');
+    const hero = document.querySelector('.hero');
+
+    if (!homeIntro || !hero) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const revealSelectors = [
+      '.hero .hero-eyebrow',
+      '.hero h1',
+      '.hero .hero-lead',
+      '.hero .hero-actions',
+      '.home-marquee__group',
+      '.home-intro__head',
+      '.home-service-card',
+      '.home-how__copy',
+      '.home-how__steps li',
+      '.gift-card-image',
+      '.gift-card-copy',
+      '.gift-logo',
+      '.newsletter-panel',
+      '.coverage-maplibre-copy',
+      '.coverage-maplibre-search',
+      '.coverage-maplibre-operators',
+      '.coverage-maplibre-note'
+    ];
+    const revealTargets = Array.from(document.querySelectorAll(revealSelectors.join(',')));
+
+    document.documentElement.classList.add('home-motion-ready');
+    revealTargets.forEach((target, index) => {
+      target.classList.add('home-reveal');
+      target.style.setProperty('--reveal-delay', `${(index % 4) * 85}ms`);
+    });
+
+    if (reducedMotion || !('IntersectionObserver' in window)) {
+      revealTargets.forEach(target => target.classList.add('is-visible'));
+      return;
+    }
+
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        revealObserver.unobserve(entry.target);
+      });
+    }, {
+      rootMargin: '0px 0px -9% 0px',
+      threshold: 0.12
+    });
+
+    revealTargets.forEach(target => revealObserver.observe(target));
+
+    const parallaxSections = [
+      document.querySelector('.home-intro'),
+      document.querySelector('.home-how'),
+      document.querySelector('.gift-card-section'),
+      document.querySelector('.newsletter-section')
+    ].filter(Boolean);
+    let motionFrame = 0;
+
+    const updateScrollEffects = () => {
+      const viewportCenter = window.innerHeight / 2;
+      const heroShift = Math.min(Math.max(window.scrollY * 0.075, 0), 72);
+      hero.style.setProperty('--home-hero-shift', `${heroShift.toFixed(1)}px`);
+
+      parallaxSections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        const sectionCenter = rect.top + (rect.height / 2);
+        const shift = Math.min(Math.max((viewportCenter - sectionCenter) * 0.065, -64), 64);
+        section.style.setProperty('--home-parallax-y', `${shift.toFixed(1)}px`);
+      });
+
+      motionFrame = 0;
+    };
+
+    const requestMotionUpdate = () => {
+      if (motionFrame) return;
+      motionFrame = window.requestAnimationFrame(updateScrollEffects);
+    };
+
+    window.addEventListener('scroll', requestMotionUpdate, { passive: true });
+    window.addEventListener('resize', requestMotionUpdate);
+    updateScrollEffects();
+
+    hero.addEventListener('pointermove', event => {
+      const bounds = hero.getBoundingClientRect();
+      const pointerX = ((event.clientX - bounds.left) / bounds.width) * 100;
+      const pointerY = ((event.clientY - bounds.top) / bounds.height) * 100;
+      hero.style.setProperty('--home-pointer-x', `${pointerX.toFixed(1)}%`);
+      hero.style.setProperty('--home-pointer-y', `${pointerY.toFixed(1)}%`);
+    });
+
+    hero.addEventListener('pointerleave', () => {
+      hero.style.removeProperty('--home-pointer-x');
+      hero.style.removeProperty('--home-pointer-y');
+    });
+  };
+
   const initGlobalBehaviors = () => {
     setHeaderActiveState();
     updateCartCount();
@@ -1922,5 +2020,6 @@
 
   window.addEventListener('dealett:cart-updated', updateCartCount);
 
+  initHomePremiumMotion();
   window.DEALETT_includesReady = includePartials().finally(initGlobalBehaviors);
 })();

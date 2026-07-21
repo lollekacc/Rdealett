@@ -142,9 +142,9 @@ body {
   height: auto;
   border-radius: 0;
   background:
-    linear-gradient(90deg, rgba(242,242,242,.92) 0%, rgba(242,242,242,.24) 38%, rgba(242,242,242,.12) 64%, rgba(242,242,242,.82) 100%),
-    url('./images/editorial-hero-connectivity.png') center 48% / cover no-repeat;
-  filter:grayscale(1);
+    linear-gradient(90deg, rgba(245,243,238,.62) 0%, rgba(245,243,238,.44) 38%, rgba(245,243,238,.18) 62%, rgba(245,243,238,.08) 100%),
+    url('./images/heero.png') center center / cover no-repeat;
+  filter:none;
   transform: none;
 }
 .hero::after { display: none; }
@@ -376,10 +376,10 @@ body {
 body:has(.home-intro) main { overflow:clip; }
 
 .hero:not(.quiz-in-hero)::before {
-  filter:grayscale(.72) contrast(1.04);
-  transform:translate3d(0, var(--home-hero-shift, 0), 0) scale(1.07);
+  filter: none;
+  transform: none;
   transform-origin:center top;
-  will-change:transform;
+  will-change: auto;
 }
 .hero:not(.quiz-in-hero)::after {
   content:"";
@@ -1306,8 +1306,8 @@ input:focus,select:focus,textarea:focus,.bredband-input-wrap:focus-within { bord
   .hero { min-height:900px; background-position:58% center; }
   .hero::before {
     background:
-      linear-gradient(90deg, rgba(242,242,242,.96) 0%, rgba(242,242,242,.72) 56%, rgba(242,242,242,.28) 100%),
-      url('./images/editorial-hero-connectivity.png') 64% center / cover no-repeat;
+      linear-gradient(180deg, rgba(245,243,238,.86) 0%, rgba(245,243,238,.58) 42%, rgba(245,243,238,.12) 100%),
+      url('./images/heero.png') 53% center / cover no-repeat;
   }
   .hero .hero-eyebrow { top:105px; }
   .hero h1 { top:155px; width:calc(100% - 36px); font-size:clamp(44px,13vw,58px); }

@@ -49,9 +49,11 @@ function createIndexQuiz() {
   const questionStepCount = Math.max(steps.length - 1, 0);
   const resultStepIndex = Math.max(steps.length - 1, 0);
   const sectionWrapperAnchor = document.createComment("quiz section mount");
+  const selectionFeedbackMs = 220;
   let plans = null;
   let recommendationsRequestId = 0;
   let lastOfferCalculation = null;
+  let pendingAdvanceTimer = null;
 
   function init() {
     if (!dom.wrapper || !dom.stack || !steps.length) return;
@@ -472,7 +474,7 @@ function createIndexQuiz() {
     setSelected(step, "[data-persons]", option);
     resetCustomerStep();
     prepareOperatorQuestion(persons);
-    showStep(1);
+    showStepAfterSelection(1);
   }
 
   function handleOperatorStep(option) {
@@ -500,7 +502,7 @@ function createIndexQuiz() {
       state.operatorNoBinding = Array.from({ length: state.persons || 1 }, () => false);
       dom.newCustomersField?.classList.add("hidden");
       hideOperatorQuestion();
-      showStep(2);
+      showStepAfterSelection(2);
       return;
     }
 
@@ -660,7 +662,7 @@ function createIndexQuiz() {
   function maybeAdvanceFromOperatorQuestion() {
     if (!updateOperatorContinueState() || state.currentStep !== 1) return;
 
-    showStep(2);
+    showStepAfterSelection(2);
   }
 
   function handleSingleChoiceStep(step, selector, option, applyState) {
@@ -668,7 +670,7 @@ function createIndexQuiz() {
     setSelected(step, selector, option);
 
     const nextIndex = Math.min(state.currentStep + 1, resultStepIndex);
-    showStep(nextIndex);
+    showStepAfterSelection(nextIndex);
   }
 
   function handleTravelStep(step, option) {
@@ -676,7 +678,7 @@ function createIndexQuiz() {
     setSelected(step, "[data-travel]", option);
 
     if (isInternationalUsageRelevant()) {
-      showStep(5);
+      showStepAfterSelection(5);
       return;
     }
 
@@ -685,7 +687,7 @@ function createIndexQuiz() {
       button.classList.remove("selected", "active");
       button.setAttribute("aria-pressed", "false");
     });
-    showStep(6);
+    showStepAfterSelection(6);
   }
 
   function isInternationalUsageRelevant() {
@@ -703,7 +705,7 @@ function createIndexQuiz() {
       .filter(Boolean);
     state.streamingCalculation = state.streamingServices.length ? "include" : "none";
 
-    showStep(Math.min(state.currentStep + 1, resultStepIndex));
+    showStepAfterSelection(Math.min(state.currentStep + 1, resultStepIndex));
   }
 
   function setSelected(scope, selector, activeOption) {
@@ -824,7 +826,23 @@ function createIndexQuiz() {
     syncProgress();
   }
 
+  function showStepAfterSelection(index) {
+    if (pendingAdvanceTimer) {
+      window.clearTimeout(pendingAdvanceTimer);
+    }
+
+    pendingAdvanceTimer = window.setTimeout(() => {
+      pendingAdvanceTimer = null;
+      showStep(index);
+    }, selectionFeedbackMs);
+  }
+
   function showStep(index) {
+    if (pendingAdvanceTimer) {
+      window.clearTimeout(pendingAdvanceTimer);
+      pendingAdvanceTimer = null;
+    }
+
     const safeIndex = Math.max(0, Math.min(index, resultStepIndex));
 
     state.currentStep = safeIndex;

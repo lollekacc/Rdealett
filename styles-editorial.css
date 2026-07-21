@@ -339,6 +339,18 @@ body {
 }
 .home-how .section-label,.home-how h2 { color:#222; }
 .home-how__copy > p:not(.section-label) { color:#555; font-weight:400; }
+.home-how__copy .section-label { font-size:11px; }
+.home-how__copy h2 {
+  max-width: 620px;
+  font-size: 46px;
+  line-height: 1.04;
+}
+.home-how__copy > p:not(.section-label) {
+  max-width: 520px;
+  margin: 20px 0 22px;
+  font-size: 16px;
+  line-height: 1.45;
+}
 .home-how .button { border:0; background:#111; color:#fff; }
 .home-how__steps li { grid-template-columns:60px 1fr; padding:34px 0; border-color:#999; }
 .home-how__steps > li > span { width:auto; height:auto; place-items:start; border-radius:0; background:transparent !important; color:#777 !important; font-weight:400; }
@@ -1953,4 +1965,254 @@ body:has(.home-intro) .newsletter-form .button:hover { color:#fff; }
   .mobile-plans-page .shop-hero-kicker span,.mobile-plans-page .shop-hero h1 em::after { animation:none; }
   .mobile-plans-page .shop-hero h1 em::after { transform:scaleX(1); }
   .mobile-plans-motion-ready .mobile-plans-reveal { opacity:1; filter:none; transform:none; }
+}
+
+/* Remove decorative circles, glow spots, and dot accents across the site. */
+.hero:not(.quiz-in-hero)::after,
+.home-intro::before,
+.home-how::before,
+.newsletter-panel::before,
+.mobile-plans-page #offersSection::before,
+.mobile-plans-page #rewardSection::before,
+.package-hero__art::after {
+  content: none !important;
+  display: none !important;
+}
+
+.hero-orbit {
+  display: none !important;
+}
+
+.hero .hero-eyebrow::before,
+.home-intro h2::after,
+.mobile-plans-page .shop-hero-kicker span {
+  content: none !important;
+  display: none !important;
+  box-shadow: none !important;
+}
+
+.hero .hero-eyebrow {
+  padding-left: 0;
+}
+
+.hero:not(.quiz-in-hero) .hero-eyebrow {
+  top: clamp(108px, 13vh, 142px);
+  max-width: min(460px, calc(100vw - 56px));
+  font-size: 10px;
+  line-height: 1.3;
+  letter-spacing: .11em;
+}
+
+.hero:not(.quiz-in-hero) h1 {
+  top: clamp(240px, 34vh, 340px);
+  width: min(610px, 36vw);
+  font-size: clamp(36px, 3.25vw, 62px);
+  line-height: 1.08;
+  letter-spacing: -.018em;
+}
+
+.hero:not(.quiz-in-hero) .hero-actions {
+  top: clamp(520px, 61vh, 605px);
+  right: auto;
+  left: clamp(28px, 3vw, 62px);
+  width: auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.hero:not(.quiz-in-hero) .button {
+  min-height: 50px;
+  padding: 0 24px;
+  font-size: 14px;
+}
+
+.hero:not(.quiz-in-hero) .hero-text-link {
+  padding: 14px 0 5px;
+  font-size: 12px;
+}
+
+.hero:not(.quiz-in-hero) .hero-proof {
+  position: absolute;
+  top: clamp(590px, 70vh, 675px);
+  left: clamp(28px, 3vw, 62px);
+  display: flex;
+  max-width: min(520px, calc(100vw - 56px));
+  margin: 0;
+  gap: 8px 16px;
+  color: #333;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.hero:not(.quiz-in-hero) .hero-proof span {
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .hero:not(.quiz-in-hero) .hero-eyebrow {
+    top: 105px;
+    left: 18px;
+    max-width: calc(100% - 36px);
+    font-size: 10px;
+  }
+
+  .hero:not(.quiz-in-hero) h1 {
+    top: 150px;
+    left: 18px;
+    width: calc(100% - 36px);
+    font-size: clamp(38px, 10.8vw, 54px);
+    line-height: 1.04;
+  }
+
+  .hero:not(.quiz-in-hero) .hero-actions {
+    top: auto;
+    bottom: 150px;
+    left: 18px;
+    right: 18px;
+    width: auto;
+    gap: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hero:not(.quiz-in-hero) .button {
+    min-height: 52px;
+    padding: 0 22px;
+    font-size: 14px;
+  }
+
+  .hero:not(.quiz-in-hero) .hero-text-link {
+    display: inline-flex;
+    padding-top: 4px;
+    font-size: 12px;
+  }
+
+  .hero:not(.quiz-in-hero) .hero-proof {
+    top: auto;
+    bottom: 76px;
+    left: 18px;
+    right: 18px;
+    max-width: none;
+    gap: 8px 12px;
+    font-size: 11px;
+  }
+}
+
+.mobile-plans-page .shop-hero-kicker {
+  gap: 0;
+}
+
+.coverage-maplibre-heading {
+  padding: clamp(72px, 8vw, 112px) clamp(28px, 3vw, 62px) clamp(28px, 4vw, 48px);
+  background: #fff;
+  color: #222;
+}
+
+.coverage-maplibre-heading h2 {
+  max-width: 760px;
+  margin: 0;
+  font: 400 clamp(38px, 4.2vw, 68px)/1 Arial, sans-serif;
+  letter-spacing: -.028em;
+}
+
+.coverage-maplibre-section .coverage-maplibre-shell {
+  height: clamp(660px, 76vh, 860px);
+  min-height: 660px;
+}
+
+@media (max-width: 720px) {
+  .coverage-maplibre-heading {
+    padding: 72px 20px 28px;
+  }
+
+  .coverage-maplibre-heading h2 {
+    font-size: clamp(34px, 11vw, 48px);
+    line-height: 1.04;
+  }
+
+  .coverage-maplibre-section .coverage-maplibre-shell {
+    min-height: 840px;
+  }
+}
+
+.mobile-plans-page .shop-hero::before {
+  background: linear-gradient(90deg, rgba(240,240,238,.05), rgba(240,240,238,.38)) !important;
+  mix-blend-mode: normal !important;
+}
+
+.quiz-card {
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+
+.quiz-option,
+.quiz-option:hover {
+  background: rgba(255, 255, 255, 0.68) !important;
+}
+
+#quiz-steps-wrapper .quiz-option.selected,
+#quiz-steps-wrapper .quiz-option.active,
+#quiz-steps-wrapper .quiz-option[aria-pressed="true"],
+#quiz-steps-wrapper .operator-choice-grid .quiz-option.selected,
+#quiz-steps-wrapper .operator-choice-grid .quiz-option.active,
+#quiz-steps-wrapper .operator-choice-grid .quiz-option[aria-pressed="true"],
+#quiz-steps-wrapper .operator-no-binding-button.selected,
+#quiz-steps-wrapper .operator-no-binding-button.active,
+#quiz-steps-wrapper .operator-no-binding-button[aria-pressed="true"] {
+  border-color: #111 !important;
+  background: #111 !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0 0 0 3px #ff8a00,
+    6px 6px 0 #ff8a00 !important;
+  transform: translate(-2px, -2px) !important;
+}
+
+#quiz-steps-wrapper .operator-choice-grid .quiz-option[aria-pressed="true"] img,
+#quiz-steps-wrapper .operator-choice-grid .quiz-option.selected img,
+#quiz-steps-wrapper .operator-choice-grid .quiz-option.active img {
+  filter: grayscale(1) invert(1) contrast(1.4) !important;
+}
+
+#quiz-steps-wrapper .quiz-option.selected::after,
+#quiz-steps-wrapper .quiz-option.active::after,
+#quiz-steps-wrapper .quiz-option[aria-pressed="true"]::after,
+#quiz-steps-wrapper .operator-no-binding-button.selected::after,
+#quiz-steps-wrapper .operator-no-binding-button.active::after,
+#quiz-steps-wrapper .operator-no-binding-button[aria-pressed="true"]::after {
+  content: "✓" !important;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-grid !important;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  background: #ff8a00;
+  color: #111;
+  font: 800 15px/1 Arial, sans-serif;
+}
+
+.hero.quiz-in-hero button:active,
+.hero.quiz-in-hero a.button:active,
+.home-how button:active,
+.home-how a.button:active,
+.newsletter-section button:active,
+.coverage-maplibre-section button:active {
+  box-shadow:
+    inset 0 0 0 3px #ff8a00,
+    3px 3px 0 #111 !important;
+  transform: translate(1px, 1px) !important;
+}
+
+body:has(.home-intro) main button[aria-pressed="true"]:not(.quiz-option):not(.operator-no-binding-button),
+body:has(.home-intro) main button.is-active:not(.quiz-option):not(.operator-no-binding-button),
+body:has(.home-intro) main button.is-selected:not(.quiz-option):not(.operator-no-binding-button) {
+  outline: 3px solid #ff8a00;
+  outline-offset: 2px;
+}
+
+.streaming-checkbox:has(input:checked) {
+  background: rgba(255, 255, 255, 0.94) !important;
 }

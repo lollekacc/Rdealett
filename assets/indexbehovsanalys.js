@@ -19,7 +19,8 @@ function createIndexQuiz() {
     binding: null,
     streamingCalculation: null,
     streamingServices: [],
-    internationalTravel: null
+    internationalTravel: null,
+    internationalUsage: null
   };
 
   const dom = {
@@ -97,7 +98,7 @@ function createIndexQuiz() {
           return;
         }
 
-        showStep(index - 1);
+        showStep(getPreviousStepIndex(index));
       });
     });
   }
@@ -239,7 +240,8 @@ function createIndexQuiz() {
         binding: state.binding,
         streamingCalculation: state.streamingCalculation,
         streamingServices: state.streamingServices,
-        internationalTravel: state.internationalTravel
+        internationalTravel: state.internationalTravel,
+        internationalUsage: state.internationalUsage
       },
       operatorsByPerson: state.operators.length ? state.operators : Array.from({ length: item.persons }, () => "Andra / Ingen"),
       bindingsByPerson: Array.from({ length: item.persons }, () => state.binding || null),
@@ -390,7 +392,8 @@ function createIndexQuiz() {
         binding: state.binding,
         streamingCalculation: state.streamingCalculation,
         streamingServices: state.streamingServices,
-        internationalTravel: state.internationalTravel
+        internationalTravel: state.internationalTravel,
+        internationalUsage: state.internationalUsage
       },
       features: [
         persons > 1 ? `${persons} abonnemang` : "1 abonnemang",
@@ -436,11 +439,14 @@ function createIndexQuiz() {
       case 3:
         break;
       case 4:
-        handleSingleChoiceStep(step, "[data-travel]", option, () => {
-          state.internationalTravel = option.dataset.travel || null;
-        });
+        handleTravelStep(step, option);
         break;
       case 5:
+        handleSingleChoiceStep(step, "[data-international-usage]", option, () => {
+          state.internationalUsage = option.dataset.internationalUsage || null;
+        });
+        break;
+      case 6:
         handleSingleChoiceStep(step, "[data-price]", option, () => {
           state.price = option.dataset.price || null;
         });
@@ -665,6 +671,32 @@ function createIndexQuiz() {
     showStep(nextIndex);
   }
 
+  function handleTravelStep(step, option) {
+    state.internationalTravel = option.dataset.travel || null;
+    setSelected(step, "[data-travel]", option);
+
+    if (isInternationalUsageRelevant()) {
+      showStep(5);
+      return;
+    }
+
+    state.internationalUsage = null;
+    steps[5]?.querySelectorAll("[data-international-usage]").forEach(button => {
+      button.classList.remove("selected", "active");
+      button.setAttribute("aria-pressed", "false");
+    });
+    showStep(6);
+  }
+
+  function isInternationalUsageRelevant() {
+    return state.internationalTravel === "outside_eu";
+  }
+
+  function getPreviousStepIndex(index) {
+    if (index === 6 && !isInternationalUsageRelevant()) return 4;
+    return Math.max(index - 1, 0);
+  }
+
   function handleStreamingStep(step) {
     state.streamingServices = Array.from(step.querySelectorAll("[data-streaming-service]:checked"))
       .map(input => input.value)
@@ -810,6 +842,11 @@ function createIndexQuiz() {
       step.classList.remove("active-step", "stacked-card", "upcoming-card", "hidden-step");
       step.setAttribute("aria-hidden", index === activeIndex ? "false" : "true");
 
+      if (index === 5 && !isInternationalUsageRelevant()) {
+        step.classList.add("hidden-step");
+        return;
+      }
+
       if (index < activeIndex) {
         step.classList.add("stacked-card");
       } else if (index === activeIndex) {
@@ -821,9 +858,15 @@ function createIndexQuiz() {
   }
 
   function syncProgress() {
-    const visibleStep = Math.min(state.currentStep + 1, questionStepCount);
-    const progressWidth = questionStepCount
-      ? `${(visibleStep / questionStepCount) * 100}%`
+    const visibleQuestionSteps = Array.from({ length: questionStepCount }, (_, index) => index)
+      .filter(index => index !== 5 || isInternationalUsageRelevant());
+    const visibleStepIndex = visibleQuestionSteps.indexOf(state.currentStep);
+    const visibleStep = state.currentStep === resultStepIndex
+      ? visibleQuestionSteps.length
+      : Math.max(visibleStepIndex + 1, 1);
+    const visibleStepCount = visibleQuestionSteps.length;
+    const progressWidth = visibleStepCount
+      ? `${(visibleStep / visibleStepCount) * 100}%`
       : "0%";
 
     document.querySelectorAll(".quiz-step-current").forEach(node => {
@@ -831,7 +874,7 @@ function createIndexQuiz() {
     });
 
     document.querySelectorAll(".quiz-step-total").forEach(node => {
-      node.textContent = String(questionStepCount);
+      node.textContent = String(visibleStepCount);
     });
 
     document.querySelectorAll(".quiz-progress-inline").forEach(node => {
@@ -1150,6 +1193,7 @@ function createIndexQuiz() {
       state.streamingCalculation ? { label: "Streaming", value: getStreamingCalculationLabel(state.streamingCalculation) } : null,
       state.streamingServices.length ? { label: "Betalar f\u00f6r", value: getStreamingServicesLabel(state.streamingServices) } : null,
       state.internationalTravel ? { label: "Utlandsresor", value: getTravelLabel(state.internationalTravel) } : null,
+      state.internationalUsage ? { label: "Anv\u00e4ndning utanf\u00f6r EU", value: getInternationalUsageLabel(state.internationalUsage) } : null,
       state.price ? { label: "Prisniv\u00e5", value: getPriceNeedLabel(state.price) } : null,
       existingOperators ? { label: "Nuvarande operat\u00f6r", value: existingOperators } : null,
     ].filter(Boolean);
@@ -1186,6 +1230,12 @@ function createIndexQuiz() {
     if (value === "none") return "Reser inte mycket";
     if (value === "eu") return "Mest inom EU";
     if (value === "outside_eu") return "Även utanför EU";
+    return value;
+  }
+
+  function getInternationalUsageLabel(value) {
+    if (value === "calls") return "Lokala samtal och surf";
+    if (value === "data") return "Bara surf";
     return value;
   }
 
@@ -1240,6 +1290,7 @@ function createIndexQuiz() {
     if (state.data) reasons.push(getDataNeedLabel(state.data).toLowerCase());
     if (state.price) reasons.push(getPriceNeedLabel(state.price).toLowerCase());
     if (state.internationalTravel) reasons.push(getTravelLabel(state.internationalTravel).toLowerCase());
+    if (state.internationalUsage) reasons.push(getInternationalUsageLabel(state.internationalUsage).toLowerCase());
     if (includedServiceValue > 0) {
       reasons.push(`Telias streamingvärde (${formatMoney(includedServiceValue)}/mån) är avräknat`);
     }

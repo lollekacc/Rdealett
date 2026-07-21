@@ -141,9 +141,7 @@ body {
   width: auto;
   height: auto;
   border-radius: 0;
-  background:
-    linear-gradient(90deg, rgba(245,243,238,.62) 0%, rgba(245,243,238,.44) 38%, rgba(245,243,238,.18) 62%, rgba(245,243,238,.08) 100%),
-    url('./images/heero.png') center center / cover no-repeat;
+  background: url('./images/testtt.png') center center / cover no-repeat;
   filter:none;
   transform: none;
 }
@@ -1305,9 +1303,7 @@ input:focus,select:focus,textarea:focus,.bredband-input-wrap:focus-within { bord
 
   .hero { min-height:900px; background-position:58% center; }
   .hero::before {
-    background:
-      linear-gradient(180deg, rgba(245,243,238,.86) 0%, rgba(245,243,238,.58) 42%, rgba(245,243,238,.12) 100%),
-      url('./images/heero.png') 53% center / cover no-repeat;
+    background: url('./images/testhero.png') 53% center / cover no-repeat;
   }
   .hero .hero-eyebrow { top:105px; }
   .hero h1 { top:155px; width:calc(100% - 36px); font-size:clamp(44px,13vw,58px); }
@@ -2004,7 +2000,7 @@ body:has(.home-intro) .newsletter-form .button:hover { color:#fff; }
 }
 
 .hero:not(.quiz-in-hero) h1 {
-  top: clamp(240px, 34vh, 340px);
+  top: clamp(170px, 0vh, 340px);
   width: min(610px, 36vw);
   font-size: clamp(36px, 3.25vw, 62px);
   line-height: 1.08;

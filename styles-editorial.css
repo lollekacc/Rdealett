@@ -141,7 +141,7 @@ body {
   width: auto;
   height: auto;
   border-radius: 0;
-  background: url('./images/testtt.png') center center / cover no-repeat;
+  background: url('./images/chat.png') center center / cover no-repeat;
   filter:none;
   transform: none;
 }
@@ -2265,4 +2265,458 @@ body:has(.home-intro) main button.is-selected:not(.quiz-option):not(.operator-no
 
 .streaming-checkbox:has(input:checked) {
   background: rgba(255, 255, 255, 0.94) !important;
+}
+
+/* Homepage palette pass for the dark handshake hero image. */
+body:has(.home-intro) {
+  --home-copper: #c9772e;
+  --home-white: #ffffff;
+  --home-amber: #d68839;
+  --home-brown: #b96926;
+  --home-ink: #171717;
+  background: var(--home-ink) !important;
+  color: var(--home-ink) !important;
+}
+
+body:has(.home-intro) .hero::before {
+  background: url('./images/chat.png') center center / cover no-repeat !important;
+  filter: none !important;
+}
+
+body:has(.home-intro) .site-header .brand-logo-crop img {
+  filter: invert(1) brightness(2.1);
+}
+
+body:has(.home-intro) .site-header .nav-link,
+body:has(.home-intro) .site-header .nav-item a,
+body:has(.home-intro) .site-header .language-switcher select,
+body:has(.home-intro) .site-header .header-topbar-link,
+body:has(.home-intro) .site-header .header-account-link {
+  color: rgba(255, 255, 255, .9) !important;
+}
+
+body:has(.home-intro) .site-header .nav-link::after,
+body:has(.home-intro) .site-header .header-account-link {
+  border-color: var(--home-amber);
+}
+
+body:has(.home-intro) .site-header .nav-link::after {
+  background-color: var(--home-amber);
+}
+
+body:has(.home-intro) .site-header .header-account-link {
+  background-color: transparent;
+}
+
+body:has(.home-intro) .hero .hero-eyebrow,
+body:has(.home-intro) .hero:not(.quiz-in-hero) h1,
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof,
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-partners {
+  color: var(--home-white);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, .55);
+}
+
+body:has(.home-intro) .hero .hero-eyebrow {
+  color: rgba(255, 255, 255, .72);
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) h1 {
+  color: var(--home-white);
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) h1 em::after {
+  background: var(--home-amber);
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) #hero-start-analysis,
+body:has(.home-intro) .hero:not(.quiz-in-hero) #hero-start-analysis:hover,
+body:has(.home-intro) .home-how .button,
+body:has(.home-intro) .newsletter-form .button {
+  border-left-color: var(--home-amber);
+  background: var(--home-copper);
+  color: var(--home-white);
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-text-link {
+  border-bottom-color: var(--home-amber);
+  color: rgba(255, 255, 255, .82);
+}
+
+body:has(.home-intro) .hero-proof i {
+  color: var(--home-amber);
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-partners {
+  color: rgba(255, 255, 255, .68);
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof {
+  top: clamp(670px, 74vh, 708px);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-partners {
+  top: clamp(724px, 80vh, 762px);
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-partner-logos img {
+  box-sizing: content-box;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .24);
+}
+
+body:has(.home-intro) .home-marquee {
+  border-color: rgba(185, 105, 38, .42);
+  background: var(--home-white);
+  color: var(--home-ink);
+}
+
+body:has(.home-intro) .home-intro,
+body:has(.home-intro) .gift-card-section,
+body:has(.home-intro) .coverage-maplibre-heading {
+  background: var(--home-white);
+  color: var(--home-ink);
+}
+
+body:has(.home-intro) .home-intro .section-label,
+body:has(.home-intro) .gift-card-copy .section-label,
+body:has(.home-intro) .home-service-card__number {
+  color: var(--home-copper);
+}
+
+body:has(.home-intro) .home-intro h2,
+body:has(.home-intro) .gift-card-copy h2,
+body:has(.home-intro) .coverage-maplibre-heading h2 {
+  color: var(--home-ink);
+}
+
+body:has(.home-intro) .home-service-card {
+  border-top-color: var(--home-brown);
+  color: var(--home-ink) !important;
+}
+
+body:has(.home-intro) .home-service-card--orange {
+  --card-accent: var(--home-copper);
+}
+
+body:has(.home-intro) .home-service-card--blue {
+  --card-accent: var(--home-brown);
+}
+
+body:has(.home-intro) .home-service-card--lime {
+  --card-accent: var(--home-amber);
+}
+
+body:has(.home-intro) .home-service-card::after {
+  background: var(--card-accent);
+}
+
+body:has(.home-intro) .home-how::after {
+  background: linear-gradient(90deg, var(--home-copper) 0 34%, var(--home-amber) 34% 67%, var(--home-brown) 67%);
+}
+
+body:has(.home-intro) .home-service-card__arrow,
+body:has(.home-intro) .home-service-card:hover .home-service-card__arrow {
+  background: var(--card-accent);
+  color: var(--home-white);
+}
+
+body:has(.home-intro) .home-how,
+body:has(.home-intro) .newsletter-panel {
+  border-color: rgba(214, 136, 57, .44);
+  background: var(--home-ink);
+  color: var(--home-white);
+}
+
+body:has(.home-intro) .home-how .section-label,
+body:has(.home-intro) .home-how h2,
+body:has(.home-intro) .home-how__steps h3,
+body:has(.home-intro) .newsletter-copy h2,
+body:has(.home-intro) .newsletter-form label > span {
+  color: var(--home-white);
+}
+
+body:has(.home-intro) .home-how__copy > p:not(.section-label),
+body:has(.home-intro) .home-how__steps p,
+body:has(.home-intro) .newsletter-copy p:last-child,
+body:has(.home-intro) .newsletter-status {
+  color: rgba(255, 255, 255, .68);
+}
+
+body:has(.home-intro) .home-how__steps li {
+  border-color: rgba(214, 136, 57, .38);
+}
+
+body:has(.home-intro) .home-how__steps > li > span {
+  color: var(--home-amber) !important;
+}
+
+body:has(.home-intro) .gift-card-image img {
+  filter: none;
+}
+
+body:has(.home-intro) .gift-logo-grid {
+  border-top-color: var(--home-brown);
+}
+
+body:has(.home-intro) .gift-logo {
+  border-bottom-color: rgba(185, 105, 38, .42);
+  color: var(--home-ink);
+}
+
+body:has(.home-intro) .newsletter-panel {
+  box-shadow: 18px 18px 0 rgba(201, 119, 46, .22);
+}
+
+body:has(.home-intro) .newsletter-copy .section-label {
+  color: var(--home-amber);
+}
+
+body:has(.home-intro) .newsletter-form input:focus {
+  border-color: var(--home-amber);
+  box-shadow: 0 0 0 4px rgba(214, 136, 57, .26);
+}
+
+body:has(.home-intro) .coverage-maplibre-section {
+  padding: 0 clamp(28px, 4vw, 72px) clamp(84px, 8vw, 128px);
+  background: var(--home-white);
+}
+
+body:has(.home-intro) .coverage-maplibre-section button {
+  border-color: var(--home-brown);
+}
+
+body:has(.home-intro) .coverage-maplibre-section button:hover,
+body:has(.home-intro) .coverage-maplibre-section button.is-active,
+body:has(.home-intro) .coverage-maplibre-section button[aria-pressed="true"] {
+  background: var(--home-copper);
+  color: var(--home-white);
+}
+
+body:has(.home-intro) #quiz-steps-wrapper .quiz-option.selected,
+body:has(.home-intro) #quiz-steps-wrapper .quiz-option.active,
+body:has(.home-intro) #quiz-steps-wrapper .quiz-option[aria-pressed="true"],
+body:has(.home-intro) #quiz-steps-wrapper .operator-no-binding-button.selected,
+body:has(.home-intro) #quiz-steps-wrapper .operator-no-binding-button.active,
+body:has(.home-intro) #quiz-steps-wrapper .operator-no-binding-button[aria-pressed="true"] {
+  border-color: var(--home-ink) !important;
+  background: var(--home-ink) !important;
+  box-shadow:
+    inset 0 0 0 3px var(--home-amber),
+    6px 6px 0 var(--home-copper) !important;
+}
+
+@media (max-width: 900px) {
+  body:has(.home-intro) .hero::before {
+    background: url('./images/chat.png') 50% center / cover no-repeat !important;
+  }
+
+  body:has(.home-intro) .site-header .header-inner {
+    background: rgba(23, 23, 23, .86) !important;
+    border-bottom-color: rgba(214, 136, 57, .32);
+  }
+
+  body:has(.home-intro) .hero:not(.quiz-in-hero) h1 {
+    width: min(340px, calc(100% - 36px));
+    font-size: clamp(32px, 9vw, 38px);
+    line-height: 1.06;
+  }
+
+  body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof {
+    top: auto;
+    bottom: 88px;
+    font-size: 11px;
+  }
+
+  body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-partners {
+    top: auto;
+    bottom: 34px;
+  }
+}
+
+/* Tighten lower homepage sections after the hero palette pass. */
+body:has(.home-intro) .gift-card-section {
+  padding: clamp(86px, 8vw, 132px) clamp(28px, 4vw, 72px);
+}
+
+body:has(.home-intro) .gift-card-section::before,
+body:has(.home-intro) .gift-card-image::after {
+  content: none !important;
+  display: none !important;
+}
+
+body:has(.home-intro) .gift-card-section .page-shell {
+  display: grid;
+  max-width: 1480px;
+  margin: 0 auto;
+  grid-template-columns: minmax(420px, .88fr) minmax(520px, 1fr);
+  gap: clamp(64px, 8vw, 132px);
+  align-items: center;
+}
+
+body:has(.home-intro) .gift-card-image {
+  width: 100%;
+  max-width: 640px;
+  justify-self: center;
+  overflow: hidden;
+}
+
+body:has(.home-intro) .gift-card-image img {
+  display: block;
+  width: 100%;
+  height: clamp(520px, 50vw, 680px);
+  min-height: 0;
+  object-fit: cover;
+  object-position: 36% center;
+}
+
+body:has(.home-intro) .gift-card-content {
+  max-width: 720px;
+}
+
+body:has(.home-intro) .gift-card-copy h2 {
+  max-width: 700px;
+  margin: 22px 0 24px;
+  font-size: clamp(48px, 4.6vw, 78px);
+  line-height: 1.02;
+  letter-spacing: -.035em;
+}
+
+body:has(.home-intro) .gift-card-copy > p:last-child {
+  max-width: 660px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+body:has(.home-intro) .gift-logo-grid {
+  margin-top: 42px;
+}
+
+body:has(.home-intro) .gift-logo {
+  min-height: 58px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+body:has(.home-intro) .coverage-maplibre-heading {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: clamp(58px, 6vw, 88px) 0 24px;
+}
+
+body:has(.home-intro) .coverage-maplibre-heading h2 {
+  max-width: 620px;
+  font-size: clamp(34px, 3.2vw, 52px);
+  line-height: 1.06;
+  letter-spacing: -.024em;
+}
+
+body:has(.home-intro) .coverage-maplibre-section .coverage-maplibre-shell {
+  max-width: 1480px;
+  height: clamp(560px, 64vh, 700px);
+  min-height: 560px;
+  margin: 0 auto;
+  border: 1px solid rgba(185, 105, 38, .36);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+body:has(.home-intro) .footer {
+  padding: clamp(76px, 7vw, 112px) clamp(28px, 4vw, 72px) clamp(56px, 6vw, 84px);
+  border-top-color: rgba(185, 105, 38, .34);
+  background: var(--home-white);
+  color: var(--home-ink);
+}
+
+body:has(.home-intro) .footer .footer-inner {
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+body:has(.home-intro) .footer .footer-main {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.15fr) minmax(320px, .95fr) minmax(260px, .8fr) minmax(280px, .9fr);
+  gap: clamp(44px, 5vw, 92px);
+  align-items: start;
+}
+
+body:has(.home-intro) .footer .footer-brand-link {
+  color: var(--home-ink);
+  font-size: clamp(46px, 4.6vw, 72px);
+  line-height: .96;
+}
+
+body:has(.home-intro) .footer .footer-brand p,
+body:has(.home-intro) .footer .footer-links a,
+body:has(.home-intro) .footer .footer-contact a,
+body:has(.home-intro) .footer .footer-contact p:not(.footer-contact-title) {
+  color: rgba(23, 23, 23, .66);
+}
+
+body:has(.home-intro) .footer .footer-links p,
+body:has(.home-intro) .footer .footer-contact .footer-contact-title {
+  color: var(--home-ink);
+}
+
+body:has(.home-intro) .footer .footer-social-grid {
+  grid-column: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  justify-content: start;
+  gap: 14px;
+}
+
+body:has(.home-intro) .footer .footer-social-plate {
+  width: 44px;
+  min-height: 44px;
+  border: 1px solid rgba(185, 105, 38, .34);
+  background: rgba(201, 119, 46, .08);
+}
+
+body:has(.home-intro) .footer .footer-social-icon {
+  color: var(--home-ink);
+}
+
+@media (max-width: 900px) {
+  body:has(.home-intro) .gift-card-section {
+    padding: 76px 20px 88px;
+  }
+
+  body:has(.home-intro) .gift-card-section .page-shell {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+
+  body:has(.home-intro) .gift-card-image {
+    max-width: none;
+  }
+
+  body:has(.home-intro) .gift-card-image img {
+    height: 380px;
+  }
+
+  body:has(.home-intro) .gift-card-copy h2 {
+    font-size: clamp(38px, 11vw, 52px);
+  }
+
+  body:has(.home-intro) .coverage-maplibre-heading {
+    padding: 64px 20px 28px;
+  }
+
+  body:has(.home-intro) .coverage-maplibre-section .coverage-maplibre-shell {
+    height: auto;
+    min-height: 780px;
+  }
+
+  body:has(.home-intro) .footer {
+    padding: 68px 20px 56px;
+  }
+
+  body:has(.home-intro) .footer .footer-main {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
 }

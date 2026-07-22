@@ -1916,6 +1916,7 @@
       '.hero h1',
       '.hero .hero-lead',
       '.hero .hero-actions',
+      '.hero .hero-proof',
       '.home-marquee__group',
       '.home-intro__head',
       '.home-service-card',

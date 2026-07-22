@@ -141,7 +141,7 @@ body {
   width: auto;
   height: auto;
   border-radius: 0;
-  background: url('./images/chat.png') center center / cover no-repeat;
+  background: url('./images/chatt.png') center center / cover no-repeat;
   filter:none;
   transform: none;
 }
@@ -589,11 +589,82 @@ body:has(.home-intro) main { overflow:clip; }
 }
 .home-motion-ready .home-reveal.is-visible { opacity:1; filter:none; transform:none; }
 
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero)::before {
+  animation: home-hero-image-in 1.15s cubic-bezier(.2,.75,.2,1) both;
+}
+
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-eyebrow.home-reveal,
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) h1.home-reveal,
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof.home-reveal {
+  --home-hero-copy-x: -86px;
+  filter: none;
+  animation: home-hero-copy-in .86s cubic-bezier(.16,1,.3,1) both;
+  transition: none;
+}
+
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-eyebrow.home-reveal {
+  animation-delay: .22s;
+}
+
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) h1.home-reveal {
+  animation-delay: .34s;
+}
+
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof.home-reveal {
+  animation-delay: .52s;
+}
+
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-actions.home-reveal {
+  --home-hero-action-x: 96px;
+  filter: none;
+  animation: home-hero-actions-in .88s .9s cubic-bezier(.16,1,.3,1) both;
+  transition: none;
+}
+
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-eyebrow.home-reveal.is-visible,
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) h1.home-reveal.is-visible,
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof.home-reveal.is-visible,
+.home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-actions.home-reveal.is-visible {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+
 @keyframes editorial-pulse {
   0%,100% { box-shadow:0 0 0 5px rgba(200,255,61,.16); }
   50% { box-shadow:0 0 0 11px rgba(200,255,61,0); }
 }
 @keyframes editorial-underline { to { transform:scaleX(1); } }
+@keyframes home-hero-image-in {
+  from {
+    opacity: .62;
+    transform: scale(1.045);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes home-hero-copy-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--home-hero-copy-x),0,0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes home-hero-actions-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--home-hero-action-x),0,0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
 /* All secondary page heroes use a clean split layout. */
 .shop-hero,.business-hero,.bredband-hero,.coverage-hero,.about-hero,.support-hero {
@@ -801,7 +872,7 @@ input:focus,select:focus,textarea:focus,.bredband-input-wrap:focus-within { bord
 .offer-compare-button:hover,
 .offer-compare-button.is-selected { background:#444; box-shadow:none; transform:none; }
 .offer-compare-button__image,
-.dealett-chat-toggle__image { display:none !important; }
+.dealett-chatt-toggle__image { display:none !important; }
 .cart-drawer-panel { border-left:1px solid #222; background:#f7f7f7; box-shadow:none; }
 .cart-drawer-head { border-bottom:1px solid #222; background:#f0f0f0; }
 .cart-line { border:0; border-bottom:1px solid #aaa; border-radius:0; background:transparent; }
@@ -1256,7 +1327,7 @@ input:focus,select:focus,textarea:focus,.bredband-input-wrap:focus-within { bord
 .package-card > span { border:0; padding:0; font-weight:400; }
 .package-card h3 { font-weight:400; }
 
-/* Footer and chat */
+/* Footer and chatt */
 .footer { padding:120px clamp(28px,3vw,58px) 48px; border-top:1px solid #aaa; background:#fafafa; }
 .footer .footer-inner { max-width:none; padding:0; }
 .footer .footer-main { grid-template-columns:1fr 1fr 1fr; gap:70px; }
@@ -1268,15 +1339,15 @@ input:focus,select:focus,textarea:focus,.bredband-input-wrap:focus-within { bord
 .footer .footer-social-plate { width:44px; min-height:44px; padding:0; border:0; border-radius:0; background:transparent; }
 .footer .footer-social-copy { display:none; }
 .footer .footer-social-icon { width:44px; color:#111; }
-.dealett-chat-toggle { width:58px; height:58px; border:0; border-radius:0; background:#111; box-shadow:none; }
-.dealett-chat-toggle::before,.dealett-chat-toggle::after { display:none; }
-.dealett-chat-toggle i { color:#fff; font-size:22px; }
-.dealett-chat-toggle:hover { background:#444; box-shadow:none; transform:none; }
-.dealett-chat-panel { border:1px solid #222; border-radius:0; background:#fafafa; box-shadow:none; }
-.dealett-chat-header { border-bottom:1px solid #222; background:#eee; }
-.dealett-chat-bubble { border:1px solid #aaa; border-radius:0; }
-.dealett-chat-message--user .dealett-chat-bubble { background:#222; }
-.dealett-chat-chip,.dealett-chat-widget-button { border:1px solid #777; border-radius:0; }
+.dealett-chatt-toggle { width:58px; height:58px; border:0; border-radius:0; background:#111; box-shadow:none; }
+.dealett-chatt-toggle::before,.dealett-chatt-toggle::after { display:none; }
+.dealett-chatt-toggle i { color:#fff; font-size:22px; }
+.dealett-chatt-toggle:hover { background:#444; box-shadow:none; transform:none; }
+.dealett-chatt-panel { border:1px solid #222; border-radius:0; background:#fafafa; box-shadow:none; }
+.dealett-chatt-header { border-bottom:1px solid #222; background:#eee; }
+.dealett-chatt-bubble { border:1px solid #aaa; border-radius:0; }
+.dealett-chatt-message--user .dealett-chatt-bubble { background:#222; }
+.dealett-chatt-chip,.dealett-chatt-widget-button { border:1px solid #777; border-radius:0; }
 
 @media (max-width: 900px) {
   .site-header { position:fixed; }
@@ -1958,6 +2029,11 @@ body:has(.home-intro) .newsletter-form .button:hover { color:#fff; }
   .hero .hero-eyebrow::before { animation:none; }
   .hero h1 em::after { animation:none; transform:scaleX(1); }
   .home-motion-ready .home-reveal { opacity:1; filter:none; transform:none; }
+  .home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero)::before { animation:none; opacity:1; transform:none; }
+  .home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-eyebrow.home-reveal,
+  .home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) h1.home-reveal,
+  .home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof.home-reveal,
+  .home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-actions.home-reveal { opacity:1; filter:none; transform:none; }
   .mobile-plans-page .shop-hero-kicker span,.mobile-plans-page .shop-hero h1 em::after { animation:none; }
   .mobile-plans-page .shop-hero h1 em::after { transform:scaleX(1); }
   .mobile-plans-motion-ready .mobile-plans-reveal { opacity:1; filter:none; transform:none; }
@@ -2279,8 +2355,16 @@ body:has(.home-intro) {
 }
 
 body:has(.home-intro) .hero::before {
-  background: url('./images/chat.png') center center / cover no-repeat !important;
+  background: url('./images/chatt.png') center center / cover no-repeat !important;
   filter: none !important;
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-actions {
+  top: clamp(500px, 56vh, 590px);
+  right: clamp(28px, 4vw, 72px);
+  left: auto;
+  justify-content: flex-end;
+  text-align: right;
 }
 
 body:has(.home-intro) .site-header .brand-logo-crop img {
@@ -2351,7 +2435,10 @@ body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-partners {
 }
 
 body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof {
-  top: clamp(670px, 74vh, 708px);
+  top: clamp(320px, 36vh, 390px);
+  bottom: auto;
+  left: clamp(28px, 3vw, 62px);
+  justify-content: flex-start;
   font-size: 12px;
   font-weight: 700;
 }
@@ -2509,8 +2596,12 @@ body:has(.home-intro) #quiz-steps-wrapper .operator-no-binding-button[aria-press
 }
 
 @media (max-width: 900px) {
+  body:has(.home-intro) .hero:not(.quiz-in-hero) {
+    min-height: calc(100svh - 34px);
+  }
+
   body:has(.home-intro) .hero::before {
-    background: url('./images/chat.png') 50% center / cover no-repeat !important;
+    background: url('./images/chatt.png') 50% center / cover no-repeat !important;
   }
 
   body:has(.home-intro) .site-header .header-inner {
@@ -2524,9 +2615,31 @@ body:has(.home-intro) #quiz-steps-wrapper .operator-no-binding-button[aria-press
     line-height: 1.06;
   }
 
+  body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-actions {
+    right: 0 !important;
+    left: 0 !important;
+    bottom: 150px !important;
+    width: 100% !important;
+    max-width: none;
+    box-sizing: border-box;
+    padding: 0 18px;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .home-motion-ready body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-actions.home-reveal {
+    --home-hero-action-x: 18px;
+  }
+
+  body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-text-link {
+    justify-content: flex-end;
+  }
+
   body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof {
     top: auto;
     bottom: 88px;
+    left: 18px;
+    right: auto;
     font-size: 11px;
   }
 
@@ -2718,5 +2831,40 @@ body:has(.home-intro) .footer .footer-social-icon {
   body:has(.home-intro) .footer .footer-main {
     grid-template-columns: 1fr;
     gap: 34px;
+  }
+}
+
+/* Final homepage hero composition: copy left, actions right. */
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-actions {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box;
+  padding: 0 clamp(28px, 4vw, 72px);
+  justify-content: flex-end;
+  align-items: center;
+  text-align: right;
+}
+
+body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof {
+  top: clamp(320px, 36vh, 390px);
+  bottom: auto;
+  left: clamp(28px, 3vw, 62px);
+  justify-content: flex-start;
+}
+
+@media (max-width: 900px) {
+  body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-actions {
+    bottom: 150px !important;
+    padding: 0 18px;
+    flex-direction: column;
+    align-items: flex-end;
+    --home-hero-action-x: 18px;
+  }
+
+  body:has(.home-intro) .hero:not(.quiz-in-hero) #hero-start-analysis,
+  body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-text-link {
+    max-width: 100%;
   }
 }

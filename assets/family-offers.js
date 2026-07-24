@@ -774,6 +774,14 @@ const getPlanDataValue = (plan) => (
   Number(plan.dataAmount) >= 999 ? 'unlimited' : String(Number(plan.dataAmount) || 0)
 );
 
+const updateRangeProgress = (input) => {
+  if (!input) return;
+  const min = Number(input.min) || 0;
+  const max = Number(input.max) || 1;
+  const progress = ((Number(input.value) - min) / Math.max(max - min, 1)) * 100;
+  input.style.setProperty('--range-progress', `${progress}%`);
+};
+
 const renderDataFilter = (plans) => {
   if (!dataFilter || dataFilter.dataset.ready === 'true') return;
 
@@ -802,11 +810,13 @@ const renderDataFilter = (plans) => {
       return tick;
     }));
   }
+  updateRangeProgress(dataFilter);
   updateDataFilterValue();
 };
 
 const updateDataFilterValue = () => {
   activeData = dataSteps[Number(dataFilter?.value) || 0] || null;
+  updateRangeProgress(dataFilter);
   if (!dataFilterValue) return;
   dataFilterValue.textContent = activeData === 'unlimited'
       ? 'Obegränsad'
@@ -818,6 +828,7 @@ const updateDataFilterValue = () => {
 };
 
 const updateFamilySizeValue = () => {
+  updateRangeProgress(familySize);
   if (familySizeValue) familySizeValue.textContent = familySize?.value || '2';
 };
 
@@ -996,5 +1007,6 @@ dataFilterAll?.addEventListener('click', () => {
   renderOffers();
 });
 renderOperatorFilter();
+updateFamilySizeValue();
 renderOffers();
 })();

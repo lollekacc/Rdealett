@@ -97,11 +97,15 @@
 }
 
 .family-page .plan-toolbar {
-  align-items: stretch;
+  align-items: end;
 }
 
 .family-size-filter {
-  flex-basis: 340px;
+  flex-basis: 300px;
+}
+
+.family-page .range-filter {
+  --range-accent: var(--family-green);
 }
 
 .family-plan-card {

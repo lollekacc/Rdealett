@@ -174,6 +174,113 @@
   box-shadow: 0 20px 48px rgba(39, 36, 67, 0.1);
 }
 
+.plan-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 24px 24px 0;
+}
+
+.plan-toolbar > div:first-child {
+  flex: 1;
+}
+
+.plan-toolbar-label {
+  display: block;
+  margin-bottom: 9px;
+  color: rgba(39, 36, 67, 0.64);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.operator-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.operator-filter-button {
+  min-height: 40px;
+  padding: 0 17px;
+  border: 1px solid rgba(39, 36, 67, 0.14);
+  border-radius: 999px;
+  background: #fff;
+  color: #272443;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.operator-filter-button:hover {
+  transform: translateY(-1px);
+  border-color: #272443;
+}
+
+.operator-filter-button.is-active {
+  border-color: #17142b;
+  background: #17142b;
+  color: #fff;
+}
+
+.plan-count {
+  margin: 0 0 10px;
+  color: rgba(39, 36, 67, 0.66);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.plan-card {
+  min-height: 350px;
+}
+
+.plan-card .offer-card-logo {
+  min-height: 88px;
+}
+
+.plan-operator-name {
+  color: var(--offer-accent, var(--accent));
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.plan-card .plan-description {
+  margin: 0;
+  min-height: 45px;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 0 !important;
+  color: #17142b !important;
+}
+
+.plan-price strong {
+  font-family: 'Roboto', sans-serif;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.plan-price span,
+.plan-price-detail {
+  color: rgba(39, 36, 67, 0.64);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.plan-price-detail {
+  margin: -7px 0 0 !important;
+}
+
 .offers-strip-top {
   display: flex;
   align-items: center;
@@ -1250,6 +1357,17 @@ body.compare-modal-open {
   .offers-inner {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  .plan-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .plan-count {
+    margin-bottom: 0;
   }
 
   .offers-container {

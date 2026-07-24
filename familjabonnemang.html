@@ -32,41 +32,39 @@
         </nav>
 
         <h1>Familjabonnemang</h1>
-
-        <ul class="shop-hero-points" aria-label="Fördelar">
-          <li><i class="fa-solid fa-check"></i> Samla familjens abonnemang</li>
-          <li><i class="fa-solid fa-check"></i> Fria samtal och sms för alla</li>
-          <li><i class="fa-solid fa-check"></i> Presentkort på familjepaket</li>
-        </ul>
-
-        <div class="family-hero-stack" aria-label="Familjepaket">
-          <div>
-            <span>2-5</span>
-            <small>abonnemang</small>
-          </div>
-          <div>
-            <span>5G</span>
-            <small>för hela familjen</small>
-          </div>
-          <div>
-            <span>1</span>
-            <small>samlad kostnad</small>
-          </div>
-        </div>
+        <p class="shop-hero-lead">Se vad familjens abonnemang kostar tillsammans.</p>
       </div>
     </section>
 
     <section id="offersSection" class="result-section">
       <div class="result-shell">
         <div class="section-head shop-list-head reveal">
-          <h2>Välj familjepaket och operatör</h2>
+          <h2>Jämför alla familjeabonnemang</h2>
+          <p>Välj hur många abonnemang ni behöver och filtrera på operatör.</p>
         </div>
 
         <div id="offersStrip" class="offers-strip reveal">
-          <div class="offers-strip-top">
-            <div class="offers-strip-badge">
-              <i class="fa-solid fa-users"></i>
-              Familjepaket
+          <div class="plan-toolbar" aria-label="Filtrera familjeabonnemang">
+            <div>
+              <span class="plan-toolbar-label">Operatör</span>
+              <div id="operatorFilter" class="operator-filter" role="group" aria-label="Välj operatör"></div>
+            </div>
+            <label class="family-size-filter" for="familySize">
+              <span class="plan-toolbar-label">Antal abonnemang</span>
+              <select id="familySize">
+                <option value="2">2 abonnemang</option>
+                <option value="3">3 abonnemang</option>
+                <option value="4">4 abonnemang</option>
+                <option value="5">5 abonnemang</option>
+                <option value="6">6 abonnemang</option>
+                <option value="7">7 abonnemang</option>
+                <option value="8">8 abonnemang</option>
+                <option value="9">9 abonnemang</option>
+                <option value="10">10 abonnemang</option>
+              </select>
+            </label>
+            <div class="plan-toolbar-summary">
+              <p id="planCount" class="plan-count" aria-live="polite"></p>
             </div>
           </div>
 

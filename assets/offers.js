@@ -6,6 +6,8 @@ const totalReward = document.querySelector('#totalReward');
 const remainingSum = document.querySelector('#remainingSum');
 const rewardProgressFill = document.querySelector('#rewardProgressFill');
 const rewardContinueBtn = document.querySelector('#rewardContinueBtn');
+const operatorFilter = document.querySelector('#operatorFilter');
+const planCount = document.querySelector('#planCount');
 
 const currency = new Intl.NumberFormat('sv-SE');
 
@@ -40,6 +42,7 @@ const giftCards = ['Apollo', 'H&M', 'Hotel', 'ICA Maxi', 'Mio', 'Zalando', 'Elgi
 
 let selectedOffer = null;
 let plansCache = null;
+let activeOperator = 'Alla';
 
 const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
 
@@ -543,47 +546,97 @@ const startOfferQuestions = (offer, card) => {
   });
 };
 
-const renderOffers = () => {
+const renderOperatorFilter = () => {
+  if (!operatorFilter) return;
+
+  const fragment = document.createDocumentFragment();
+  ['Alla', ...offers.map((offer) => offer.provider)].forEach((operator) => {
+    const button = createElement('button', 'operator-filter-button', operator);
+    const isActive = operator === activeOperator;
+    button.type = 'button';
+    button.dataset.operator = operator;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+    button.addEventListener('click', () => {
+      activeOperator = operator;
+      renderOperatorFilter();
+      renderOffers();
+    });
+    fragment.append(button);
+  });
+  operatorFilter.replaceChildren(fragment);
+};
+
+const createPlanCard = (plan) => {
+  const operatorOffer = getOperatorOffer(plan.operator);
+  const selectedPlan = buildSelectedPlanOffer(plan, {});
+  const card = createElement('article', 'offer-card plan-card');
+  card.dataset.operator = plan.operator;
+  card.style.setProperty('--offer-accent', operatorOffer.accent || 'var(--accent)');
+
+  const logoWrap = createElement('div', 'offer-card-logo');
+  const logo = document.createElement('img');
+  logo.src = plan.logo || operatorOffer.logo;
+  logo.alt = plan.operator;
+  logo.loading = 'lazy';
+  logo.decoding = 'async';
+  logoWrap.append(logo, createCompareButton(buildPlanCompareItem(selectedPlan, plan, {})));
+
+  const details = createElement('div', 'offer-card-details');
+  const heading = createElement('div', 'offer-card-copy');
+  heading.append(
+    createElement('span', 'plan-operator-name', plan.operator),
+    createElement('h3', '', getPlanDataLabel(plan))
+  );
+
+  const price = createElement('p', 'plan-price');
+  price.innerHTML = `<strong>${formatCurrency(plan.price)} kr</strong><span>/mån</span>`;
+
+  const meta = createElement('ul', 'offer-card-meta');
+  ['Fria samtal och sms', `${formatCurrency(selectedPlan.reward)} kr presentkort`].forEach((item) => {
+    meta.append(createElement('li', '', item));
+  });
+
+  const button = createElement('button', 'offer-card-action', 'Välj abonnemang');
+  button.type = 'button';
+  button.addEventListener('click', () => selectOffer(selectedPlan, card));
+
+  details.append(heading, price, meta, button);
+  card.append(logoWrap, details);
+  return card;
+};
+
+const renderOffers = async () => {
   if (!offersContainer) {
     return;
   }
 
-  const fragment = document.createDocumentFragment();
+  offersContainer.innerHTML = '<div class="offers-loading">Hämtar abonnemang...</div>';
 
-  offers.forEach((offer) => {
-    const card = createElement('article', 'offer-card');
-    card.style.setProperty('--offer-accent', offer.accent);
+  try {
+    const plans = await loadPlans();
+    const visiblePlans = plans
+      .filter((plan) => ['mobil', 'mobile_subscription'].includes(plan.category))
+      .filter((plan) => !plan.isFamilyPlan)
+      .filter((plan) => plan.runtimeSellable !== false)
+      .filter((plan) => activeOperator === 'Alla' || plan.operator === activeOperator)
+      .sort((left, right) => (
+        offers.findIndex((offer) => offer.provider === left.operator) -
+        offers.findIndex((offer) => offer.provider === right.operator) ||
+        (left.dataAmount || 0) - (right.dataAmount || 0) ||
+        (left.price || 0) - (right.price || 0)
+      ));
 
-    const logoWrap = createElement('div', 'offer-card-logo');
-    const logo = document.createElement('img');
-    logo.src = offer.logo;
-    logo.alt = offer.provider;
-    logo.loading = 'lazy';
-    logo.decoding = 'async';
-    logoWrap.append(logo, createCompareButton(buildBaseCompareItem(offer)));
-
-    const details = createElement('div', 'offer-card-details');
-    const copy = createElement('div');
-    copy.append(createElement('p', '', 'Obegr\u00e4nsad surf'));
-
-    const meta = createElement('ul', 'offer-card-meta');
-    ['Fria samtal och sms', '5G & eSIM', `${formatCurrency(offer.reward)} kr presentkort`].forEach((item) => {
-      meta.append(createElement('li', '', item));
-    });
-
-    const button = createElement('button', 'offer-card-action', 'V\u00e4lj');
-    button.type = 'button';
-    button.addEventListener('click', () => startOfferQuestions(offer, card));
-
-    const actions = createElement('div', 'offer-card-actions');
-    actions.append(button);
-
-    details.append(copy, meta, actions);
-    card.append(logoWrap, details);
-    fragment.append(card);
-  });
-
-  offersContainer.replaceChildren(fragment);
+    const fragment = document.createDocumentFragment();
+    visiblePlans.forEach((plan) => fragment.append(createPlanCard(plan)));
+    offersContainer.replaceChildren(fragment);
+    if (planCount) {
+      planCount.textContent = `${visiblePlans.length} abonnemang`;
+    }
+  } catch {
+    offersContainer.innerHTML = '<div class="offers-loading">Kunde inte hämta abonnemang just nu.</div>';
+    if (planCount) planCount.textContent = '';
+  }
 };
 
 const buildFallbackMobileCart = (rewards) => {
@@ -677,5 +730,6 @@ rewardContinueBtn?.addEventListener('click', async () => {
 });
 
 window.DealettCart?.bindDrawerEvents();
+renderOperatorFilter();
 renderOffers();
 })();

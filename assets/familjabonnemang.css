@@ -96,6 +96,42 @@
   background: rgba(47, 125, 106, 0.08);
 }
 
+.family-page .plan-toolbar {
+  align-items: end;
+}
+
+.family-size-filter {
+  flex: 0 0 190px;
+}
+
+.family-size-filter select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 36px 0 12px;
+  border: 1px solid rgba(39, 36, 67, 0.14);
+  border-radius: 8px;
+  background: #fff;
+  color: #17142b;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.family-plan-card {
+  min-height: 420px;
+}
+
+@media (max-width: 800px) {
+  .family-page .plan-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .family-size-filter {
+    flex-basis: auto;
+  }
+}
+
 .family-person-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

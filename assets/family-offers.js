@@ -6,6 +6,9 @@ const totalReward = document.querySelector('#totalReward');
 const remainingSum = document.querySelector('#remainingSum');
 const rewardProgressFill = document.querySelector('#rewardProgressFill');
 const rewardContinueBtn = document.querySelector('#rewardContinueBtn');
+const operatorFilter = document.querySelector('#operatorFilter');
+const familySize = document.querySelector('#familySize');
+const planCount = document.querySelector('#planCount');
 
 const currency = new Intl.NumberFormat('sv-SE');
 
@@ -116,6 +119,7 @@ const teliaStreamingOffers = [
 
 let selectedOffer = null;
 let plansCache = null;
+let activeOperator = 'Alla';
 
 const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
 
@@ -740,47 +744,115 @@ const renderPersonQuestion = (offer, card) => {
   });
 };
 
-const renderOffers = () => {
+const renderOperatorFilter = () => {
+  if (!operatorFilter) return;
+
+  const fragment = document.createDocumentFragment();
+  ['Alla', ...offers.map((offer) => offer.provider)].forEach((operator) => {
+    const button = createElement('button', 'operator-filter-button', operator);
+    const isActive = operator === activeOperator;
+    button.type = 'button';
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+    button.addEventListener('click', () => {
+      activeOperator = operator;
+      renderOperatorFilter();
+      renderOffers();
+    });
+    fragment.append(button);
+  });
+  operatorFilter.replaceChildren(fragment);
+};
+
+const createFamilyPlanCard = (plan, addonPlan, offer, persons) => {
+  const answers = {
+    persons,
+    customerStatus: 'none',
+    streamingPackage: 'all',
+    streamingCalculation: 'none',
+    internationalTravel: 'none',
+  };
+  const selectedPlan = buildFamilyPlanOffer(plan, addonPlan, offer, answers);
+  const dataLabel = getPlanDataLabel(plan);
+  const surfLabel = dataLabel === 'Obegränsad' ? 'obegränsad' : dataLabel;
+  const card = createElement('article', 'offer-card plan-card family-plan-card');
+  card.dataset.operator = plan.operator;
+  card.style.setProperty('--offer-accent', offer.accent);
+
+  const logoWrap = createElement('div', 'offer-card-logo');
+  const logo = document.createElement('img');
+  logo.src = plan.logo || offer.logo;
+  logo.alt = plan.operator;
+  logo.loading = 'lazy';
+  logo.decoding = 'async';
+  logoWrap.append(logo, createCompareButton(buildFamilyCompareItem(selectedPlan, plan, answers)));
+
+  const details = createElement('div', 'offer-card-details');
+  const heading = createElement('div', 'offer-card-copy');
+  heading.append(
+    createElement('span', 'plan-operator-name', plan.operator),
+    createElement('h3', '', dataLabel),
+    createElement('p', 'plan-description', `${persons} abonnemang med ${surfLabel} surf per abonnemang.`)
+  );
+
+  const price = createElement('p', 'plan-price');
+  price.innerHTML = `<strong>${formatCurrency(selectedPlan.price)} kr</strong><span>/mån totalt</span>`;
+  const perPerson = createElement('p', 'plan-price-detail', `${formatCurrency(selectedPlan.pricePerPerson)} kr per person`);
+
+  const meta = createElement('ul', 'offer-card-meta');
+  [
+    `${formatCurrency(selectedPlan.addonPrice)} kr per extra abonnemang`,
+    `${formatCurrency(selectedPlan.reward)} kr presentkort`,
+  ].forEach((item) => meta.append(createElement('li', '', item)));
+
+  const button = createElement('button', 'offer-card-action', 'Välj familjeabonnemang');
+  button.type = 'button';
+  button.addEventListener('click', () => selectOffer(selectedPlan, card));
+
+  details.append(heading, price, perPerson, meta, button);
+  card.append(logoWrap, details);
+  return card;
+};
+
+const renderOffers = async () => {
   if (!offersContainer) {
     return;
   }
 
-  const fragment = document.createDocumentFragment();
+  offersContainer.innerHTML = '<div class="offers-loading">Hämtar familjeabonnemang...</div>';
 
-  offers.forEach((offer) => {
-    const card = createElement('article', 'offer-card');
-    card.style.setProperty('--offer-accent', offer.accent);
-
-    const logoWrap = createElement('div', 'offer-card-logo');
-    const logo = document.createElement('img');
-    logo.src = offer.logo;
-    logo.alt = offer.label;
-    logo.loading = 'lazy';
-    logo.decoding = 'async';
-    logoWrap.append(logo, createCompareButton(buildBaseCompareItem(offer)));
-
-    const details = createElement('div', 'offer-card-details');
-    const copy = createElement('div');
-    copy.append(createElement('p', '', `${offer.members} | ${offer.surf}`));
-
-    const meta = createElement('ul', 'offer-card-meta');
-    ['Samlad faktura', 'Fria samtal och sms', `${formatCurrency(offer.reward)} kr presentkort`].forEach((item) => {
-      meta.append(createElement('li', '', item));
+  try {
+    const persons = Number(familySize?.value) || 2;
+    const plans = await loadPlans();
+    const visiblePlans = plans
+      .filter((plan) => isMobilePlan(plan) && !plan.isFamilyPlan)
+      .filter((plan) => plan.runtimeSellable !== false)
+      .filter((plan) => activeOperator === 'Alla' || plan.operator === activeOperator)
+      .sort((left, right) => (
+        offers.findIndex((offer) => offer.provider === left.operator) -
+        offers.findIndex((offer) => offer.provider === right.operator) ||
+        (left.dataAmount || 0) - (right.dataAmount || 0) ||
+        (left.price || 0) - (right.price || 0)
+      ));
+    const addons = new Map(
+      plans
+        .filter((plan) => isMobilePlan(plan) && plan.isFamilyPlan && plan.familyPriceType === 'addon')
+        .filter((plan) => plan.runtimeSellable !== false)
+        .map((plan) => [plan.operator, plan])
+    );
+    const fragment = document.createDocumentFragment();
+    visiblePlans.forEach((plan) => {
+      const offer = offers.find((item) => item.provider === plan.operator);
+      if (offer && addons.has(plan.operator)) {
+        fragment.append(createFamilyPlanCard(plan, addons.get(plan.operator), offer, persons));
+      }
     });
-
-    const button = createElement('button', 'offer-card-action', 'V\u00e4lj familjepaket');
-    button.type = 'button';
-    button.addEventListener('click', () => renderPersonQuestion(offer, card));
-
-    const actions = createElement('div', 'offer-card-actions');
-    actions.append(button);
-
-    details.append(copy, meta, actions);
-    card.append(logoWrap, details);
-    fragment.append(card);
-  });
-
-  offersContainer.replaceChildren(fragment);
+    offersContainer.replaceChildren(fragment);
+    if (planCount) planCount.textContent = `${visiblePlans.length} abonnemang`;
+  } catch {
+    offersContainer.innerHTML = '<div class="offers-loading">Kunde inte hämta familjeabonnemang just nu.</div>';
+    if (planCount) planCount.textContent = '';
+  }
 };
 
 rewardContinueBtn?.addEventListener('click', () => {
@@ -844,5 +916,11 @@ rewardContinueBtn?.addEventListener('click', () => {
 });
 
 window.DealettCart?.bindDrawerEvents();
+familySize?.addEventListener('change', () => {
+  selectedOffer = null;
+  rewardSection?.classList.add('is-hidden');
+  renderOffers();
+});
+renderOperatorFilter();
 renderOffers();
 })();

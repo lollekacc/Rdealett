@@ -492,16 +492,24 @@ const runSmokeTests = async ({ baseUrl, debugBase }) => {
   bredband.close();
   results.push('5G cart flow and shared cart state');
 
+  const mobile = await newPage(debugBase, `${baseUrl}/mobilabonnemang.html`);
+  await mobile.waitFor(`document.querySelectorAll('.plan-card').length >= 10`, 10000);
+  await mobile.evaluate(`[...document.querySelectorAll('.operator-filter-button')].find((button) => button.textContent.trim() === 'Telenor')?.click()`);
+  await mobile.waitFor(`document.querySelectorAll('.plan-card').length > 0 && [...document.querySelectorAll('.plan-card')].every((card) => card.dataset.operator === 'Telenor')`);
+  assertNoExceptions(mobile, 'mobilabonnemang');
+  mobile.close();
+  results.push('mobile plan cards and operator filter');
+
   const family = await newPage(debugBase, `${baseUrl}/familjabonnemang.html`);
   await family.evaluate(clearCartStorage);
-  await family.waitFor(`document.querySelectorAll('.offer-card').length >= 5`, 10000);
-  await family.evaluate(`document.querySelector('.offer-card .offer-card-action').click()`);
-  await family.waitFor(`document.querySelector('[data-persons="4"]')`);
-  await family.evaluate(`document.querySelector('[data-persons="4"]').click()`);
-  await family.waitFor(`document.querySelector('[data-customer-status="none"]')`);
-  await family.evaluate(`document.querySelector('[data-customer-status="none"]').click()`);
-  await family.waitFor(`document.querySelectorAll('.offer-card--plan').length > 0`, 10000);
-  await family.evaluate(`document.querySelector('.offer-card--plan .offer-card-action').click()`);
+  await family.waitFor(`document.querySelectorAll('.plan-card').length >= 10`, 10000);
+  await family.evaluate(`(() => {
+    const select = document.querySelector('#familySize');
+    select.value = '4';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await family.waitFor(`document.querySelector('.family-plan-card .plan-description')?.textContent.includes('4 abonnemang')`, 10000);
+  await family.evaluate(`document.querySelector('.family-plan-card .offer-card-action').click()`);
   await family.waitFor(`document.querySelector('.reward-choice input')`);
   await family.evaluate(`(() => {
     const total = document.querySelector('#totalReward')?.textContent?.replace(/[^0-9]/g, '') || '0';

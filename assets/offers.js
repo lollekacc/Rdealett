@@ -7,6 +7,7 @@ const remainingSum = document.querySelector('#remainingSum');
 const rewardProgressFill = document.querySelector('#rewardProgressFill');
 const rewardContinueBtn = document.querySelector('#rewardContinueBtn');
 const operatorFilter = document.querySelector('#operatorFilter');
+const dataFilter = document.querySelector('#dataFilter');
 const planCount = document.querySelector('#planCount');
 
 const currency = new Intl.NumberFormat('sv-SE');
@@ -43,6 +44,7 @@ const giftCards = ['Apollo', 'H&M', 'Hotel', 'ICA Maxi', 'Mio', 'Zalando', 'Elgi
 let selectedOffer = null;
 let plansCache = null;
 let activeOperator = 'Alla';
+let activeData = 'all';
 
 const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
 
@@ -567,6 +569,33 @@ const renderOperatorFilter = () => {
   operatorFilter.replaceChildren(fragment);
 };
 
+const getPlanDataValue = (plan) => (
+  Number(plan.dataAmount) >= 999 ? 'unlimited' : String(Number(plan.dataAmount) || 0)
+);
+
+const renderDataFilter = (plans) => {
+  if (!dataFilter || dataFilter.dataset.ready === 'true') return;
+
+  const values = [...new Set(
+    plans
+      .filter((plan) => ['mobil', 'mobile_subscription'].includes(plan.category))
+      .filter((plan) => !plan.isFamilyPlan && plan.runtimeSellable !== false)
+      .map((plan) => Number(plan.dataAmount) || 0)
+      .filter((value) => value > 0 && value < 999)
+  )].sort((left, right) => left - right);
+
+  const fragment = document.createDocumentFragment();
+  fragment.append(new Option('Alla surfmängder', 'all'));
+  values.forEach((value) => fragment.append(new Option(`${value} GB`, String(value))));
+  if (plans.some((plan) => !plan.isFamilyPlan && Number(plan.dataAmount) >= 999)) {
+    fragment.append(new Option('Obegränsad', 'unlimited'));
+  }
+
+  dataFilter.replaceChildren(fragment);
+  dataFilter.value = activeData;
+  dataFilter.dataset.ready = 'true';
+};
+
 const createPlanCard = (plan) => {
   const operatorOffer = getOperatorOffer(plan.operator);
   const selectedPlan = buildSelectedPlanOffer(plan, {});
@@ -615,11 +644,13 @@ const renderOffers = async () => {
 
   try {
     const plans = await loadPlans();
+    renderDataFilter(plans);
     const visiblePlans = plans
       .filter((plan) => ['mobil', 'mobile_subscription'].includes(plan.category))
       .filter((plan) => !plan.isFamilyPlan)
       .filter((plan) => plan.runtimeSellable !== false)
       .filter((plan) => activeOperator === 'Alla' || plan.operator === activeOperator)
+      .filter((plan) => activeData === 'all' || getPlanDataValue(plan) === activeData)
       .sort((left, right) => (
         offers.findIndex((offer) => offer.provider === left.operator) -
         offers.findIndex((offer) => offer.provider === right.operator) ||
@@ -730,6 +761,10 @@ rewardContinueBtn?.addEventListener('click', async () => {
 });
 
 window.DealettCart?.bindDrawerEvents();
+dataFilter?.addEventListener('change', () => {
+  activeData = dataFilter.value;
+  renderOffers();
+});
 renderOperatorFilter();
 renderOffers();
 })();

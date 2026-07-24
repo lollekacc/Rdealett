@@ -494,11 +494,23 @@ const runSmokeTests = async ({ baseUrl, debugBase }) => {
 
   const mobile = await newPage(debugBase, `${baseUrl}/mobilabonnemang.html`);
   await mobile.waitFor(`document.querySelectorAll('.plan-card').length >= 10`, 10000);
+  await mobile.waitFor(`document.querySelectorAll('#dataFilter option').length >= 3`);
+  await mobile.evaluate(`(() => {
+    const select = document.querySelector('#dataFilter');
+    select.value = '10';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await mobile.waitFor(`document.querySelectorAll('.plan-card').length > 0 && [...document.querySelectorAll('.plan-card h3')].every((heading) => heading.textContent.trim() === '10 GB')`);
+  await mobile.evaluate(`(() => {
+    const select = document.querySelector('#dataFilter');
+    select.value = 'all';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
   await mobile.evaluate(`[...document.querySelectorAll('.operator-filter-button')].find((button) => button.textContent.trim() === 'Telenor')?.click()`);
   await mobile.waitFor(`document.querySelectorAll('.plan-card').length > 0 && [...document.querySelectorAll('.plan-card')].every((card) => card.dataset.operator === 'Telenor')`);
   assertNoExceptions(mobile, 'mobilabonnemang');
   mobile.close();
-  results.push('mobile plan cards and operator filter');
+  results.push('mobile plan cards, operator filter, and data filter');
 
   const family = await newPage(debugBase, `${baseUrl}/familjabonnemang.html`);
   await family.evaluate(clearCartStorage);

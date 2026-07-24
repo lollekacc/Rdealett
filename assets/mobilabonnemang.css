@@ -235,6 +235,24 @@
   white-space: nowrap;
 }
 
+.plan-select-filter {
+  flex: 0 0 184px;
+}
+
+.plan-select-filter select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 36px 0 12px;
+  border: 1px solid rgba(39, 36, 67, 0.14);
+  border-radius: 8px;
+  background: #fff;
+  color: #17142b;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .plan-card {
   min-height: 350px;
 }
@@ -1368,6 +1386,10 @@ body.compare-modal-open {
 
   .plan-count {
     margin-bottom: 0;
+  }
+
+  .plan-select-filter {
+    flex-basis: auto;
   }
 
   .offers-container {

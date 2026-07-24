@@ -280,8 +280,15 @@
   color: #fff;
 }
 
-.range-filter input[type="range"] {
+.range-scale {
   position: relative;
+  height: 30px;
+}
+
+.range-filter input[type="range"] {
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: 1;
   appearance: none;
   width: 100%;
@@ -337,13 +344,17 @@
 }
 
 .range-ticks {
-  position: relative;
-  z-index: 0;
+  position: absolute;
+  top: 9px;
+  right: 7px;
+  left: 7px;
+  z-index: 2;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  height: 17px;
-  margin: -10px 7px 0;
+  height: 8px;
+  margin: 0;
+  transform: translateY(-50%);
   pointer-events: none;
 }
 

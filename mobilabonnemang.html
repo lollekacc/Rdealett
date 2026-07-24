@@ -53,8 +53,10 @@
                 <button id="dataFilterAll" class="range-all-button" type="button">Alla</button>
               </span>
               <output id="dataFilterValue" class="range-current-value" for="dataFilter">—</output>
-              <input id="dataFilter" type="range" min="0" max="0" value="0" step="1" aria-label="Välj surfmängd" />
-              <span id="dataFilterTicks" class="range-ticks" aria-hidden="true"></span>
+              <div class="range-scale">
+                <input id="dataFilter" type="range" min="0" max="0" value="0" step="1" aria-label="Välj surfmängd" />
+                <span id="dataFilterTicks" class="range-ticks" aria-hidden="true"></span>
+              </div>
             </div>
           </div>
 

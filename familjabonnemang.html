@@ -54,12 +54,14 @@
                 <label class="plan-toolbar-label" for="familySize">Antal abonnemang</label>
               </span>
               <output id="familySizeValue" class="range-current-value" for="familySize">3</output>
-              <input id="familySize" type="range" min="2" max="10" value="3" step="1" aria-label="Välj antal abonnemang" />
-              <span class="range-ticks" aria-hidden="true">
-                <span data-label="2"></span><span data-label="3"></span><span data-label="4"></span>
-                <span data-label="5"></span><span data-label="6"></span><span data-label="7"></span>
-                <span data-label="8"></span><span data-label="9"></span><span data-label="10"></span>
-              </span>
+              <div class="range-scale">
+                <input id="familySize" type="range" min="2" max="10" value="3" step="1" aria-label="Välj antal abonnemang" />
+                <span class="range-ticks" aria-hidden="true">
+                  <span data-label="2"></span><span data-label="3"></span><span data-label="4"></span>
+                  <span data-label="5"></span><span data-label="6"></span><span data-label="7"></span>
+                  <span data-label="8"></span><span data-label="9"></span><span data-label="10"></span>
+                </span>
+              </div>
             </div>
             <div class="range-filter data-range-filter">
               <span class="range-filter-head">
@@ -67,8 +69,10 @@
                 <button id="dataFilterAll" class="range-all-button" type="button">Alla</button>
               </span>
               <output id="dataFilterValue" class="range-current-value" for="dataFilter">—</output>
-              <input id="dataFilter" type="range" min="0" max="0" value="0" step="1" aria-label="Välj surfmängd" />
-              <span id="dataFilterTicks" class="range-ticks" aria-hidden="true"></span>
+              <div class="range-scale">
+                <input id="dataFilter" type="range" min="0" max="0" value="0" step="1" aria-label="Välj surfmängd" />
+                <span id="dataFilterTicks" class="range-ticks" aria-hidden="true"></span>
+              </div>
             </div>
           </div>
 

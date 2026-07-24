@@ -8,7 +8,9 @@ const rewardProgressFill = document.querySelector('#rewardProgressFill');
 const rewardContinueBtn = document.querySelector('#rewardContinueBtn');
 const operatorFilter = document.querySelector('#operatorFilter');
 const dataFilter = document.querySelector('#dataFilter');
-const planCount = document.querySelector('#planCount');
+const dataFilterValue = document.querySelector('#dataFilterValue');
+const dataFilterAll = document.querySelector('#dataFilterAll');
+const dataFilterTicks = document.querySelector('#dataFilterTicks');
 
 const currency = new Intl.NumberFormat('sv-SE');
 
@@ -44,7 +46,8 @@ const giftCards = ['Apollo', 'H&M', 'Hotel', 'ICA Maxi', 'Mio', 'Zalando', 'Elgi
 let selectedOffer = null;
 let plansCache = null;
 let activeOperator = 'Alla';
-let activeData = 'all';
+let activeData = null;
+let dataSteps = [];
 
 const formatCurrency = (value) => currency.format(Math.max(Number(value) || 0, 0));
 
@@ -584,16 +587,36 @@ const renderDataFilter = (plans) => {
       .filter((value) => value > 0 && value < 999)
   )].sort((left, right) => left - right);
 
-  const fragment = document.createDocumentFragment();
-  fragment.append(new Option('Alla surfmängder', 'all'));
-  values.forEach((value) => fragment.append(new Option(`${value} GB`, String(value))));
+  dataSteps = values.map(String);
   if (plans.some((plan) => !plan.isFamilyPlan && Number(plan.dataAmount) >= 999)) {
-    fragment.append(new Option('Obegränsad', 'unlimited'));
+    dataSteps.push('unlimited');
   }
 
-  dataFilter.replaceChildren(fragment);
-  dataFilter.value = activeData;
+  dataFilter.min = '0';
+  dataFilter.max = String(Math.max(dataSteps.length - 1, 0));
+  dataFilter.value = String(Math.min(1, Math.max(dataSteps.length - 1, 0)));
+  dataFilter.dataset.values = dataSteps.join(',');
   dataFilter.dataset.ready = 'true';
+  if (dataFilterTicks) {
+    dataFilterTicks.replaceChildren(...dataSteps.map((value) => {
+      const tick = document.createElement('span');
+      tick.dataset.label = value === 'unlimited' ? '∞' : value;
+      return tick;
+    }));
+  }
+  updateDataFilterValue();
+};
+
+const updateDataFilterValue = () => {
+  activeData = dataSteps[Number(dataFilter?.value) || 0] || null;
+  if (!dataFilterValue) return;
+  dataFilterValue.textContent = activeData === 'unlimited'
+      ? 'Obegränsad'
+      : activeData
+        ? `${activeData} GB`
+        : '—';
+  dataFilterAll?.classList.remove('is-active');
+  dataFilterAll?.setAttribute('aria-pressed', 'false');
 };
 
 const createPlanCard = (plan) => {
@@ -661,12 +684,8 @@ const renderOffers = async () => {
     const fragment = document.createDocumentFragment();
     visiblePlans.forEach((plan) => fragment.append(createPlanCard(plan)));
     offersContainer.replaceChildren(fragment);
-    if (planCount) {
-      planCount.textContent = `${visiblePlans.length} abonnemang`;
-    }
   } catch {
     offersContainer.innerHTML = '<div class="offers-loading">Kunde inte hämta abonnemang just nu.</div>';
-    if (planCount) planCount.textContent = '';
   }
 };
 
@@ -762,7 +781,14 @@ rewardContinueBtn?.addEventListener('click', async () => {
 
 window.DealettCart?.bindDrawerEvents();
 dataFilter?.addEventListener('change', () => {
-  activeData = dataFilter.value;
+  updateDataFilterValue();
+  renderOffers();
+});
+dataFilter?.addEventListener('input', updateDataFilterValue);
+dataFilterAll?.addEventListener('click', () => {
+  activeData = 'all';
+  dataFilterAll.classList.add('is-active');
+  dataFilterAll.setAttribute('aria-pressed', 'true');
   renderOffers();
 });
 renderOperatorFilter();

@@ -621,7 +621,7 @@ const updateDataFilterValue = () => {
   updateRangeProgress(dataFilter);
   if (!dataFilterValue) return;
   dataFilterValue.textContent = activeData === 'unlimited'
-      ? 'Obegränsad'
+      ? '∞ Obegränsad'
       : activeData
         ? `${activeData} GB`
         : '—';
@@ -797,6 +797,7 @@ dataFilter?.addEventListener('change', () => {
 dataFilter?.addEventListener('input', updateDataFilterValue);
 dataFilterAll?.addEventListener('click', () => {
   activeData = 'all';
+  if (dataFilterValue) dataFilterValue.textContent = 'Alla';
   dataFilterAll.classList.add('is-active');
   dataFilterAll.setAttribute('aria-pressed', 'true');
   renderOffers();

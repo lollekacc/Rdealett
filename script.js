@@ -1936,7 +1936,7 @@
     document.documentElement.classList.add('home-motion-ready');
     revealTargets.forEach((target, index) => {
       target.classList.add('home-reveal');
-      target.style.setProperty('--reveal-delay', `${(index % 4) * 85}ms`);
+      target.style.setProperty('--reveal-delay', `${(index % 4) * 38}ms`);
     });
 
     if (reducedMotion || !('IntersectionObserver' in window)) {
@@ -2019,7 +2019,7 @@
     document.documentElement.classList.add('mobile-plans-motion-ready');
     revealTargets.forEach((target, index) => {
       target.classList.add('mobile-plans-reveal');
-      target.style.setProperty('--mobile-reveal-delay', `${(index % 4) * 85}ms`);
+      target.style.setProperty('--mobile-reveal-delay', `${(index % 4) * 38}ms`);
     });
 
     if (reducedMotion || !('IntersectionObserver' in window)) {

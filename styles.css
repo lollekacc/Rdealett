@@ -1443,7 +1443,7 @@ img {
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.14s ease, transform 0.14s ease;
   z-index: 10;
 }
 
@@ -5306,7 +5306,7 @@ body {
   background: var(--deal-blue);
   box-shadow: 20px 20px 0 #111;
   transform: rotate(1.5deg);
-  transition: opacity .25s ease, transform .25s ease;
+  transition: opacity .14s ease, transform .14s ease;
 }
 
 .hero-visual::before {
@@ -6389,7 +6389,7 @@ body.cart-drawer-open {
   min-width: 0;
   height: var(--quiz-card-height, 620px);
   opacity: 1;
-  transition: opacity 0.28s ease, transform 0.28s ease;
+  transition: opacity 0.14s ease, transform 0.14s ease;
 }
 
 #quiz-steps-wrapper.opacity-0 {
@@ -6414,7 +6414,7 @@ body.cart-drawer-open {
 
 .quiz-step-card.active-step {
   display: flex;
-  animation: quizFadeIn 0.28s ease both;
+  animation: quizFadeIn 0.14s ease both;
 }
 
 .quiz-card {

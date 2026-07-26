@@ -215,10 +215,10 @@ const initAccountPage = () => {
   setText('profileNameCard', userName);
   setText('userInitials', initials);
   setText('avatarCircle', initials);
-  setText('accountStatusLabel', user.authMode === 'demo' ? 'Demo' : 'Aktivt');
-  setText('accountTypeLabel', user.authMode === 'demo' ? 'Testsida' : 'Privat');
-  setText('sidebarStatusLabel', user.authMode === 'demo' ? 'Demo' : 'Aktivt');
-  setText('profileModeLabel', user.authMode === 'demo' ? 'Demoprofil' : 'Dealett medlem');
+  setText('accountStatusLabel', user.authMode === 'bankid' ? 'BankID' : 'Demo');
+  setText('accountTypeLabel', user.authMode === 'bankid' ? 'Verifierat' : 'Testsida');
+  setText('sidebarStatusLabel', user.authMode === 'bankid' ? 'BankID' : 'Demo');
+  setText('profileModeLabel', user.authMode === 'bankid' ? 'BankID-verifierad' : 'Demoprofil');
 
   setupPlan(getActivePlan());
   setupReward(getReward());

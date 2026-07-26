@@ -543,6 +543,55 @@
     });
   };
 
+  const getPrimaryPlanForAccount = () => {
+    const firstItem = cart[0];
+    if (!firstItem) return null;
+
+    return {
+      name: firstItem.title || firstItem.data || 'Abonnemang',
+      operator: firstItem.operator || 'Dealett',
+      price: firstItem.price || 0,
+      data: firstItem.data || firstItem.title || 'Ej angivet',
+      startDate: selectedStartDate || 'Ej angivet',
+      persons: firstItem.persons || 1,
+      signedAt: new Date().toISOString(),
+    };
+  };
+
+  const saveSignedPurchase = (bankIdResult) => {
+    const signedAt = new Date().toISOString();
+    const signature = bankIdResult.signature || {
+      id: `local-${Date.now()}`,
+      signedAt,
+      text: 'Dealett beställning signerad med BankID.',
+    };
+
+    saveCheckout({
+      readyForSigning: true,
+      signed: true,
+      signedAt,
+      signature,
+      bankIdUser: bankIdResult.user || null,
+    });
+
+    const accountPlan = getPrimaryPlanForAccount();
+    if (accountPlan) writeJson('dealett_plan', accountPlan);
+
+    if (bankIdResult.user) {
+      try {
+        sessionStorage.setItem('dealett_user', JSON.stringify({
+          authMode: 'bankid',
+          name: bankIdResult.user.name || 'BankID Kund',
+          personalNumberMasked: bankIdResult.user.personalNumberMasked || '',
+          authenticatedAt: signedAt,
+        }));
+        localStorage.removeItem('dealett_user');
+      } catch {
+        // Signing should still complete even if browser storage is unavailable.
+      }
+    }
+  };
+
   const handleContactContinue = () => {
     const contact = getContact();
 
@@ -597,10 +646,50 @@
     }
 
     saveCheckout({ readyForSigning: true });
-    showMessage(els.signMessage, 'Uppgifterna \u00e4r sparade. Du kan forts\u00e4tta till signering.');
-    if (els.goToSignBtn) {
-      els.goToSignBtn.textContent = 'Redo f\u00f6r signering';
+
+    if (!window.DealettBankId?.open) {
+      saveSignedPurchase({});
+      showMessage(els.signMessage, 'Best\u00e4llningen \u00e4r signerad och sparad.');
+      if (els.goToSignBtn) els.goToSignBtn.textContent = 'Signerad med BankID';
+      return;
     }
+
+    if (els.goToSignBtn) els.goToSignBtn.disabled = true;
+    showMessage(els.signMessage, 'Startar BankID...');
+
+    const totals = window.DealettCart?.getTotals(cart) || {
+      price: cart.reduce((sum, item) => sum + Math.max(Number(item.price) || 0, 0), 0),
+      reward: cart.reduce((sum, item) => sum + Math.max(Number(item.rewardTotal) || 0, 0), 0),
+    };
+
+    window.DealettBankId.open({
+      intent: 'sign',
+      title: 'Signera best\u00e4llningen',
+      description: 'Kontrollera uppgifterna i BankID och signera f\u00f6r att slutf\u00f6ra k\u00f6pet.',
+      userVisibleData: `Dealett best\u00e4llning: ${cart.length} val, ${formatCurrency(totals.price)} kr/m\u00e5n, start ${selectedStartDate}.`,
+      payload: {
+        cart,
+        contact: getContact(),
+        startDate: selectedStartDate,
+        totals,
+      },
+      onComplete(result) {
+        saveSignedPurchase(result);
+        showMessage(els.signMessage, 'Best\u00e4llningen \u00e4r signerad med BankID och sparad p\u00e5 Mina sidor.');
+        if (els.goToSignBtn) {
+          els.goToSignBtn.disabled = true;
+          els.goToSignBtn.textContent = 'Signerad med BankID';
+        }
+      },
+      onCancel() {
+        if (els.goToSignBtn) els.goToSignBtn.disabled = false;
+        showMessage(els.signMessage, 'Signeringen avbr\u00f6ts. Du kan starta BankID igen.');
+      },
+      onError() {
+        if (els.goToSignBtn) els.goToSignBtn.disabled = false;
+        showMessage(els.signMessage, 'BankID kunde inte slutf\u00f6ras. F\u00f6rs\u00f6k igen.');
+      },
+    });
   };
 
   const bindEvents = () => {

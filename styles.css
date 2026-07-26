@@ -7601,6 +7601,159 @@ body.cart-drawer-open {
   transform: translateY(-2px);
 }
 
+.bankid-modal-open {
+  overflow: hidden;
+}
+
+.bankid-modal {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.bankid-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.bankid-modal__panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: start;
+  width: min(100%, 460px);
+  border: 1px solid #111;
+  border-radius: 0;
+  padding: 30px;
+  background: #fff;
+  color: #111;
+  box-shadow: 12px 12px 0 rgba(201, 119, 46, 0.34);
+}
+
+.bankid-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(17, 17, 17, 0.22);
+  background: #fff;
+  color: #111;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.bankid-modal__mark {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  font: 800 20px/1 Arial, sans-serif;
+}
+
+.bankid-modal__kicker {
+  margin: 18px 0 0;
+  color: var(--accent, #c9772e);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.bankid-modal__panel h2 {
+  margin: 10px 0 0;
+  font: 800 clamp(30px, 4vw, 42px)/1 Arial, sans-serif;
+  letter-spacing: -0.04em;
+}
+
+.bankid-modal__description {
+  margin: 12px 0 0;
+  color: rgba(17, 17, 17, 0.68);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.bankid-modal__qr-wrap {
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  margin-top: 22px;
+}
+
+.bankid-modal__qr {
+  display: grid;
+  grid-template-columns: repeat(25, 1fr);
+  grid-template-rows: repeat(25, 1fr);
+  width: min(58vw, 210px);
+  aspect-ratio: 1;
+  border: 10px solid #fff;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(17, 17, 17, 0.2),
+    0 14px 30px rgba(17, 17, 17, 0.12);
+}
+
+.bankid-modal__qr span {
+  display: block;
+  background: #fff;
+}
+
+.bankid-modal__qr span.is-active {
+  background: #111;
+}
+
+.bankid-modal__qr-wrap p {
+  margin: 12px 0 0;
+  color: rgba(17, 17, 17, 0.62);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.bankid-modal__status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 58px;
+  margin-top: 24px;
+  border: 1px solid rgba(17, 17, 17, 0.18);
+  padding: 0 14px;
+  background: #f7f5f1;
+  font-weight: 800;
+}
+
+.bankid-modal__spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(17, 17, 17, 0.18);
+  border-top-color: #111;
+  border-radius: 999px;
+  animation: bankidSpin 0.8s linear infinite;
+}
+
+.bankid-modal__note {
+  margin: 14px 0 0;
+  color: rgba(17, 17, 17, 0.52);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@keyframes bankidSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .offer-card__accent {
   height: 5px;
   background: var(--accent);

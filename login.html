@@ -18,31 +18,23 @@
   <main class="login-main">
     <section class="login-card account-card">
       <div class="login-head">
-        <span class="account-kicker">Demol&auml;ge</span>
+        <span class="account-kicker">BankID</span>
         <h1>Logga in</h1>
-        <p>Skapa en lokal testsession f&ouml;r att se Mina sidor-fl&ouml;det.</p>
+        <p>Logga in med BankID f&ouml;r att se Mina sidor, orderstatus och dina abonnemang.</p>
       </div>
 
       <form id="loginForm" class="login-form">
-        <label for="loginEmail">
-          <span>E-post</span>
-          <input id="loginEmail" type="email" required placeholder="namn@email.se" autocomplete="email" />
-        </label>
-
-        <label for="loginPassword">
-          <span>L&ouml;senord</span>
-          <input id="loginPassword" type="password" required placeholder="••••••••" autocomplete="current-password" />
-        </label>
-
-        <button class="primary-btn full-btn" type="submit">Logga in</button>
+        <button id="bankidLoginBtn" class="primary-btn full-btn" type="submit">
+          Logga in med BankID
+        </button>
       </form>
 
       <p class="login-note">
-        Har du inget konto?
-        <button id="registerDemoBtn" type="button">Registrera dig</button>
+        Testar du lokalt?
+        <button id="registerDemoBtn" type="button">Skapa demoinloggning</button>
       </p>
       <p class="login-demo-note">
-        Detta &auml;r inte riktig autentisering. En backend beh&ouml;vs innan konton, ordrar eller personuppgifter hanteras skarpt.
+        BankID-fl&ouml;det k&ouml;rs i demol&auml;ge tills riktiga BankID-certifikat och produktionsavtal &auml;r anslutna.
       </p>
     </section>
   </main>
@@ -51,6 +43,7 @@
 
   <script src="./assets/cart-helpers.js"></script>
   <script src="./assets/network-utils.js"></script>
+  <script src="./assets/bankid.js"></script>
   <script src="script.js"></script>
   <script src="./assets/login.js"></script>
 </body>

@@ -190,7 +190,7 @@ const updateButtons = () => {
       button.setAttribute('aria-label', isSelected ? 'Vald f\u00f6r j\u00e4mf\u00f6relse' : 'J\u00e4mf\u00f6r');
 
       const label = button.querySelector('[data-compare-label]');
-      if (label) label.textContent = isSelected ? 'Vald' : 'J\u00e4mf\u00f6r';
+      if (label) label.textContent = 'J\u00e4mf\u00f6r';
     });
   });
 };

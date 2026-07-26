@@ -3768,3 +3768,43 @@ textarea:focus,
     max-width: 360px;
   }
 }
+
+.offer-compare-button,
+.offer-compare-button--icon,
+.abon-page .offer-compare-button--icon,
+.mobile-plans-page .offer-compare-button--icon,
+.hero.quiz-in-hero .offer-card__head .offer-compare-button--icon,
+.operator-plan-row .offer-compare-button--icon,
+.offer-card-logo .offer-compare-button--icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 10px !important;
+}
+
+.offer-compare-button [data-compare-label],
+.offer-compare-button--icon [data-compare-label],
+.abon-page .offer-compare-button--icon [data-compare-label],
+.mobile-plans-page .offer-compare-button--icon [data-compare-label],
+.hero.quiz-in-hero .offer-card__head .offer-compare-button--icon [data-compare-label],
+.operator-plan-row .offer-compare-button--icon [data-compare-label],
+.offer-card-logo .offer-compare-button--icon [data-compare-label] {
+  position: static !important;
+  display: inline !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  white-space: nowrap !important;
+}
+
+.offer-compare-button i,
+.offer-compare-button--icon i {
+  flex: 0 0 auto;
+}

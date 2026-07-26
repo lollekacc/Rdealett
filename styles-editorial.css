@@ -2868,3 +2868,903 @@ body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-proof {
     max-width: 100%;
   }
 }
+
+/* Full-site alignment pass: match the current homepage palette and interaction style. */
+:root {
+  --site-ink: #171717;
+  --site-white: #ffffff;
+  --site-paper: #f7f5f1;
+  --site-soft: #ece6dc;
+  --site-copper: #c9772e;
+  --site-amber: #d68839;
+  --site-brown: #8a4c22;
+  --site-line: rgba(23, 23, 23, .22);
+  --site-shadow: 8px 8px 0 rgba(201, 119, 46, .24);
+}
+
+.abon-page,
+.family-page,
+.bredband-page,
+.business-page,
+.jamfor-page,
+.about-page,
+.support-page,
+.account-page,
+.varukorg-page,
+.package-page {
+  background: var(--site-white) !important;
+  color: var(--site-ink) !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+.abon-page .site-header .header-inner,
+.family-page .site-header .header-inner,
+.bredband-page .site-header .header-inner,
+.business-page .site-header .header-inner,
+.jamfor-page .site-header .header-inner,
+.about-page .site-header .header-inner,
+.support-page .site-header .header-inner,
+.account-page .site-header .header-inner,
+.varukorg-page .site-header .header-inner,
+.package-page .site-header .header-inner {
+  background: rgba(255, 255, 255, .88) !important;
+  border-bottom: 1px solid rgba(201, 119, 46, .22) !important;
+}
+
+.shop-hero,
+.business-hero,
+.bredband-hero,
+.coverage-hero,
+.about-hero,
+.support-hero,
+.package-hero {
+  min-height: min(820px, 100svh);
+  border-bottom: 1px solid rgba(214, 136, 57, .34);
+  background: var(--site-ink) !important;
+  color: var(--site-white) !important;
+}
+
+.shop-hero-image,
+.business-hero-image,
+.bredband-hero-image,
+.coverage-hero__img,
+.about-hero-image,
+.support-hero-image,
+.package-hero__art {
+  filter: none !important;
+  opacity: .78;
+}
+
+.shop-hero::before,
+.business-hero::before,
+.bredband-hero::before,
+.coverage-hero::before,
+.about-hero::before,
+.support-hero::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 112px auto 0 0;
+  display: block;
+  width: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 70% 42%, rgba(214, 136, 57, .3), transparent 24%),
+    linear-gradient(90deg, rgba(23, 23, 23, .04), rgba(23, 23, 23, .62));
+}
+
+.shop-hero::after,
+.business-hero::after,
+.bredband-hero::after,
+.coverage-hero::after,
+.about-hero::after,
+.support-hero::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 112px;
+  bottom: 0;
+  left: calc(50% - 3px);
+  display: block;
+  width: 6px;
+  background: linear-gradient(180deg, var(--site-copper) 0 42%, var(--site-amber) 42% 100%);
+}
+
+.shop-hero h1,
+.business-hero h1,
+.bredband-hero h1,
+.coverage-hero h1,
+.about-hero h1,
+.support-hero h1,
+.package-hero__copy h1 {
+  color: var(--site-white) !important;
+  font-weight: 400 !important;
+  letter-spacing: -.045em !important;
+}
+
+.shop-hero-lead,
+.business-hero-copy > p,
+.bredband-hero-copy > p,
+.coverage-hero__copy > p,
+.about-hero-copy > p,
+.support-hero-copy > p,
+.package-hero__copy p {
+  color: rgba(255, 255, 255, .7) !important;
+  max-width: 620px;
+}
+
+.business-kicker,
+.bredband-kicker,
+.about-kicker,
+.support-eyebrow,
+.section-kicker,
+.account-kicker,
+.account-stat-label {
+  color: var(--site-amber) !important;
+  font-weight: 700 !important;
+}
+
+.shop-hero-points,
+.business-hero-points,
+.bredband-trust-row,
+.about-hero-points,
+.support-hero-tags {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.shop-hero-points li,
+.business-hero-points li,
+.bredband-trust-row li,
+.about-hero-points li,
+.support-hero-tags li {
+  width: auto;
+  min-height: 38px;
+  margin: 0;
+  padding: 0 13px;
+  border: 1px solid rgba(214, 136, 57, .42);
+  background: rgba(255, 255, 255, .08);
+  color: rgba(255, 255, 255, .82);
+}
+
+.shop-hero-points i,
+.business-hero-points i,
+.bredband-trust-row i,
+.about-hero-points i,
+.support-hero-tags i {
+  color: var(--site-amber) !important;
+}
+
+.business-hero-panel,
+.about-hero-side,
+.support-hero-panel,
+.coverage-hero__panel {
+  display: none !important;
+}
+
+.result-section,
+.business-size-section,
+.business-plans-section,
+.about-section,
+.support-section,
+.account-content-section,
+.bredband-results-section,
+.package-options {
+  background: var(--site-white) !important;
+}
+
+.about-section-soft,
+.support-contact-section,
+.business-size-section,
+.account-hero,
+.login-main {
+  border-block: 1px solid rgba(201, 119, 46, .24) !important;
+  background: var(--site-paper) !important;
+}
+
+.section-head h2,
+.abon-page .section-head h2,
+.business-page .section-head h2,
+.about-section-head h2,
+.support-head h2,
+.account-panel-head h2,
+.bredband-results-top h2,
+.package-options__head h2 {
+  color: var(--site-ink) !important;
+  font-weight: 400 !important;
+  letter-spacing: -.045em !important;
+}
+
+.section-head p,
+.about-section-head p,
+.support-head p,
+.support-contact-info > p,
+.about-cta-inner p,
+.support-cta-box p,
+.account-panel-head p,
+.account-empty-state p,
+.account-reward-box p {
+  max-width: 680px;
+  color: rgba(23, 23, 23, .62) !important;
+}
+
+.primary-btn,
+.adeala-btn,
+.business-action,
+.business-plan-btn,
+.about-btn,
+.support-btn,
+.bredband-primary-btn,
+.bredband-secondary-btn,
+.bredband-search-btn,
+.bredband-choose-btn,
+.bredband-tv-btn,
+.coverage-btn,
+.account-ghost-btn,
+.login-form button,
+.offer-card-action,
+.offer-answer-edit,
+.compare-open-button,
+.compare-clear-button,
+.coverage-soft-btn,
+.full-btn {
+  border: 1px solid var(--site-ink) !important;
+  border-left: 5px solid var(--site-amber) !important;
+  border-radius: 0 !important;
+  background: var(--site-copper) !important;
+  color: var(--site-white) !important;
+  box-shadow: none !important;
+  font-weight: 700 !important;
+}
+
+.primary-btn:hover,
+.adeala-btn:hover,
+.business-action:hover,
+.business-plan-btn:hover,
+.about-btn:hover,
+.support-btn:hover,
+.bredband-primary-btn:hover,
+.bredband-secondary-btn:hover,
+.bredband-search-btn:hover,
+.bredband-choose-btn:hover,
+.bredband-tv-btn:hover,
+.coverage-btn:hover,
+.account-ghost-btn:hover,
+.login-form button:hover,
+.offer-card-action:hover,
+.offer-answer-edit:hover,
+.compare-open-button:hover,
+.compare-clear-button:hover,
+.coverage-soft-btn:hover,
+.full-btn:hover {
+  background: var(--site-brown) !important;
+  box-shadow: var(--site-shadow) !important;
+  transform: translate(-2px, -2px) !important;
+}
+
+.offers-strip,
+.reward-panel,
+.contact-card,
+.checkout-card,
+.bredband-search-panel,
+.bredband-filters,
+.support-contact-wrap,
+.login-card,
+.account-hero-card,
+.cart-summary-card,
+.empty-cart-card {
+  border: 1px solid var(--site-line) !important;
+  border-radius: 0 !important;
+  background: var(--site-white) !important;
+  box-shadow: var(--site-shadow) !important;
+}
+
+.bredband-hero .bredband-search-panel {
+  position: relative !important;
+  z-index: 4 !important;
+  grid-column: 2 !important;
+  width: min(100%, 520px) !important;
+  margin: 28px 0 0 !important;
+  padding: 22px !important;
+  align-self: start !important;
+}
+
+.bredband-search-head span,
+.bredband-search-head h2,
+.bredband-search-head p {
+  color: var(--site-ink) !important;
+}
+
+.bredband-search-head h2 {
+  font: 400 26px/1.05 Arial, Helvetica, sans-serif !important;
+  letter-spacing: -.035em !important;
+}
+
+.offer-card,
+.operator-plan-row,
+.bredband-offer-card,
+.business-plan-card,
+.about-story-card,
+.about-value-card,
+.about-process-card,
+.about-team-card,
+.support-faq-item,
+.account-card,
+.package-card,
+.business-size,
+.reward-choice,
+.phone-input-field,
+.start-date-choice {
+  border: 1px solid rgba(23, 23, 23, .18) !important;
+  border-radius: 0 !important;
+  background: var(--site-paper) !important;
+  box-shadow: none !important;
+}
+
+.offer-card::before,
+.bredband-offer-card::before,
+.business-plan-card::before,
+.package-card::before {
+  height: 5px !important;
+  background: var(--offer-accent, var(--site-copper)) !important;
+}
+
+.offer-card:hover,
+.operator-plan-row:hover,
+.bredband-offer-card:hover,
+.business-plan-card:hover,
+.package-card:hover,
+.business-size:hover,
+.start-date-choice:hover {
+  background: var(--site-soft) !important;
+  box-shadow: var(--site-shadow) !important;
+  transform: translate(-2px, -2px) !important;
+}
+
+.offer-card.is-answering,
+.offer-card.is-selected,
+.operator-plan-row.is-selected,
+.bredband-offer-card.active,
+.business-size.is-selected,
+.start-date-choice.is-selected,
+.reward-choice:has(input:checked),
+.family-streaming-choice.is-selected,
+.family-calc-options button.is-selected {
+  border-color: var(--site-ink) !important;
+  background: #fff6eb !important;
+  box-shadow:
+    inset 0 0 0 3px rgba(214, 136, 57, .45),
+    var(--site-shadow) !important;
+  transform: translate(-2px, -2px) !important;
+}
+
+.offer-card-expanded-panel,
+.offer-card-questions,
+.account-plan-box,
+.account-reward-box,
+.account-empty-state,
+.cart-total-box,
+.cart-checkout-total-card {
+  border: 1px solid rgba(23, 23, 23, .22) !important;
+  border-radius: 0 !important;
+  background: #fff6eb !important;
+  color: var(--site-ink) !important;
+  box-shadow: none !important;
+}
+
+.reward-summary-bar,
+.cart-total-box,
+.cart-checkout-total-card {
+  background: var(--site-ink) !important;
+  color: var(--site-white) !important;
+}
+
+input,
+select,
+textarea,
+.bredband-input-wrap {
+  border: 1px solid rgba(23, 23, 23, .28) !important;
+  border-radius: 0 !important;
+  background: var(--site-white) !important;
+  color: var(--site-ink) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.bredband-input-wrap:focus-within {
+  border-color: var(--site-copper) !important;
+  box-shadow: 0 0 0 4px rgba(201, 119, 46, .18) !important;
+}
+
+.about-team-card {
+  text-align: left !important;
+}
+
+.about-team-card .about-step-number {
+  background: var(--site-copper) !important;
+  color: var(--site-white) !important;
+}
+
+.support-contact-info,
+.about-cta-inner,
+.support-cta-box,
+.cart-drawer-head,
+.bredband-modal-head,
+.compare-modal-head {
+  background: var(--site-ink) !important;
+  color: var(--site-white) !important;
+}
+
+.support-contact-info h2,
+.about-cta-inner h2,
+.support-cta-box h2,
+.cart-drawer-head h2,
+.cart-drawer-head h3,
+.bredband-modal-head h3,
+.compare-modal-head h2 {
+  color: var(--site-white) !important;
+}
+
+.about-cta-section,
+.support-cta {
+  background: var(--site-ink) !important;
+}
+
+.about-cta-inner,
+.support-cta-box {
+  border-color: rgba(214, 136, 57, .44) !important;
+  box-shadow: 12px 12px 0 rgba(201, 119, 46, .18) !important;
+}
+
+.package-hero__art {
+  border: 1px solid rgba(214, 136, 57, .34) !important;
+  box-shadow: var(--site-shadow) !important;
+}
+
+.package-card i,
+.business-size i,
+.about-icon-wrap,
+.support-faq-left i {
+  color: var(--site-copper) !important;
+}
+
+.compare-tray,
+.bredband-sticky-bar,
+.cart-drawer-panel,
+.dealett-chat-panel,
+.dealett-chatt-panel {
+  border: 1px solid rgba(214, 136, 57, .42) !important;
+  border-radius: 0 !important;
+  background: var(--site-white) !important;
+  color: var(--site-ink) !important;
+  box-shadow: var(--site-shadow) !important;
+}
+
+.bredband-sticky-inner {
+  background: var(--site-ink) !important;
+  color: var(--site-white) !important;
+}
+
+.bredband-modal-overlay,
+.compare-modal-backdrop,
+.cart-drawer-overlay {
+  background: rgba(23, 23, 23, .74) !important;
+  backdrop-filter: blur(10px);
+}
+
+.bredband-modal-card,
+.coverage-modal-card,
+.compare-modal-panel {
+  border: 1px solid rgba(214, 136, 57, .5) !important;
+  border-radius: 0 !important;
+  background: var(--site-white) !important;
+  box-shadow: 12px 12px 0 rgba(201, 119, 46, .28) !important;
+}
+
+.coverage-modal-sidebar {
+  background: var(--site-ink) !important;
+  color: var(--site-white) !important;
+}
+
+.coverage-modal-sidebar h2,
+.coverage-modal-sidebar .coverage-modal-copy {
+  color: var(--site-white) !important;
+}
+
+.coverage-operator,
+.modal-close-btn,
+.compare-modal-close,
+.cart-drawer-close,
+.offer-question-actions button,
+.coverage-soft-btn,
+.range-all-button,
+.operator-filter-button,
+.family-person-grid button,
+.family-status-options button,
+.family-calc-options button,
+.family-streaming-choice {
+  border: 1px solid rgba(23, 23, 23, .24) !important;
+  border-radius: 0 !important;
+  background: var(--site-white) !important;
+  color: var(--site-ink) !important;
+  box-shadow: none !important;
+}
+
+.coverage-operator.is-active,
+.coverage-operator:hover,
+.offer-question-actions button:hover,
+.range-all-button:hover,
+.range-all-button.is-active,
+.operator-filter-button:hover,
+.operator-filter-button.is-active,
+.family-person-grid button:hover,
+.family-status-options button:hover,
+.family-calc-options button:hover,
+.family-streaming-choice:hover,
+.family-streaming-choice.is-selected {
+  border-color: var(--site-ink) !important;
+  background: var(--site-copper) !important;
+  color: var(--site-white) !important;
+}
+
+.hero.quiz-in-hero {
+  background: var(--site-ink) !important;
+}
+
+.hero.quiz-in-hero .quiz-card {
+  border: 1px solid rgba(214, 136, 57, .46) !important;
+  border-radius: 0 !important;
+  background: var(--site-white) !important;
+  box-shadow: 12px 12px 0 rgba(201, 119, 46, .28) !important;
+}
+
+.hero.quiz-in-hero .quiz-progress-inline {
+  background: var(--site-copper) !important;
+}
+
+.hero.quiz-in-hero .quiz-option:hover,
+.hero.quiz-in-hero .operator-no-binding-button:hover,
+.hero.quiz-in-hero .quiz-option.active,
+.hero.quiz-in-hero .quiz-option.selected,
+.hero.quiz-in-hero .operator-no-binding-button[aria-pressed="true"] {
+  border-color: var(--site-ink) !important;
+  background: #fff6eb !important;
+  color: var(--site-ink) !important;
+  box-shadow: inset 0 0 0 3px rgba(214, 136, 57, .42) !important;
+}
+
+.hero.quiz-in-hero .offer-card__cta,
+.hero.quiz-in-hero .quiz-next-button {
+  border-left: 5px solid var(--site-amber) !important;
+  background: var(--site-copper) !important;
+  color: var(--site-white) !important;
+}
+
+.mobile-nav-toggle,
+.dealett-chat-toggle,
+.dealett-chatt-toggle {
+  border-radius: 0 !important;
+  background: var(--site-copper) !important;
+  color: var(--site-white) !important;
+  box-shadow: none !important;
+}
+
+.dealett-chat-header,
+.dealett-chatt-header,
+.dealett-chat-composer,
+.dealett-chatt-composer {
+  border-color: rgba(23, 23, 23, .18) !important;
+  background: var(--site-paper) !important;
+}
+
+.dealett-chat-bubble,
+.dealett-chatt-bubble,
+.dealett-chat-chip,
+.dealett-chatt-chip,
+.dealett-chat-widget-button,
+.dealett-chatt-widget-button {
+  border-radius: 0 !important;
+}
+
+.dealett-chat-message--user .dealett-chat-bubble,
+.dealett-chatt-message--user .dealett-chatt-bubble {
+  background: var(--site-copper) !important;
+  color: var(--site-white) !important;
+}
+
+.footer {
+  border-top: 1px solid rgba(214, 136, 57, .28) !important;
+  background: var(--site-ink) !important;
+  color: var(--site-white) !important;
+}
+
+.footer .footer-brand-link,
+.footer .footer-links p,
+.footer .footer-contact .footer-contact-title {
+  color: var(--site-white) !important;
+}
+
+.footer .footer-brand p,
+.footer .footer-links a,
+.footer .footer-contact a,
+.footer .footer-contact p:not(.footer-contact-title),
+.footer .footer-social-icon {
+  color: rgba(255, 255, 255, .68) !important;
+}
+
+@media (max-width: 900px) {
+  .abon-page .site-header .header-inner,
+  .family-page .site-header .header-inner,
+  .bredband-page .site-header .header-inner,
+  .business-page .site-header .header-inner,
+  .jamfor-page .site-header .header-inner,
+  .about-page .site-header .header-inner,
+  .support-page .site-header .header-inner,
+  .account-page .site-header .header-inner,
+  .varukorg-page .site-header .header-inner,
+  .package-page .site-header .header-inner {
+    background: rgba(23, 23, 23, .9) !important;
+  }
+
+  .abon-page .site-header .brand-logo-crop img,
+  .family-page .site-header .brand-logo-crop img,
+  .bredband-page .site-header .brand-logo-crop img,
+  .business-page .site-header .brand-logo-crop img,
+  .jamfor-page .site-header .brand-logo-crop img,
+  .about-page .site-header .brand-logo-crop img,
+  .support-page .site-header .brand-logo-crop img,
+  .account-page .site-header .brand-logo-crop img,
+  .varukorg-page .site-header .brand-logo-crop img,
+  .package-page .site-header .brand-logo-crop img {
+    filter: invert(1) brightness(2.1);
+  }
+
+  .abon-page .site-header .header-topbar-link,
+  .family-page .site-header .header-topbar-link,
+  .bredband-page .site-header .header-topbar-link,
+  .business-page .site-header .header-topbar-link,
+  .jamfor-page .site-header .header-topbar-link,
+  .about-page .site-header .header-topbar-link,
+  .support-page .site-header .header-topbar-link,
+  .account-page .site-header .header-topbar-link,
+  .varukorg-page .site-header .header-topbar-link,
+  .package-page .site-header .header-topbar-link {
+    color: var(--site-white) !important;
+  }
+
+  .site-header .site-nav {
+    background: var(--site-ink) !important;
+    border-bottom: 1px solid rgba(214, 136, 57, .42) !important;
+  }
+
+  .site-header .nav-item a,
+  .site-header .nav-link {
+    color: var(--site-white) !important;
+  }
+
+  .shop-hero,
+  .business-hero,
+  .bredband-hero,
+  .coverage-hero,
+  .about-hero,
+  .support-hero,
+  .package-hero {
+    min-height: auto;
+    padding-top: 76px;
+  }
+
+  .shop-hero-image,
+  .business-hero-image,
+  .bredband-hero-image,
+  .coverage-hero__img,
+  .about-hero-image,
+  .support-hero-image {
+    height: 38vh !important;
+    min-height: 260px !important;
+  }
+
+  .shop-hero::before,
+  .business-hero::before,
+  .bredband-hero::before,
+  .coverage-hero::before,
+  .about-hero::before,
+  .support-hero::before {
+    inset: 76px 0 auto;
+    width: 100%;
+    height: 38vh;
+    min-height: 260px;
+  }
+
+  .shop-hero::after,
+  .business-hero::after,
+  .bredband-hero::after,
+  .coverage-hero::after,
+  .about-hero::after,
+  .support-hero::after {
+    top: auto;
+    right: 20px;
+    bottom: 0;
+    left: 20px;
+    width: auto;
+    height: 5px;
+  }
+
+  .shop-hero-points,
+  .business-hero-points,
+  .bredband-trust-row,
+  .about-hero-points,
+  .support-hero-tags {
+    display: grid !important;
+  }
+
+  .support-contact-wrap,
+  .offer-card-expanded-panel,
+  .coverage-modal-body {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .shop-hero,
+  .business-hero,
+  .bredband-hero,
+  .coverage-hero,
+  .about-hero,
+  .support-hero {
+    display: block !important;
+    min-height: 0 !important;
+    padding: 76px 0 0 !important;
+    background: var(--site-ink) !important;
+  }
+
+  .shop-hero-image,
+  .business-hero-image,
+  .bredband-hero-image,
+  .coverage-hero__img,
+  .about-hero-image,
+  .support-hero-image {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    height: 38svh !important;
+    min-height: 260px !important;
+    max-height: 360px !important;
+    opacity: .76 !important;
+    object-fit: cover !important;
+  }
+
+  .shop-hero-content,
+  .business-hero-inner,
+  .bredband-hero-inner,
+  .coverage-hero__inner,
+  .about-hero-inner,
+  .support-hero-inner {
+    position: relative !important;
+    z-index: 3 !important;
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 34px 20px 58px !important;
+    background: var(--site-ink) !important;
+  }
+
+  .bredband-hero .bredband-search-panel {
+    grid-column: auto !important;
+    width: 100% !important;
+    max-width: 350px !important;
+    margin-top: 22px !important;
+  }
+
+  .shop-hero::before,
+  .business-hero::before,
+  .bredband-hero::before,
+  .coverage-hero::before,
+  .about-hero::before,
+  .support-hero::before {
+    inset: 76px 0 auto !important;
+    height: 38svh !important;
+    min-height: 260px !important;
+    max-height: 360px !important;
+  }
+
+  .shop-hero h1,
+  .business-hero h1,
+  .bredband-hero h1,
+  .coverage-hero h1,
+  .about-hero h1,
+  .support-hero h1 {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 12px !important;
+    font-size: clamp(40px, 11.5vw, 50px) !important;
+    line-height: 1.04 !important;
+    white-space: normal !important;
+    overflow-wrap: break-word;
+  }
+
+  .shop-hero-copy,
+  .shop-hero-content,
+  .business-hero-copy,
+  .bredband-hero-copy,
+  .coverage-hero__copy,
+  .about-hero-copy,
+  .support-hero-copy {
+    width: 100% !important;
+    max-width: min(calc(100vw - 40px), 350px) !important;
+    overflow: visible !important;
+    white-space: normal !important;
+  }
+
+  .shop-hero-lead,
+  .business-hero-copy > p,
+  .bredband-hero-copy > p,
+  .coverage-hero__copy > p,
+  .about-hero-copy > p,
+  .support-hero-copy > p {
+    white-space: normal !important;
+    overflow-wrap: break-word;
+  }
+
+  .abon-main,
+  .business-main,
+  .bredband-main,
+  .about-main,
+  .support-main,
+  .package-main {
+    overflow-x: hidden !important;
+  }
+}
+
+.hero.quiz-in-hero .offers-recommendation-grid.offers-recommendation-grid--featured {
+  grid-template-columns: repeat(2, minmax(0, 360px));
+  justify-content: center;
+  max-width: 780px;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+.hero.quiz-in-hero .offers-recommendation-grid.offers-recommendation-grid--expanded {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 1180px;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+.hero.quiz-in-hero .offers-recommendation-grid .recommendation-results-toggle {
+  grid-column: 1 / -1;
+  justify-self: center;
+  min-height: 52px;
+  margin-top: 0;
+  border: 1px solid #222;
+  border-radius: 0;
+  padding: 0 24px;
+  background: transparent;
+  color: #222;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.hero.quiz-in-hero .offers-recommendation-grid .recommendation-results-toggle:hover,
+.hero.quiz-in-hero .offers-recommendation-grid .recommendation-results-toggle:focus-visible {
+  background: #222;
+  color: #fff;
+  transform: none;
+}
+
+@media (max-width: 980px) {
+  .hero.quiz-in-hero .offers-recommendation-grid.offers-recommendation-grid--expanded {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .hero.quiz-in-hero .offers-recommendation-grid.offers-recommendation-grid--featured,
+  .hero.quiz-in-hero .offers-recommendation-grid.offers-recommendation-grid--expanded {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+  }
+}

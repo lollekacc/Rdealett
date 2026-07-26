@@ -7563,6 +7563,44 @@ body.cart-drawer-open {
   order: 3;
 }
 
+.offers-recommendation-grid--featured {
+  flex-wrap: wrap;
+  max-width: 760px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.offers-recommendation-grid--expanded {
+  flex-wrap: wrap;
+}
+
+.recommendation-results-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 100%;
+  justify-self: center;
+  width: fit-content;
+  min-height: 46px;
+  margin: 2px auto 0;
+  border: 1px solid rgba(39, 36, 67, 0.22);
+  border-radius: 999px;
+  padding: 0 20px;
+  background: #fff;
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.recommendation-results-toggle:hover {
+  border-color: var(--accent);
+  box-shadow: 0 10px 22px rgba(39, 36, 67, 0.1);
+  transform: translateY(-2px);
+}
+
 .offer-card__accent {
   height: 5px;
   background: var(--accent);

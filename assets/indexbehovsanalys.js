@@ -953,9 +953,7 @@ function createIndexQuiz() {
       return;
     }
 
-    recommendedPlans.forEach((plan, index) => {
-      dom.offersContainer.appendChild(buildRecommendationCard(plan, index));
-    });
+    renderRecommendationResults(getUniqueOperatorPlans(recommendedPlans), { expanded: false });
 
     syncStackHeight();
   }
@@ -1010,7 +1008,7 @@ function createIndexQuiz() {
         return left.operator.localeCompare(right.operator, "sv");
       });
 
-    return candidates.slice(0, 3);
+    return getUniqueOperatorPlans(candidates).slice(0, 4);
   }
 
   async function getStrictCalculatedPlans() {
@@ -1035,7 +1033,7 @@ function createIndexQuiz() {
       return [];
     }
 
-    return (calculation.options || []).map(option => {
+    return getUniqueOperatorPlans((calculation.options || []).map(option => {
       const sourcePlan = allPlans.find(plan => String(plan.id) === String(option.planId)) || {};
 
       return {
@@ -1050,7 +1048,82 @@ function createIndexQuiz() {
         qualification,
         source: "homepage-quiz-calculator",
       };
+    })).slice(0, 4);
+  }
+
+  function getUniqueOperatorPlans(items = []) {
+    const seenOperators = new Set();
+
+    return items.filter(item => {
+      const operatorKey = String(item?.operator || "").trim().toLowerCase();
+      if (!operatorKey || seenOperators.has(operatorKey)) return false;
+      seenOperators.add(operatorKey);
+      return true;
     });
+  }
+
+  function getRecommendationPrice(plan) {
+    return Number(plan.monthlyPrice ?? plan.finalPrice ?? plan.price ?? plan.pricePerPerson) || 0;
+  }
+
+  function getRecommendationKey(plan) {
+    return String(plan?.planId ?? plan?.id ?? `${plan?.operator || ""}-${plan?.title || ""}`);
+  }
+
+  function selectFeaturedRecommendationEntries(plans = []) {
+    if (!plans.length) return [];
+    if (plans.length === 1) return [{ plan: plans[0], label: "Bäst värde" }];
+
+    const bestValue = plans[0];
+    const cheapest = [...plans].sort((left, right) => getRecommendationPrice(left) - getRecommendationPrice(right))[0];
+
+    return [
+      { plan: bestValue, label: "Bäst värde" },
+      { plan: cheapest, label: "Billigast möjlig" }
+    ];
+  }
+
+  function getExpandedRecommendationLabel(plan, index, featuredEntries = []) {
+    const key = getRecommendationKey(plan);
+
+    if (key === getRecommendationKey(featuredEntries[0]?.plan)) return "Bäst värde";
+    if (key === getRecommendationKey(featuredEntries[1]?.plan)) return "Billigast möjlig";
+
+    return `Operatör ${index + 1}`;
+  }
+
+  function renderRecommendationResults(plans = [], { expanded = false } = {}) {
+    const featuredEntries = selectFeaturedRecommendationEntries(plans);
+    const visibleEntries = expanded
+      ? plans.map((plan, index) => ({
+        plan,
+        label: getExpandedRecommendationLabel(plan, index, featuredEntries)
+      }))
+      : featuredEntries;
+    const hasMoreOperators = plans.length > visibleEntries.length;
+
+    dom.offersContainer.classList.toggle("offers-recommendation-grid--featured", !expanded);
+    dom.offersContainer.classList.toggle("offers-recommendation-grid--expanded", expanded);
+    dom.offersContainer.innerHTML = "";
+
+    visibleEntries.forEach(({ plan, label }, index) => {
+      dom.offersContainer.appendChild(
+        buildRecommendationCard(plan, index, label)
+      );
+    });
+
+    if (!expanded && hasMoreOperators) {
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "recommendation-results-toggle";
+      toggle.textContent = "Show all 4 operators";
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.addEventListener("click", () => {
+        renderRecommendationResults(plans, { expanded: true });
+        syncStackHeight();
+      });
+      dom.offersContainer.appendChild(toggle);
+    }
   }
 
   function buildQualificationFromState() {
@@ -1319,7 +1392,7 @@ function createIndexQuiz() {
       : "Visas eftersom den matchar svaren du gav i analysen.";
   }
 
-  function buildRecommendationCard(plan, index) {
+  function buildRecommendationCard(plan, index, label) {
     const article = document.createElement("article");
     const providerClass = getProviderClass(plan.operator);
     article.className = [
@@ -1328,8 +1401,7 @@ function createIndexQuiz() {
       providerClass ? `provider-card--${providerClass}` : ""
     ].filter(Boolean).join(" ");
 
-    const resultLabels = ["Lägst pris", "Mest värde", "Starkast match"];
-    const topLabel = resultLabels[index] || `Rekommendation ${index + 1}`;
+    const topLabel = label || `Operatör ${index + 1}`;
     const isMulti = state.persons && state.persons > 1;
     const priceMain = isMulti ? `${plan.pricePerPerson} kr/p` : `${plan.finalPrice} kr/mån`;
     const priceSub  = isMulti ? `${plan.finalPrice} kr totalt` : null;

@@ -50,7 +50,7 @@ body {
 .site-header .brand small { display: none; }
 .site-header .brand--logo {
   display:block;
-  width:clamp(94px,7.7vw,118px);
+  width:clamp(142px,11vw,184px);
   height:auto;
   overflow:visible;
 }
@@ -2368,7 +2368,7 @@ body:has(.home-intro) .hero:not(.quiz-in-hero) .hero-actions {
 }
 
 body:has(.home-intro) .site-header .brand-logo-crop img {
-  filter: invert(1) brightness(2.1);
+  filter:none;
 }
 
 body:has(.home-intro) .site-header .nav-link,
@@ -3518,7 +3518,7 @@ textarea:focus,
   .account-page .site-header .brand-logo-crop img,
   .varukorg-page .site-header .brand-logo-crop img,
   .package-page .site-header .brand-logo-crop img {
-    filter: invert(1) brightness(2.1);
+    filter:none;
   }
 
   .abon-page .site-header .header-topbar-link,

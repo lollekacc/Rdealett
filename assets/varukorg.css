@@ -343,6 +343,161 @@
   color: rgba(39, 36, 67, 0.76);
 }
 
+.terms-review-container {
+  margin-top: 24px;
+}
+
+.terms-review {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(39, 36, 67, 0.12);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 34px rgba(39, 36, 67, 0.07);
+}
+
+.terms-review-compact {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.terms-review-compact img {
+  width: 82px;
+  max-height: 46px;
+  object-fit: contain;
+}
+
+.terms-review-copy h3 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.terms-review-copy p {
+  margin: 0;
+  color: rgba(39, 36, 67, 0.68);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.terms-consent-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  color: rgba(39, 36, 67, 0.78);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.terms-consent-row--compact {
+  padding-top: 12px;
+  border-top: 1px solid rgba(39, 36, 67, 0.1);
+}
+
+.terms-consent-row input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.terms-consent-row:focus-within span {
+  color: var(--text);
+}
+
+.terms-full-version {
+  border-top: 1px solid rgba(39, 36, 67, 0.1);
+  padding-top: 12px;
+}
+
+.terms-full-version summary {
+  width: fit-content;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.terms-document-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.terms-document-card {
+  padding: 16px;
+  border: 1px solid rgba(39, 36, 67, 0.1);
+  border-radius: 10px;
+  background: rgba(246, 244, 240, 0.58);
+}
+
+.terms-document-card h4 {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.terms-document-card p,
+.terms-facts dd {
+  margin: 0;
+  color: rgba(39, 36, 67, 0.72);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.terms-document-card p + p {
+  margin-top: 10px;
+}
+
+.terms-document-links,
+.terms-facts {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.terms-document-links li,
+.terms-facts div {
+  display: grid;
+  gap: 4px;
+}
+
+.terms-document-links strong,
+.terms-facts dt {
+  color: rgba(39, 36, 67, 0.9);
+  font-weight: 800;
+}
+
+.terms-document-links a {
+  color: var(--accent);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.terms-document-missing {
+  color: rgba(39, 36, 67, 0.62);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.terms-legal-note {
+  padding: 12px;
+  border-left: 4px solid var(--accent);
+  background: rgba(255, 255, 255, 0.72);
+}
+
 @media (max-width: 980px) {
   .cart-main {
     padding-top: 130px;
@@ -382,5 +537,18 @@
 
   .cart-summary-main h3 {
     font-size: 24px;
+  }
+
+  .terms-review-compact {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .terms-review-compact img {
+    width: 78px;
+  }
+
+  .terms-review-copy h3 {
+    font-size: 19px;
   }
 }

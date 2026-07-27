@@ -14,6 +14,7 @@
     startDateOptions: document.querySelector('#startDateOptions'),
     startDateText: document.querySelector('#startDateText'),
     startDateValue: document.querySelector('#startDateValue'),
+    termsReviewContainer: document.querySelector('#termsReviewContainer'),
     goToSignBtn: document.querySelector('#goToSignBtn'),
     signMessage: document.querySelector('#signMessage')
   };
@@ -55,8 +56,36 @@
     }
   };
 
+  const combinedLegalConsentKey = 'checkoutTerms';
+
+  const operatorDocumentLinks = {
+    telia: {
+      summaryUrl: '',
+      termsUrl: '',
+    },
+    telenor: {
+      summaryUrl: '',
+      termsUrl: '',
+    },
+    tre: {
+      summaryUrl: '',
+      termsUrl: '',
+    },
+    tele2: {
+      summaryUrl: '',
+      termsUrl: '',
+    },
+  };
+
+  const dealettLegalDocument = {
+    id: 'dealett-forformedling-presentkort-2026-07',
+    title: 'Dealetts f\u00f6rmedlings- och presentkortsvillkor',
+    version: '2026-07',
+  };
+
   let cart = [];
   let selectedStartDate = '';
+  let signingComplete = false;
 
   const readJson = (key, fallback) => {
     try {
@@ -133,6 +162,59 @@
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+
+  const getSelectedOperators = () => [...new Set(
+    cart
+      .map((item) => String(item.operator || '').trim())
+      .filter((operator) => operator && operator.toLowerCase() !== 'dealett')
+  )];
+
+  const formatList = (items, fallback = 'vald operat\u00f6r') => {
+    const cleanItems = items.filter(Boolean);
+    if (!cleanItems.length) return fallback;
+    if (cleanItems.length === 1) return cleanItems[0];
+    return `${cleanItems.slice(0, -1).join(', ')} och ${cleanItems.at(-1)}`;
+  };
+
+  const createOperatorDocumentSnapshot = () => getSelectedOperators().map((operator) => {
+    const slug = slugProvider(operator);
+    const documents = operatorDocumentLinks[slug] || {};
+
+    return {
+      operator,
+      summaryUrl: documents.summaryUrl || null,
+      termsUrl: documents.termsUrl || null,
+    };
+  });
+
+  const renderDocumentLink = (href, text) => {
+    if (href) {
+      return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(text)}</a>`;
+    }
+
+    return `<span class="terms-document-missing">${escapeHtml(text)} l\u00e4ggs in n\u00e4r operat\u00f6rens avtal \u00e4r anslutet.</span>`;
+  };
+
+  const getLegalAcceptance = (acceptedAt = null) => {
+    const allAccepted = Boolean(
+      els.termsReviewContainer?.querySelector(`[data-legal-consent="${combinedLegalConsentKey}"]`)?.checked
+    );
+
+    return {
+      operatorAgreement: allAccepted,
+      dealettTerms: allAccepted,
+      withdrawalInfo: allAccepted,
+      allAccepted,
+      acceptedAt: allAccepted ? acceptedAt : null,
+      documents: {
+        operatorDocuments: createOperatorDocumentSnapshot(),
+        dealettDocument: dealettLegalDocument,
+        withdrawalInfoVersion: 'checkout-2026-07',
+      },
+    };
+  };
+
+  const areLegalConsentsAccepted = () => getLegalAcceptance().allAccepted;
 
   const formatCurrency = (value) => (
     window.DealettCart?.formatCurrency(value) || currency.format(Math.max(Number(value) || 0, 0))
@@ -427,6 +509,8 @@
     cart.splice(index, 1);
     syncStoredCart();
     renderCartSummary();
+    renderTermsReview();
+    updateSignButtonState();
     refreshCheckoutAfterCartChange();
   };
 
@@ -546,6 +630,90 @@
     updateStartDate(options[0].value);
   };
 
+  const renderTermsReview = () => {
+    if (!els.termsReviewContainer) return;
+
+    const operatorDocuments = createOperatorDocumentSnapshot();
+    const operatorNames = formatList(operatorDocuments.map((document) => document.operator));
+    const operatorDocumentRows = operatorDocuments.length
+      ? operatorDocuments.map((document) => [
+        '<li>',
+        `  <strong>${escapeHtml(document.operator)}</strong>`,
+        '  <span>',
+        renderDocumentLink(document.summaryUrl, 'Avtalssammanfattning'),
+        '    <span aria-hidden="true"> | </span>',
+        renderDocumentLink(document.termsUrl, 'Abonnemangsvillkor'),
+        '  </span>',
+        '</li>'
+      ].join('')).join('')
+      : [
+        '<li>',
+        '  <strong>Vald operat\u00f6r</strong>',
+        '  <span class="terms-document-missing">Operat\u00f6rens dokument visas h\u00e4r n\u00e4r ett abonnemang \u00e4r valt.</span>',
+        '</li>'
+      ].join('');
+
+    els.termsReviewContainer.innerHTML = [
+      '<section class="terms-review" aria-labelledby="termsReviewTitle">',
+      '  <div class="terms-review-compact">',
+      '    <img src="./images/logo.png" alt="Dealett" loading="lazy" decoding="async" />',
+      '    <div class="terms-review-copy">',
+      '      <h3 id="termsReviewTitle">Avtal och villkor</h3>',
+      `      <p>L\u00e4s villkoren innan BankID. De g\u00e4ller abonnemanget hos ${escapeHtml(operatorNames)} och Dealetts f\u00f6rmedling av presentkortet.</p>`,
+      '    </div>',
+      '  </div>',
+      '',
+      '  <label class="terms-consent-row terms-consent-row--compact">',
+      `    <input type="checkbox" data-legal-consent="${escapeHtml(combinedLegalConsentKey)}" />`,
+      `    <span>Jag har tagit del av och accepterar ${escapeHtml(operatorNames)}s abonnemangsvillkor, Dealetts villkor och informationen om \u00e5ngerr\u00e4tt.</span>`,
+      '  </label>',
+      '',
+      '  <details class="terms-full-version">',
+      '    <summary>L\u00e4s fullst\u00e4ndig version</summary>',
+      '    <div class="terms-document-grid">',
+      '      <article class="terms-document-card">',
+      '        <h4>Avtalet med operat\u00f6ren</h4>',
+      `        <p>Mobilabonnemanget ing\u00e5s mellan kunden och ${escapeHtml(operatorNames)}. Operat\u00f6rens avtal styr pris, avgifter, bindningstid, upps\u00e4gningstid och abonnemangets villkor.</p>`,
+      '        <ul class="terms-document-links">',
+      operatorDocumentRows,
+      '        </ul>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card">',
+      '        <h4>Avtalet med Dealett</h4>',
+      `        <p>${escapeHtml(dealettLegalDocument.title)}, version ${escapeHtml(dealettLegalDocument.version)}. Dealett j\u00e4mf\u00f6r och f\u00f6rmedlar erbjudanden samt hanterar presentkort enligt den best\u00e4llning som kunden signerar.</p>`,
+      '        <dl class="terms-facts">',
+      '          <div><dt>Dealett ansvarar f\u00f6r</dt><dd>f\u00f6rmedlingen, orderbekr\u00e4ftelsen och leveransinformation f\u00f6r presentkortet.</dd></div>',
+      '          <div><dt>Operat\u00f6ren ansvarar f\u00f6r</dt><dd>abonnemanget, n\u00e4tet, prisplanen, bindningstid och l\u00f6pande kundrelation.</dd></div>',
+      '          <div><dt>Presentkort</dt><dd>skickas enligt orderbekr\u00e4ftelsen efter godk\u00e4nd best\u00e4llning och de villkor som framg\u00e5r i erbjudandet.</dd></div>',
+      '        </dl>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card">',
+      '        <h4>Information om \u00e5ngerr\u00e4tt</h4>',
+      '        <p>Kunden ska ta del av information om \u00e5ngerr\u00e4tt innan avtalet ing\u00e5s. Om operat\u00f6rens villkor kr\u00e4ver separat signering eller separat \u00e5ngerinformation ska den processen f\u00f6ljas.</p>',
+      '        <p class="terms-legal-note">BankID-signeringen hos Dealett kan endast anv\u00e4ndas f\u00f6r operat\u00f6rsavtalet om operat\u00f6ren godk\u00e4nner det i \u00e5terf\u00f6rs\u00e4ljaravtalet.</p>',
+      '      </article>',
+      '    </div>',
+      '  </details>',
+      '</section>'
+    ].join('');
+  };
+
+  const updateSignButtonState = () => {
+    if (!els.goToSignBtn || signingComplete) return;
+
+    const canSign = areLegalConsentsAccepted();
+    els.goToSignBtn.disabled = !canSign;
+    els.goToSignBtn.textContent = canSign
+      ? 'Godk\u00e4nn och best\u00e4ll med BankID'
+      : 'Godk\u00e4nn villkoren f\u00f6rst';
+
+    if (canSign && els.signMessage?.textContent === 'Kryssa i villkoren f\u00f6r att forts\u00e4tta till BankID.') {
+      showMessage(els.signMessage, '');
+    }
+  };
+
   const getContact = () => ({
     email: els.contactEmail?.value.trim() || '',
     phone: els.contactPhone?.value.trim() || ''
@@ -558,6 +726,7 @@
       cart,
       contact: getContact(),
       startDate: selectedStartDate,
+      legalAcceptance: getLegalAcceptance(),
       updatedAt: new Date().toISOString(),
       ...extra
     });
@@ -591,6 +760,7 @@
       signed: true,
       signedAt,
       signature,
+      legalAcceptance: getLegalAcceptance(signedAt),
       bankIdUser: bankIdResult.user || null,
     });
 
@@ -660,6 +830,13 @@
   };
 
   const handleSignContinue = () => {
+    if (!areLegalConsentsAccepted()) {
+      showMessage(els.signMessage, 'Kryssa i villkoren f\u00f6r att forts\u00e4tta till BankID.');
+      els.termsReviewContainer?.querySelector('[data-legal-consent]:not(:checked)')?.focus();
+      updateSignButtonState();
+      return;
+    }
+
     if (!selectedStartDate) {
       showMessage(els.signMessage, 'V\u00e4lj startdatum innan signering.');
       if (els.startDateOptions?.querySelector('input[name="startDate"][value="custom"]')?.checked) {
@@ -668,12 +845,16 @@
       return;
     }
 
-    saveCheckout({ readyForSigning: true });
+    saveCheckout({ readyForSigning: true, legalAcceptance: getLegalAcceptance(new Date().toISOString()) });
 
     if (!window.DealettBankId?.open) {
       saveSignedPurchase({});
       showMessage(els.signMessage, 'Best\u00e4llningen \u00e4r signerad och sparad.');
-      if (els.goToSignBtn) els.goToSignBtn.textContent = 'Signerad med BankID';
+      signingComplete = true;
+      if (els.goToSignBtn) {
+        els.goToSignBtn.disabled = true;
+        els.goToSignBtn.textContent = 'Signerad med BankID';
+      }
       return;
     }
 
@@ -695,21 +876,23 @@
         contact: getContact(),
         startDate: selectedStartDate,
         totals,
+        legalAcceptance: getLegalAcceptance(new Date().toISOString()),
       },
       onComplete(result) {
         saveSignedPurchase(result);
         showMessage(els.signMessage, 'Best\u00e4llningen \u00e4r signerad med BankID och sparad p\u00e5 Mina sidor.');
+        signingComplete = true;
         if (els.goToSignBtn) {
           els.goToSignBtn.disabled = true;
           els.goToSignBtn.textContent = 'Signerad med BankID';
         }
       },
       onCancel() {
-        if (els.goToSignBtn) els.goToSignBtn.disabled = false;
+        updateSignButtonState();
         showMessage(els.signMessage, 'Signeringen avbr\u00f6ts. Du kan starta BankID igen.');
       },
       onError() {
-        if (els.goToSignBtn) els.goToSignBtn.disabled = false;
+        updateSignButtonState();
         showMessage(els.signMessage, 'BankID kunde inte slutf\u00f6ras. F\u00f6rs\u00f6k igen.');
       },
     });
@@ -726,6 +909,13 @@
     els.contactContinueBtn?.addEventListener('click', handleContactContinue);
     els.confirmNumbersBtn?.addEventListener('click', handleConfirmNumbers);
     els.goToSignBtn?.addEventListener('click', handleSignContinue);
+
+    els.termsReviewContainer?.addEventListener('change', (event) => {
+      if (!event.target.matches('[data-legal-consent]')) return;
+
+      saveCheckout();
+      updateSignButtonState();
+    });
 
     els.startDateOptions?.addEventListener('change', (event) => {
       if (event.target.name === 'startDate') {
@@ -749,6 +939,8 @@
     window.DEALETT_updateCartCount?.();
     renderCartSummary();
     renderStartDates();
+    renderTermsReview();
+    updateSignButtonState();
     bindEvents();
   };
 

@@ -169,13 +169,6 @@
       .filter((operator) => operator && operator.toLowerCase() !== 'dealett')
   )];
 
-  const formatList = (items, fallback = 'vald operat\u00f6r') => {
-    const cleanItems = items.filter(Boolean);
-    if (!cleanItems.length) return fallback;
-    if (cleanItems.length === 1) return cleanItems[0];
-    return `${cleanItems.slice(0, -1).join(', ')} och ${cleanItems.at(-1)}`;
-  };
-
   const createOperatorDocumentSnapshot = () => getSelectedOperators().map((operator) => {
     const slug = slugProvider(operator);
     const documents = operatorDocumentLinks[slug] || {};
@@ -187,22 +180,16 @@
     };
   });
 
-  const renderDocumentLink = (href, text) => {
-    if (href) {
-      return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(text)}</a>`;
-    }
-
-    return `<span class="terms-document-missing">${escapeHtml(text)} l\u00e4ggs in n\u00e4r operat\u00f6rens avtal \u00e4r anslutet.</span>`;
-  };
-
   const getLegalAcceptance = (acceptedAt = null) => {
     const allAccepted = Boolean(
       els.termsReviewContainer?.querySelector(`[data-legal-consent="${combinedLegalConsentKey}"]`)?.checked
     );
 
     return {
-      operatorAgreement: allAccepted,
+      operatorAgreement: false,
+      operatorAgreementHandledSeparately: true,
       dealettTerms: allAccepted,
+      privacyPolicy: allAccepted,
       withdrawalInfo: allAccepted,
       allAccepted,
       acceptedAt: allAccepted ? acceptedAt : null,
@@ -633,66 +620,117 @@
   const renderTermsReview = () => {
     if (!els.termsReviewContainer) return;
 
-    const operatorDocuments = createOperatorDocumentSnapshot();
-    const operatorNames = formatList(operatorDocuments.map((document) => document.operator));
-    const operatorDocumentRows = operatorDocuments.length
-      ? operatorDocuments.map((document) => [
-        '<li>',
-        `  <strong>${escapeHtml(document.operator)}</strong>`,
-        '  <span>',
-        renderDocumentLink(document.summaryUrl, 'Avtalssammanfattning'),
-        '    <span aria-hidden="true"> | </span>',
-        renderDocumentLink(document.termsUrl, 'Abonnemangsvillkor'),
-        '  </span>',
-        '</li>'
-      ].join('')).join('')
-      : [
-        '<li>',
-        '  <strong>Vald operat\u00f6r</strong>',
-        '  <span class="terms-document-missing">Operat\u00f6rens dokument visas h\u00e4r n\u00e4r ett abonnemang \u00e4r valt.</span>',
-        '</li>'
-      ].join('');
-
     els.termsReviewContainer.innerHTML = [
       '<section class="terms-review" aria-labelledby="termsReviewTitle">',
       '  <div class="terms-review-compact">',
-      '    <img src="./images/logo.png" alt="Dealett" loading="lazy" decoding="async" />',
+      '    <img src="./images/Dealett.png" alt="Dealett" loading="lazy" decoding="async" />',
       '    <div class="terms-review-copy">',
       '      <h3 id="termsReviewTitle">Avtal och villkor</h3>',
-      `      <p>L\u00e4s villkoren innan BankID. De g\u00e4ller abonnemanget hos ${escapeHtml(operatorNames)} och Dealetts f\u00f6rmedling av presentkortet.</p>`,
+      '      <p>L\u00e4s och godk\u00e4nn Dealetts villkor f\u00f6r f\u00f6rmedling och presentkort innan BankID.</p>',
       '    </div>',
       '  </div>',
       '',
       '  <label class="terms-consent-row terms-consent-row--compact">',
       `    <input type="checkbox" data-legal-consent="${escapeHtml(combinedLegalConsentKey)}" />`,
-      `    <span>Jag har tagit del av och accepterar ${escapeHtml(operatorNames)}s abonnemangsvillkor, Dealetts villkor och informationen om \u00e5ngerr\u00e4tt.</span>`,
+      '    <span>Jag har l\u00e4st och accepterar Dealetts <strong>allm\u00e4nna villkor</strong>, <strong>villkor f\u00f6r presentkort</strong> och <strong>integritetspolicy</strong>, samt tagit del av informationen om \u00e5ngerr\u00e4tt.</span>',
       '  </label>',
       '',
       '  <details class="terms-full-version">',
       '    <summary>L\u00e4s fullst\u00e4ndig version</summary>',
       '    <div class="terms-document-grid">',
       '      <article class="terms-document-card">',
-      '        <h4>Avtalet med operat\u00f6ren</h4>',
-      `        <p>Mobilabonnemanget ing\u00e5s mellan kunden och ${escapeHtml(operatorNames)}. Operat\u00f6rens avtal styr pris, avgifter, bindningstid, upps\u00e4gningstid och abonnemangets villkor.</p>`,
-      '        <ul class="terms-document-links">',
-      operatorDocumentRows,
+      '        <p class="terms-meta">Dealetts allm\u00e4nna villkor · Version 2026-07 · G\u00e4ller fr\u00e5n 27 juli 2026</p>',
+      '        <nav class="terms-toc" aria-label="Villkorsavsnitt">',
+      '          <a href="#dealett-term-1">1. Vad Dealett g\u00f6r</a>',
+      '          <a href="#dealett-term-2">2. Avtal och best\u00e4llning</a>',
+      '          <a href="#dealett-term-3">3. Priser och betalning</a>',
+      '          <a href="#dealett-term-4">4. Leverans av presentkort</a>',
+      '          <a href="#dealett-term-5">5. \u00c5ngerr\u00e4tt</a>',
+      '          <a href="#dealett-term-6">6. Personuppgifter</a>',
+      '          <a href="#dealett-term-7">7. Ansvar och ansvarsbegr\u00e4nsning</a>',
+      '          <a href="#dealett-term-8">8. Force majeure</a>',
+      '          <a href="#dealett-term-9">9. \u00c4ndringar</a>',
+      '          <a href="#dealett-term-10">10. Tvist och lag</a>',
+      '          <a href="#dealett-term-11">11. Kontakt</a>',
+      '        </nav>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card terms-block" id="dealett-term-1">',
+      '        <h4>1. Vad Dealett g\u00f6r</h4>',
+      '        <p>Dealett f\u00f6rmedlar erbjudanden om abonnemang och tj\u00e4nster fr\u00e5n olika operat\u00f6rer och leverant\u00f6rer. Dealett hj\u00e4lper kunden att j\u00e4mf\u00f6ra erbjudanden, skicka in best\u00e4llningen till vald leverant\u00f6r och hantera eventuellt presentkort som ing\u00e5r i erbjudandet.</p>',
+      '        <p>Dealett \u00e4r inte part i det abonnemangsavtal som tecknas mellan kunden och leverant\u00f6ren. Det avtalet regleras av leverant\u00f6rens egna villkor, som kunden ocks\u00e5 ska ta del av innan best\u00e4llning.</p>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card terms-block" id="dealett-term-2">',
+      '        <h4>2. Avtal och best\u00e4llning</h4>',
+      '        <h5>Dealett \u00e5tar sig att</h5>',
+      '        <ul>',
+      '          <li>tydligt visa den best\u00e4llning kunden valt, inklusive pris, bindningstid och eventuellt presentkortsv\u00e4rde, innan den skickas in,</li>',
+      '          <li>ta emot och behandla kundens kontaktuppgifter i syfte att genomf\u00f6ra best\u00e4llningen,</li>',
+      '          <li>skicka en orderbekr\u00e4ftelse till den e-postadress kunden angett s\u00e5 snart best\u00e4llningen \u00e4r registrerad.</li>',
+      '        </ul>',
+      '        <h5>Kunden \u00e5tar sig att</h5>',
+      '        <ul>',
+      '          <li>l\u00e4mna korrekta och fullst\u00e4ndiga uppgifter vid best\u00e4llning,</li>',
+      '          <li>ha r\u00e4tt att ing\u00e5 avtalet, till exempel genom att vara myndig eller ha m\u00e5lsmans godk\u00e4nnande,</li>',
+      '          <li>sj\u00e4lv kontrollera villkoren hos den leverant\u00f6r som best\u00e4llningen avser.</li>',
+      '        </ul>',
+      '        <p>Avtal om abonnemang anses ing\u00e5nget n\u00e4r leverant\u00f6ren bekr\u00e4ftat best\u00e4llningen, inte n\u00e4r Dealett tar emot den. BankID-signering utg\u00f6r kundens bekr\u00e4ftelse av identitet och godk\u00e4nnande av dessa villkor.</p>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card terms-block" id="dealett-term-3">',
+      '        <h4>3. Priser och betalning</h4>',
+      '        <p>Alla priser anges i svenska kronor och inklusive moms d\u00e4r annat inte anges. Priser, kampanjer och eventuella rabatter g\u00e4ller enligt vad som visas vid best\u00e4llningstillf\u00e4llet och kan komma att \u00e4ndras eller upph\u00f6ra utan f\u00f6reg\u00e5ende meddelande.</p>',
+      '        <p>Betalning f\u00f6r abonnemanget sker till leverant\u00f6ren enligt dennes betalningsvillkor. Dealett tar inte emot betalning f\u00f6r sj\u00e4lva abonnemanget, om inte annat uttryckligen anges i det specifika erbjudandet.</p>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card terms-block" id="dealett-term-4">',
+      '        <h4>4. Leverans av presentkort</h4>',
+      '        <p>Om erbjudandet inkluderar ett presentkort hanteras detta av Dealett enligt uppgifterna i orderbekr\u00e4ftelsen och de s\u00e4rskilda villkor som g\u00e4ller f\u00f6r det aktuella presentkortet.</p>',
+      '        <ul>',
+      '          <li>Presentkortet skickas normalt efter att bindningstiden hos leverant\u00f6ren inletts och eventuell \u00e5ngerfrist l\u00f6pt ut, om inte annat anges.</li>',
+      '          <li>Presentkortet kan \u00e5terkallas om abonnemanget s\u00e4gs upp, avbryts eller inte fullf\u00f6ljs under den period som anges i erbjudandet.</li>',
+      '          <li>Presentkort som utf\u00e4rdas av tredje part omfattas \u00e4ven av utf\u00e4rdarens egna villkor f\u00f6r giltighetstid och anv\u00e4ndning.</li>',
       '        </ul>',
       '      </article>',
       '',
-      '      <article class="terms-document-card">',
-      '        <h4>Avtalet med Dealett</h4>',
-      `        <p>${escapeHtml(dealettLegalDocument.title)}, version ${escapeHtml(dealettLegalDocument.version)}. Dealett j\u00e4mf\u00f6r och f\u00f6rmedlar erbjudanden samt hanterar presentkort enligt den best\u00e4llning som kunden signerar.</p>`,
-      '        <dl class="terms-facts">',
-      '          <div><dt>Dealett ansvarar f\u00f6r</dt><dd>f\u00f6rmedlingen, orderbekr\u00e4ftelsen och leveransinformation f\u00f6r presentkortet.</dd></div>',
-      '          <div><dt>Operat\u00f6ren ansvarar f\u00f6r</dt><dd>abonnemanget, n\u00e4tet, prisplanen, bindningstid och l\u00f6pande kundrelation.</dd></div>',
-      '          <div><dt>Presentkort</dt><dd>skickas enligt orderbekr\u00e4ftelsen efter godk\u00e4nd best\u00e4llning och de villkor som framg\u00e5r i erbjudandet.</dd></div>',
-      '        </dl>',
+      '      <article class="terms-document-card terms-block" id="dealett-term-5">',
+      '        <h4>5. \u00c5ngerr\u00e4tt</h4>',
+      '        <p>Vid distansavtal har kunden enligt distansavtalslagen normalt 14 dagars \u00e5ngerr\u00e4tt fr\u00e5n det att avtalet ingicks. Under \u00e5ngerfristen kan kunden \u00e5ngra best\u00e4llningen utan att ange sk\u00e4l.</p>',
+      '        <p>Vill kunden \u00e5ngra eller \u00e4ndra en best\u00e4llning ska Dealett kontaktas s\u00e5 snart som m\u00f6jligt, och senast innan \u00e5ngerfristen l\u00f6per ut. Observera att sj\u00e4lva abonnemangsavtalet ing\u00e5s med leverant\u00f6ren, vars egna \u00e5ngerr\u00e4ttsvillkor ocks\u00e5 g\u00e4ller och ska l\u00e4sas innan best\u00e4llning.</p>',
+      '        <p class="terms-legal-note">Dessa villkor g\u00e4ller Dealetts f\u00f6rmedling och presentkortet. Eventuella separata abonnemangsvillkor, inklusive bindningstid och upps\u00e4gning, l\u00e4mnas i leverant\u00f6rens egen information och ska l\u00e4sas separat.</p>',
       '      </article>',
       '',
-      '      <article class="terms-document-card">',
-      '        <h4>Information om \u00e5ngerr\u00e4tt</h4>',
-      '        <p>Kunden ska ta del av information om \u00e5ngerr\u00e4tt innan avtalet ing\u00e5s. Om operat\u00f6rens villkor kr\u00e4ver separat signering eller separat \u00e5ngerinformation ska den processen f\u00f6ljas.</p>',
-      '        <p class="terms-legal-note">BankID-signeringen hos Dealett kan endast anv\u00e4ndas f\u00f6r operat\u00f6rsavtalet om operat\u00f6ren godk\u00e4nner det i \u00e5terf\u00f6rs\u00e4ljaravtalet.</p>',
+      '      <article class="terms-document-card terms-block" id="dealett-term-6">',
+      '        <h4>6. Personuppgifter</h4>',
+      '        <p>Dealett behandlar personuppgifter i enlighet med g\u00e4llande dataskyddslagstiftning (GDPR). Uppgifter som samlas in vid best\u00e4llning anv\u00e4nds f\u00f6r att genomf\u00f6ra best\u00e4llningen, skicka orderbekr\u00e4ftelse, hantera presentkort samt fullg\u00f6ra r\u00e4ttsliga skyldigheter.</p>',
+      '        <p>Uppgifter kan delas med den leverant\u00f6r som best\u00e4llningen avser i den utstr\u00e4ckning det kr\u00e4vs f\u00f6r att teckna abonnemanget. Kunden har r\u00e4tt att beg\u00e4ra utdrag, r\u00e4ttelse eller radering av sina uppgifter i enlighet med g\u00e4llande lag. Fullst\u00e4ndig information finns i Dealetts integritetspolicy.</p>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card terms-block" id="dealett-term-7">',
+      '        <h4>7. Ansvar och ansvarsbegr\u00e4nsning</h4>',
+      '        <p>Dealett ansvarar f\u00f6r att best\u00e4llningen f\u00f6rmedlas korrekt till vald leverant\u00f6r och att uppgivna kontaktuppgifter hanteras enligt dessa villkor. Dealett ansvarar d\u00e4remot inte f\u00f6r leverant\u00f6rens fullg\u00f6rande av abonnemangsavtalet, exempelvis leverans av mobiltj\u00e4nst, n\u00e4tverkst\u00e4ckning, fakturering eller kundservice kopplad till sj\u00e4lva abonnemanget.</p>',
+      '        <p>Dealetts ansvar f\u00f6r eventuell skada \u00e4r begr\u00e4nsat till direkt skada som orsakats av grov v\u00e5rdsl\u00f6shet eller upps\u00e5t fr\u00e5n Dealetts sida, och omfattar inte indirekta skador eller f\u00f6ljdskador.</p>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card terms-block" id="dealett-term-8">',
+      '        <h4>8. Force majeure</h4>',
+      '        <p>Dealett \u00e4r befriat fr\u00e5n ansvar f\u00f6r underl\u00e5tenhet att fullg\u00f6ra sina \u00e5taganden om detta beror p\u00e5 omst\u00e4ndigheter utanf\u00f6r Dealetts kontroll, s\u00e5som myndighets\u00e5tg\u00e4rd, driftsst\u00f6rning hos tredje part, arbetsmarknadskonflikt, naturh\u00e4ndelse eller liknande.</p>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card terms-block" id="dealett-term-9">',
+      '        <h4>9. \u00c4ndringar av villkoren</h4>',
+      '        <p>Dealett f\u00f6rbeh\u00e5ller sig r\u00e4tten att \u00e4ndra dessa villkor. V\u00e4sentliga \u00e4ndringar meddelas p\u00e5 l\u00e4mpligt s\u00e4tt, exempelvis via webbplatsen eller e-post. Den version av villkoren som g\u00e4llde vid tidpunkten f\u00f6r best\u00e4llningen \u00e4r den som till\u00e4mpas p\u00e5 den best\u00e4llningen.</p>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card terms-block" id="dealett-term-10">',
+      '        <h4>10. Tvist och till\u00e4mplig lag</h4>',
+      '        <p>Svensk lag ska till\u00e4mpas p\u00e5 dessa villkor. Tvist ska i f\u00f6rsta hand l\u00f6sas genom \u00f6verenskommelse mellan parterna. Kan parterna inte enas kan kunden v\u00e4nda sig till Allm\u00e4nna reklamationsn\u00e4mnden (ARN) eller till allm\u00e4n domstol.</p>',
+      '      </article>',
+      '',
+      '      <article class="terms-document-card terms-block" id="dealett-term-11">',
+      '        <h4>11. Kontakt</h4>',
+      '        <p>Fr\u00e5gor om dessa villkor, en best\u00e4llning eller ett presentkort kan skickas till Dealetts kundtj\u00e4nst via kontaktuppgifterna p\u00e5 webbplatsen.</p>',
       '      </article>',
       '    </div>',
       '  </details>',

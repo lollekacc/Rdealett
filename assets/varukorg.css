@@ -446,7 +446,15 @@
   line-height: 1.25;
 }
 
+.terms-block h5 {
+  margin: 16px 0 6px;
+  color: rgba(39, 36, 67, 0.86);
+  font-size: 15px;
+  line-height: 1.3;
+}
+
 .terms-document-card p,
+.terms-document-card li,
 .terms-facts dd {
   margin: 0;
   color: rgba(39, 36, 67, 0.72);
@@ -458,11 +466,20 @@
   margin-top: 10px;
 }
 
+.terms-document-card ul,
 .terms-document-links,
 .terms-facts {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   margin: 14px 0 0;
+}
+
+.terms-document-card ul {
+  padding-left: 20px;
+}
+
+.terms-document-links,
+.terms-facts {
   padding: 0;
   list-style: none;
 }
@@ -496,6 +513,31 @@
   padding: 12px;
   border-left: 4px solid var(--accent);
   background: rgba(255, 255, 255, 0.72);
+}
+
+.terms-meta {
+  color: rgba(39, 36, 67, 0.58);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.terms-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 12px;
+}
+
+.terms-toc a {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.terms-toc a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 980px) {

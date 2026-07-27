@@ -4172,6 +4172,40 @@ body:has(.home-intro) .newsletter-section,
   transform: none !important;
 }
 
+.start-date-choice {
+  align-items: flex-start !important;
+  gap: 12px !important;
+}
+
+.start-date-choice > span {
+  display: grid !important;
+  gap: 7px !important;
+  width: 100% !important;
+}
+
+.start-date-choice__date {
+  color: #C96F24 !important;
+  font-weight: 700 !important;
+}
+
+.start-date-calendar {
+  width: min(100%, 230px) !important;
+  min-height: 42px !important;
+  margin-top: 6px !important;
+  padding: 0 12px !important;
+  border: 1px solid rgba(13, 23, 38, 0.28) !important;
+  border-radius: 0 !important;
+  background: #FFFFFF !important;
+  color: #0D1726 !important;
+  font: 600 14px/1 Arial, Helvetica, sans-serif !important;
+}
+
+.start-date-calendar:focus {
+  border-color: #C96F24 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 4px rgba(201, 111, 36, 0.18) !important;
+}
+
 /* Header correction after the signature palette pass. */
 .site-header {
   position: absolute !important;

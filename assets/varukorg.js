@@ -472,10 +472,21 @@
     return date;
   };
 
+  const addMonths = (months) => {
+    const date = new Date();
+    date.setHours(12, 0, 0, 0);
+    date.setMonth(date.getMonth() + months);
+    return date;
+  };
+
   const toIsoDate = (date) => date.toISOString().slice(0, 10);
 
   const updateStartDate = (value) => {
-    selectedStartDate = value;
+    const customDateInput = document.querySelector('[data-custom-start-date]');
+    const isCustom = value === 'custom';
+    const customDate = customDateInput?.value || '';
+
+    selectedStartDate = isCustom ? customDate : value;
 
     document.querySelectorAll('.start-date-choice').forEach((choice) => {
       const input = choice.querySelector('input');
@@ -484,7 +495,9 @@
 
     const selected = [...document.querySelectorAll('input[name="startDate"]')]
       .find((input) => input.value === value);
-    const label = selected?.dataset.label || value;
+    const label = isCustom && customDate
+      ? dateFormatter.format(new Date(`${customDate}T12:00:00`))
+      : selected?.dataset.label || value;
 
     if (els.startDateValue && els.startDateText) {
       els.startDateValue.textContent = label;
@@ -495,30 +508,37 @@
   const renderStartDates = () => {
     if (!els.startDateOptions) return;
 
+    const today = addDays(0);
+    const oneMonthAhead = addMonths(1);
     const options = [
       {
         value: 'snarast',
         title: 'Snarast m\u00f6jligt',
+        dateLabel: dateFormatter.format(today),
         text: 'Vi startar processen direkt efter signering.'
       },
       {
-        value: toIsoDate(addDays(14)),
-        title: dateFormatter.format(addDays(14)),
-        text: 'Passar om du vill ha lite marginal.'
+        value: toIsoDate(oneMonthAhead),
+        title: 'En m\u00e5nad fram',
+        dateLabel: dateFormatter.format(oneMonthAhead),
+        text: 'Bra vid planerat operat\u00f6rsbyte.'
       },
       {
-        value: toIsoDate(addDays(30)),
-        title: dateFormatter.format(addDays(30)),
-        text: 'Bra vid planerat operat\u00f6rsbyte.'
+        value: 'custom',
+        title: 'V\u00e4lj fritt',
+        text: 'V\u00e4lj ett eget datum i kalendern.',
+        custom: true
       }
     ];
 
     els.startDateOptions.innerHTML = options.map((option, index) => [
       `<label class="start-date-choice${index === 0 ? ' is-selected' : ''}">`,
-      `  <input type="radio" name="startDate" value="${escapeHtml(option.value)}" data-label="${escapeHtml(option.title)}"${index === 0 ? ' checked' : ''} />`,
+      `  <input type="radio" name="startDate" value="${escapeHtml(option.value)}" data-label="${escapeHtml(option.dateLabel ? `${option.title} - ${option.dateLabel}` : option.title)}"${index === 0 ? ' checked' : ''} />`,
       '  <span>',
       `    <strong>${escapeHtml(option.title)}</strong>`,
+      option.dateLabel ? `    <span class="start-date-choice__date">${escapeHtml(option.dateLabel)}</span>` : '',
       `    <span>${escapeHtml(option.text)}</span>`,
+      option.custom ? `    <input class="start-date-calendar" type="date" min="${escapeHtml(toIsoDate(addDays(0)))}" data-custom-start-date aria-label="V\u00e4lj startdatum" />` : '',
       '  </span>',
       '</label>'
     ].join('')).join('');
@@ -642,6 +662,9 @@
   const handleSignContinue = () => {
     if (!selectedStartDate) {
       showMessage(els.signMessage, 'V\u00e4lj startdatum innan signering.');
+      if (els.startDateOptions?.querySelector('input[name="startDate"][value="custom"]')?.checked) {
+        els.startDateOptions.querySelector('[data-custom-start-date]')?.focus();
+      }
       return;
     }
 
@@ -707,6 +730,15 @@
     els.startDateOptions?.addEventListener('change', (event) => {
       if (event.target.name === 'startDate') {
         updateStartDate(event.target.value);
+        saveCheckout();
+      }
+    });
+
+    els.startDateOptions?.addEventListener('input', (event) => {
+      if (event.target.matches('[data-custom-start-date]')) {
+        const customRadio = els.startDateOptions.querySelector('input[name="startDate"][value="custom"]');
+        if (customRadio) customRadio.checked = true;
+        updateStartDate('custom');
         saveCheckout();
       }
     });

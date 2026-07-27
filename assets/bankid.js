@@ -114,6 +114,12 @@
       }
     }
 
+    cells.push([
+      '<span class="bankid-modal__qr-logo" aria-hidden="true">',
+      '  <img src="images/Dealett.png" alt="" />',
+      '</span>'
+    ].join(''));
+
     qr.innerHTML = cells.join('');
   };
 

@@ -4140,6 +4140,12 @@ body:has(.home-intro) .newsletter-section,
   border-color: rgba(13, 23, 38, 0.28) !important;
 }
 
+.bankid-modal__qr-logo {
+  border-color: #FFFFFF !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 0 1px rgba(13, 23, 38, 0.16) !important;
+}
+
 .newsletter-form input:focus,
 .checkout-form input:focus,
 .checkout-form select:focus,

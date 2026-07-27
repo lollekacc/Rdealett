@@ -7690,6 +7690,7 @@ body.cart-drawer-open {
 }
 
 .bankid-modal__qr {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(25, 1fr);
   grid-template-rows: repeat(25, 1fr);
@@ -7709,6 +7710,30 @@ body.cart-drawer-open {
 
 .bankid-modal__qr span.is-active {
   background: #111;
+}
+
+.bankid-modal__qr-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: 33%;
+  aspect-ratio: 1;
+  border: 5px solid #fff;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.14);
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+}
+
+.bankid-modal__qr-logo img {
+  position: absolute;
+  top: -112%;
+  left: -190%;
+  width: 490%;
+  max-width: none;
+  height: auto;
 }
 
 .bankid-modal__qr-wrap p {

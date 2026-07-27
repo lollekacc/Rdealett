@@ -2462,10 +2462,19 @@ body:has(.home-intro) .home-marquee {
 }
 
 body:has(.home-intro) .home-intro,
-body:has(.home-intro) .gift-card-section,
 body:has(.home-intro) .coverage-maplibre-heading {
   background: var(--home-white);
   color: var(--home-ink);
+}
+
+body:has(.home-intro) .home-how {
+  background: var(--home-white) !important;
+  color: var(--home-ink) !important;
+}
+
+body:has(.home-intro) .gift-card-section {
+  background: var(--home-ink) !important;
+  color: var(--home-white) !important;
 }
 
 body:has(.home-intro) .home-intro .section-label,
@@ -2511,34 +2520,53 @@ body:has(.home-intro) .home-service-card:hover .home-service-card__arrow {
   color: var(--home-white);
 }
 
-body:has(.home-intro) .home-how,
 body:has(.home-intro) .newsletter-panel {
   border-color: rgba(214, 136, 57, .44);
   background: var(--home-ink);
   color: var(--home-white);
 }
 
-body:has(.home-intro) .home-how .section-label,
-body:has(.home-intro) .home-how h2,
-body:has(.home-intro) .home-how__steps h3,
 body:has(.home-intro) .newsletter-copy h2,
 body:has(.home-intro) .newsletter-form label > span {
   color: var(--home-white);
 }
 
-body:has(.home-intro) .home-how__copy > p:not(.section-label),
-body:has(.home-intro) .home-how__steps p,
 body:has(.home-intro) .newsletter-copy p:last-child,
 body:has(.home-intro) .newsletter-status {
   color: rgba(255, 255, 255, .68);
 }
 
+body:has(.home-intro) .home-how .section-label,
+body:has(.home-intro) .home-how h2,
+body:has(.home-intro) .home-how__steps h3 {
+  color: var(--home-ink) !important;
+}
+
+body:has(.home-intro) .home-how__copy > p:not(.section-label),
+body:has(.home-intro) .home-how__steps p {
+  color: rgba(13, 23, 38, .68) !important;
+}
+
+body:has(.home-intro) .gift-card-copy h2 {
+  color: var(--home-white) !important;
+}
+
+body:has(.home-intro) .gift-card-copy .section-label,
+body:has(.home-intro) .gift-card-copy > p:last-child {
+  color: rgba(255, 255, 255, .72) !important;
+}
+
+body:has(.home-intro) .gift-logo {
+  border-bottom-color: rgba(255, 255, 255, .22) !important;
+  color: var(--home-white) !important;
+}
+
 body:has(.home-intro) .home-how__steps li {
-  border-color: rgba(214, 136, 57, .38);
+  border-color: rgba(13, 23, 38, .18);
 }
 
 body:has(.home-intro) .home-how__steps > li > span {
-  color: var(--home-amber) !important;
+  color: var(--home-copper) !important;
 }
 
 body:has(.home-intro) .gift-card-image img {

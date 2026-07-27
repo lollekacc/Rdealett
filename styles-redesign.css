@@ -77,12 +77,12 @@
 }
 .site-header .header-account-link { gap: 10px; padding: 0 18px; background: #111; color: #fff; }
 .site-header .header-account-link:hover,
-.site-header .header-account-link.is-active { background: var(--deal-blue, #5268ff); color: #fff; }
+.site-header .header-account-link.is-active { background: var(--deal-blue, #0D1726); color: #fff; }
 
 .footer {
   padding-top: 80px;
   border-top: 1px solid #111;
-  background: var(--deal-lime, #d9ff55);
+  background: var(--deal-lime, #F8F5F0);
 }
 .footer .footer-inner { max-width: 1400px; padding: 0 28px 38px; }
 .footer .footer-main { grid-template-columns: 1.05fr .8fr 1.4fr .75fr; gap: 50px; }
@@ -163,17 +163,17 @@
    -------------------------------------------------------------------------- */
 
 :root {
-  --rd-ink: #0b0b0b;
-  --rd-paper: #f7f7f2;
-  --rd-white: #fff;
-  --rd-blue: #5268ff;
-  --rd-orange: #ff5c35;
-  --rd-lime: #d9ff55;
-  --rd-pink: #ffc7e8;
-  --rd-muted: rgba(11, 11, 11, 0.62);
+  --rd-ink: #0D1726;
+  --rd-paper: #F8F5F0;
+  --rd-white: #FFFFFF;
+  --rd-blue: #0D1726;
+  --rd-orange: #C96F24;
+  --rd-lime: #F8F5F0;
+  --rd-pink: #FFFFFF;
+  --rd-muted: rgba(13, 23, 38, 0.62);
   --rd-radius: 24px;
-  --rd-line: 1px solid #111;
-  --rd-shadow: 10px 10px 0 #111;
+  --rd-line: 1px solid #0D1726;
+  --rd-shadow: 10px 10px 0 rgba(13, 23, 38, 0.16);
 }
 
 .abon-page,
@@ -299,7 +299,7 @@ select:focus,
 textarea:focus,
 .bredband-input-wrap:focus-within {
   border-color: var(--rd-blue) !important;
-  box-shadow: 0 0 0 4px rgba(82, 104, 255, .16) !important;
+  box-shadow: 0 0 0 4px rgba(13, 23, 38, .16) !important;
 }
 
 /* Editorial hero family */

@@ -1,12 +1,12 @@
 :root {
   color-scheme: light;
-  --bg: #f6f4f0;
-  --surface: #ffffff;
-  --text: #272443;
-  --accent: #ef8214;
-  --accent-soft: rgba(218, 57, 43, 0.1);
-  --yellow: #fcff72;
-  --shadow: 0 25px 50px rgba(39, 36, 67, 0.14);
+  --bg: #F8F5F0;
+  --surface: #FFFFFF;
+  --text: #0D1726;
+  --accent: #C96F24;
+  --accent-soft: rgba(201, 111, 36, 0.12);
+  --yellow: #F8F5F0;
+  --shadow: 0 25px 50px rgba(13, 23, 38, 0.14);
   --border-radius: 20px;
   --page-width: 1251px;
 }
@@ -140,7 +140,7 @@ img {
   position: absolute;
   background: #ff8a00;
   clip-path: polygon(50% 0, 62% 36%, 100% 50%, 62% 64%, 50% 100%, 38% 64%, 0 50%, 38% 36%);
-  filter: drop-shadow(0 4px 8px rgba(255, 138, 0, 0.28));
+  filter: drop-shadow(0 4px 8px rgba(201, 111, 36, 0.28));
 }
 
 .dealett-chat-toggle__sparkles::before {
@@ -272,7 +272,7 @@ img {
 .dealett-chat-header {
   min-height: 72px;
   padding: 16px;
-  background: #272443;
+  background: #0D1726;
   color: #fff;
   display: flex;
   align-items: center;
@@ -337,7 +337,7 @@ img {
 .dealett-chat-message--assistant {
   align-self: flex-start;
   background: #fff;
-  color: #272443;
+  color: #0D1726;
   border: 1px solid rgba(39, 36, 67, 0.08);
 }
 
@@ -373,7 +373,7 @@ img {
   border: 1px solid rgba(39, 36, 67, 0.14);
   border-radius: 999px;
   background: #fff;
-  color: #272443;
+  color: #0D1726;
   padding: 5px 10px;
   font-size: 12px;
   cursor: pointer;
@@ -386,8 +386,8 @@ img {
 }
 
 .dealett-chat-feedback__button--primary {
-  border-color: #272443;
-  background: #272443;
+  border-color: #0D1726;
+  background: #0D1726;
   color: #fff;
 }
 
@@ -412,7 +412,7 @@ img {
   border: 1px solid rgba(39, 36, 67, 0.14);
   border-radius: 8px;
   padding: 8px;
-  color: #272443;
+  color: #0D1726;
   font: inherit;
   font-size: 12px;
 }
@@ -434,7 +434,7 @@ img {
   border: 1px solid rgba(39, 36, 67, 0.14);
   border-radius: 999px;
   background: #fff;
-  color: #272443;
+  color: #0D1726;
   padding: 5px 10px;
   font-size: 12px;
   font-weight: 800;
@@ -462,7 +462,7 @@ img {
 }
 
 .dealett-chat-widget-title {
-  color: #272443;
+  color: #0D1726;
   font-size: 13px;
   font-weight: 900;
 }
@@ -486,7 +486,7 @@ img {
   border: 1px solid rgba(39, 36, 67, 0.14);
   border-radius: 999px;
   background: #fff;
-  color: #272443;
+  color: #0D1726;
   padding: 6px 10px;
   font-size: 12px;
   font-weight: 800;
@@ -499,8 +499,8 @@ img {
 }
 
 .dealett-chat-widget-button--primary {
-  border-color: #272443;
-  background: #272443;
+  border-color: #0D1726;
+  background: #0D1726;
   color: #fff;
 }
 
@@ -526,7 +526,7 @@ img {
   border: 1px solid rgba(39, 36, 67, 0.14);
   border-radius: 8px;
   padding: 0 9px;
-  color: #272443;
+  color: #0D1726;
   background: #fff;
   font-size: 12px;
 }
@@ -555,7 +555,7 @@ img {
 
 .dealett-chat-offer-title {
   margin: 10px 0 0;
-  color: #272443;
+  color: #0D1726;
   font-size: 15px;
   font-weight: 900;
 }
@@ -587,7 +587,7 @@ img {
   border: 1px solid rgba(39, 36, 67, 0.14);
   border-radius: 999px;
   background: #fff;
-  color: #272443;
+  color: #0D1726;
   padding: 7px 11px;
   font-size: 13px;
   cursor: pointer;
@@ -613,7 +613,7 @@ img {
   border: 1px solid rgba(39, 36, 67, 0.14);
   border-radius: 8px;
   padding: 0 12px;
-  color: #272443;
+  color: #0D1726;
   background: #fff;
 }
 
@@ -627,7 +627,7 @@ img {
   height: 44px;
   border: 0;
   border-radius: 8px;
-  background: #ef8214;
+  background: #C96F24;
   color: #fff;
   cursor: pointer;
 }
@@ -1201,7 +1201,7 @@ img {
 }
 
 .header-topbar-inner > .header-topbar-group:first-child .header-topbar-link.is-active {
-  background: linear-gradient(135deg, #ff9d2f 0%, #ef8214 52%, #dd6410 100%);
+  background: linear-gradient(135deg, #C96F24 0%, #C96F24 52%, #C96F24 100%);
   color: #fff;
   box-shadow:
     0 5px 12px rgba(239, 130, 20, 0.24),
@@ -1278,7 +1278,7 @@ img {
   height: 17px;
   padding: 0 5px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #ff9d2f 0%, #ef8214 55%, #dc6310 100%);
+  background: linear-gradient(135deg, #C96F24 0%, #C96F24 55%, #C96F24 100%);
   color: #fff;
   font-size: 10px;
   font-weight: 800;
@@ -1290,7 +1290,7 @@ img {
 
 .header-topbar-link:hover .header-cart-count,
 .header-topbar-link.is-active .header-cart-count {
-  background: linear-gradient(135deg, #ff9d2f 0%, #ef8214 55%, #dc6310 100%);
+  background: linear-gradient(135deg, #C96F24 0%, #C96F24 55%, #C96F24 100%);
   color: #fff;
 }
 
@@ -4818,7 +4818,7 @@ textarea {
   }
 
   .nav-item--active > .nav-link {
-    background: linear-gradient(135deg, #ff9d2f 0%, #ef8214 55%, #de6410 100%);
+    background: linear-gradient(135deg, #C96F24 0%, #C96F24 55%, #C96F24 100%);
   }
 
   .nav-item--start .nav-link,
@@ -5026,17 +5026,17 @@ textarea {
    Dealett 2026 visual system — editorial, expressive and product-led.
    -------------------------------------------------------------------------- */
 :root {
-  --bg: #f7f7f2;
-  --surface: #fff;
-  --text: #0b0b0b;
-  --accent: #ff5c35;
-  --accent-soft: rgba(255, 92, 53, 0.12);
-  --deal-blue: #5268ff;
-  --deal-lime: #d9ff55;
-  --deal-pink: #ffc7e8;
-  --deal-line: #161616;
+  --bg: #F8F5F0;
+  --surface: #FFFFFF;
+  --text: #0D1726;
+  --accent: #C96F24;
+  --accent-soft: rgba(201, 111, 36, 0.12);
+  --deal-blue: #0D1726;
+  --deal-lime: #F8F5F0;
+  --deal-pink: #FFFFFF;
+  --deal-line: #0D1726;
   --page-width: 1440px;
-  --shadow: 0 18px 50px rgba(14, 14, 14, 0.12);
+  --shadow: 0 18px 50px rgba(13, 23, 38, 0.12);
 }
 
 html { scroll-behavior: smooth; }
@@ -5229,7 +5229,7 @@ body {
   height: 11px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 5px rgba(255, 92, 53, 0.16);
+  box-shadow: 0 0 0 5px rgba(201, 111, 36, 0.16);
 }
 
 .hero h1 {
@@ -5253,7 +5253,7 @@ body {
 .hero .hero-lead {
   max-width: 650px;
   margin: 34px 0 0;
-  color: #202020;
+  color: #0D1726;
   font: 500 clamp(18px, 1.45vw, 22px)/1.42 Arial, sans-serif;
 }
 
@@ -5950,7 +5950,7 @@ textarea:user-valid:not(:placeholder-shown) {
 .contact-card form > button,
 .newsletter-card form > button {
   border: 0;
-  background: linear-gradient(135deg, #ff9d2f 0%, #ef8214 55%, #dc6310 100%);
+  background: linear-gradient(135deg, #C96F24 0%, #C96F24 55%, #C96F24 100%);
   color: #fff;
   box-shadow: 0 14px 30px rgba(239, 130, 20, 0.22);
   font-family: 'Roboto', sans-serif;
@@ -7182,7 +7182,7 @@ body.cart-drawer-open {
   border: 0;
   border-radius: 999px;
   padding: 0 34px;
-  background: linear-gradient(135deg, #ff9d2f 0%, #ef8214 55%, #dc6310 100%);
+  background: linear-gradient(135deg, #C96F24 0%, #C96F24 55%, #C96F24 100%);
   color: #fff;
   font-family: 'Roboto', sans-serif;
   font-size: 16px;
@@ -7632,7 +7632,7 @@ body.cart-drawer-open {
   padding: 30px;
   background: #fff;
   color: #111;
-  box-shadow: 12px 12px 0 rgba(201, 119, 46, 0.34);
+  box-shadow: 12px 12px 0 rgba(201, 111, 36, 0.34);
 }
 
 .bankid-modal__close {
@@ -7662,7 +7662,7 @@ body.cart-drawer-open {
 
 .bankid-modal__kicker {
   margin: 18px 0 0;
-  color: var(--accent, #c9772e);
+  color: var(--accent, #C96F24);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -8044,7 +8044,7 @@ body.cart-drawer-open {
   border: 1px solid rgba(39, 36, 67, 0.14);
   border-radius: 9px;
   background: #fff;
-  color: #272443;
+  color: #0D1726;
   font-family: 'Roboto', sans-serif;
   font-size: 14px;
   font-weight: 800;
@@ -8217,7 +8217,7 @@ body.has-compare-tray {
   border: none;
   border-radius: 8px;
   background: rgba(39, 36, 67, 0.06);
-  color: #272443;
+  color: #0D1726;
   cursor: pointer;
 }
 
@@ -8250,7 +8250,7 @@ body.has-compare-tray {
 .compare-clear-button {
   border: 1px solid rgba(39, 36, 67, 0.14);
   background: #fff;
-  color: #272443;
+  color: #0D1726;
 }
 
 .compare-open-button {
@@ -9370,7 +9370,7 @@ body {
   }
 
   .nav-item--active > .nav-link {
-    background: linear-gradient(135deg, #ff9d2f 0%, #ef8214 55%, #de6410 100%);
+    background: linear-gradient(135deg, #C96F24 0%, #C96F24 55%, #C96F24 100%);
   }
 
   .hero-title-nowrap {

@@ -4164,6 +4164,14 @@ body:has(.home-intro) .newsletter-section,
   color: inherit !important;
 }
 
+.home-intro .home-service-card {
+  cursor: default !important;
+}
+
+.home-intro .home-service-card:hover {
+  transform: none !important;
+}
+
 /* Header correction after the signature palette pass. */
 .site-header {
   position: absolute !important;

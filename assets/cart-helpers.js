@@ -175,7 +175,23 @@
       speed: item.speed || null,
       speedMbps: Number(item.speedMbps) || 0,
       price,
-      monthlyPrice: price,
+      monthlyPrice: Math.max(Number(item.monthlyPrice ?? price) || 0, 0),
+      regularMonthlyPrice: Math.max(Number(
+        item.regularMonthlyPrice ?? item.normalPriceAfterCampaign ?? item.monthlyPrice ?? price
+      ) || 0, 0),
+      campaignPrice: item.campaignPrice === null || item.campaignPrice === undefined
+        ? null
+        : Math.max(Number(item.campaignPrice) || 0, 0),
+      campaignMonths: Math.max(Number(item.campaignMonths) || 0, 0),
+      campaignDiscount: Math.max(Number(item.campaignDiscount) || 0, 0),
+      bindingMonths: Math.max(Number(item.bindingMonths) || 0, 0),
+      noticePeriodMonths: Math.max(Number(item.noticePeriodMonths) || 0, 0),
+      startFee: Math.max(Number(item.startFee) || 0, 0),
+      invoiceFee: Math.max(Number(item.invoiceFee) || 0, 0),
+      invoiceFeeOptional: item.invoiceFeeOptional !== false,
+      minimumTotalCost: Math.max(Number(item.minimumTotalCost) || 0, 0),
+      deliveryType: item.deliveryType || null,
+      operatorDocuments: item.operatorDocuments || null,
       pricePerPerson: Number(item.pricePerPerson) || (persons > 1 ? Math.round(price / persons) : 0),
       persons,
       phoneLines: getPhoneLines({ ...item, productType, persons }),

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="./images/favicon.svg" type="image/svg+xml" />
+  <title>Dealett - Leverans och bekräftelse</title>
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="styles-redesign.css" />
+  <link rel="stylesheet" href="styles-editorial.css" />
+  <link rel="stylesheet" href="./assets/bestallning.css" />
+</head>
+<body class="bestallning-page">
+  <div data-include="header"></div>
+
+  <main class="checkout-page" id="mainContent">
+    <div class="checkout-layout">
+      <aside class="checkout-summary-panel" aria-labelledby="summaryTitle">
+        <div class="checkout-summary-sticky">
+          <button
+            class="checkout-summary-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="checkoutSummaryContent"
+          >
+            <span>
+              <span>Sammanställning</span>
+              <strong id="mobileSummaryPrice">0 kr/mån</strong>
+            </span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+
+          <div class="checkout-summary-content" id="checkoutSummaryContent">
+            <h2 id="summaryTitle">Sammanställning</h2>
+            <div id="orderSummary" aria-live="polite"></div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="checkout-main-column" aria-labelledby="checkoutTitle">
+        <div class="checkout-main-inner">
+          <nav class="checkout-progress" aria-label="Beställningssteg">
+            <a class="checkout-back-link" href="varukorg.html" aria-label="Gå tillbaka till nummerhantering">
+              <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+            </a>
+            <span class="checkout-progress-complete">
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+              Nummerhantering
+            </span>
+            <span class="checkout-progress-current" aria-current="step">
+              <strong>2</strong>
+              Leverans och bekräftelse
+            </span>
+          </nav>
+
+          <header class="checkout-heading">
+            <h1 id="checkoutTitle">Leverans och bekräftelse</h1>
+            <p>Kontrollera dina uppgifter, avtal och villkor innan du slutför beställningen.</p>
+          </header>
+
+          <form id="checkoutForm" novalidate>
+            <section class="checkout-card contact-information" aria-labelledby="contactTitle">
+              <h2 id="contactTitle">Ange dina kontaktuppgifter</h2>
+
+              <div class="checkout-field-grid">
+                <div class="checkout-field" data-field-wrap="email">
+                  <label for="checkoutEmail">Mejladress</label>
+                  <div class="checkout-input-wrap">
+                    <input
+                      id="checkoutEmail"
+                      name="email"
+                      type="email"
+                      autocomplete="email"
+                      inputmode="email"
+                      aria-describedby="emailError"
+                      required
+                    />
+                    <span class="checkout-valid-mark" aria-hidden="true">
+                      <i class="fa-solid fa-check"></i>
+                    </span>
+                  </div>
+                  <p class="checkout-field-error" id="emailError"></p>
+                </div>
+
+                <div class="checkout-field" data-field-wrap="phone">
+                  <label for="checkoutPhone">Mobilnummer</label>
+                  <div class="checkout-input-wrap">
+                    <input
+                      id="checkoutPhone"
+                      name="phone"
+                      type="tel"
+                      autocomplete="tel"
+                      inputmode="tel"
+                      aria-describedby="phoneError"
+                      required
+                    />
+                    <span class="checkout-valid-mark" aria-hidden="true">
+                      <i class="fa-solid fa-check"></i>
+                    </span>
+                  </div>
+                  <p class="checkout-field-error" id="phoneError"></p>
+                </div>
+              </div>
+
+              <p class="checkout-info-row">
+                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                <span>Mejladressen används för orderbekräftelsen och mobilnumret för aviseringar om beställningen.</span>
+              </p>
+            </section>
+
+            <section class="checkout-card" aria-labelledby="deliveryTitle">
+              <h2 id="deliveryTitle">Leverans</h2>
+              <div id="deliveryDetails"></div>
+
+              <hr />
+
+              <h3>Betalning</h3>
+              <div id="paymentDetails"></div>
+            </section>
+
+            <section class="checkout-card checkout-gift-section" id="giftCardSection" aria-labelledby="giftCardTitle">
+              <h2 id="giftCardTitle">Ditt presentkort</h2>
+              <div id="giftCardDetails"></div>
+            </section>
+
+            <section class="checkout-card checkout-conditions" aria-labelledby="conditionsTitle">
+              <h2 id="conditionsTitle">Villkor</h2>
+              <div id="conditionsIntro"></div>
+              <nav class="checkout-document-list" id="conditionDocuments" aria-label="Villkor och köpinformation"></nav>
+            </section>
+
+            <section class="checkout-card agreement-card" aria-labelledby="agreementTitle">
+              <h2 id="agreementTitle">Avtal</h2>
+              <p>Innan du går vidare ber vi dig läsa igenom avtalen och bekräfta att du har tagit del av informationen.</p>
+
+              <div class="agreement-actions" id="agreementActions"></div>
+              <p class="document-status" id="documentStatus" role="status" aria-live="polite"></p>
+
+              <fieldset class="agreement-confirmations">
+                <legend class="visually-hidden">Obligatoriska bekräftelser</legend>
+
+                <label class="agreement-checkbox">
+                  <input type="checkbox" name="operatorAgreement" data-required-confirmation />
+                  <span id="operatorAgreementLabel"></span>
+                </label>
+
+                <label class="agreement-checkbox">
+                  <input type="checkbox" name="dealettTerms" data-required-confirmation />
+                  <span>Jag accepterar Dealetts förmedlings- och presentkortsvillkor.</span>
+                </label>
+
+                <label class="agreement-checkbox">
+                  <input type="checkbox" name="withdrawalInformation" data-required-confirmation />
+                  <span id="withdrawalLabel"></span>
+                </label>
+
+                <label class="agreement-checkbox agreement-checkbox--privacy">
+                  <input type="checkbox" name="privacyPolicy" data-required-confirmation />
+                  <span>Jag har tagit del av Dealetts integritetspolicy.</span>
+                </label>
+              </fieldset>
+
+              <div class="marketing-consent">
+                <p>Håll mig gärna uppdaterad</p>
+                <label class="agreement-checkbox agreement-checkbox--optional">
+                  <input type="checkbox" name="marketingConsent" />
+                  <span>Ja tack, jag vill få erbjudanden och nyheter från Dealett via e-post och sms. Jag kan när som helst återkalla mitt samtycke.</span>
+                </label>
+              </div>
+            </section>
+
+            <div class="checkout-action-row">
+              <a class="checkout-secondary-button" href="varukorg.html">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                Gå tillbaka
+              </a>
+
+              <div class="checkout-submit-group">
+                <p id="paymentObligation"></p>
+                <button class="checkout-primary-button" id="submitOrderButton" type="submit" disabled>
+                  <span class="checkout-button-spinner" aria-hidden="true"></span>
+                  <i class="fa-solid fa-shield-halved checkout-button-icon" aria-hidden="true"></i>
+                  <span data-submit-label>Godkänn och beställ med BankID</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="checkout-form-message" id="checkoutMessage" role="alert" aria-live="assertive" tabindex="-1"></div>
+          </form>
+
+          <section class="checkout-result" id="checkoutResult" hidden aria-labelledby="checkoutResultTitle">
+            <p class="checkout-result-kicker" id="checkoutResultKicker"></p>
+            <h2 id="checkoutResultTitle"></h2>
+            <p id="checkoutResultText"></p>
+            <div class="checkout-result-actions">
+              <a href="account.html" class="checkout-primary-button">Till Mina sidor</a>
+              <a href="kontakt.html" class="checkout-text-link">Kontakta Dealett</a>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div data-include="footer"></div>
+
+  <dialog class="document-dialog" id="documentDialog" aria-labelledby="documentDialogTitle">
+    <div class="document-dialog-header">
+      <div>
+        <p>Avtalsdokument</p>
+        <h2 id="documentDialogTitle">Dokument</h2>
+      </div>
+      <button type="button" class="document-dialog-close" data-close-document aria-label="Stäng dokumentet">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="document-dialog-actions">
+      <a href="#" target="_blank" rel="noopener" data-document-new-tab>
+        <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+        Öppna i ny flik
+      </a>
+      <a href="#" download data-document-download>
+        <i class="fa-solid fa-download" aria-hidden="true"></i>
+        Ladda ner dokumentet
+      </a>
+    </div>
+    <div class="document-dialog-viewer">
+      <iframe title="Förhandsvisning av avtalsdokument" data-document-frame></iframe>
+    </div>
+  </dialog>
+
+  <script src="./assets/cart-helpers.js"></script>
+  <script src="./assets/network-utils.js"></script>
+  <script src="./assets/bankid.js"></script>
+  <script src="script.js"></script>
+  <script src="./assets/bestallning.js"></script>
+</body>
+</html>

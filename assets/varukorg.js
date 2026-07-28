@@ -496,7 +496,6 @@
     cart.splice(index, 1);
     syncStoredCart();
     renderCartSummary();
-    renderTermsReview();
     updateSignButtonState();
     refreshCheckoutAfterCartChange();
   };
@@ -739,17 +738,12 @@
   };
 
   const updateSignButtonState = () => {
-    if (!els.goToSignBtn || signingComplete) return;
+    if (!els.goToSignBtn) return;
 
-    const canSign = areLegalConsentsAccepted();
-    els.goToSignBtn.disabled = !canSign;
-    els.goToSignBtn.textContent = canSign
-      ? 'Godk\u00e4nn och best\u00e4ll med BankID'
-      : 'Godk\u00e4nn villkoren f\u00f6rst';
-
-    if (canSign && els.signMessage?.textContent === 'Kryssa i villkoren f\u00f6r att forts\u00e4tta till BankID.') {
-      showMessage(els.signMessage, '');
-    }
+    els.goToSignBtn.disabled = !selectedStartDate;
+    els.goToSignBtn.textContent = selectedStartDate
+      ? 'Forts\u00e4tt till granskning'
+      : 'V\u00e4lj startdatum f\u00f6rst';
   };
 
   const getContact = () => ({
@@ -764,7 +758,6 @@
       cart,
       contact: getContact(),
       startDate: selectedStartDate,
-      legalAcceptance: getLegalAcceptance(),
       updatedAt: new Date().toISOString(),
       ...extra
     });
@@ -868,72 +861,20 @@
   };
 
   const handleSignContinue = () => {
-    if (!areLegalConsentsAccepted()) {
-      showMessage(els.signMessage, 'Kryssa i villkoren f\u00f6r att forts\u00e4tta till BankID.');
-      els.termsReviewContainer?.querySelector('[data-legal-consent]:not(:checked)')?.focus();
-      updateSignButtonState();
-      return;
-    }
-
     if (!selectedStartDate) {
-      showMessage(els.signMessage, 'V\u00e4lj startdatum innan signering.');
+      showMessage(els.signMessage, 'V\u00e4lj startdatum innan du forts\u00e4tter.');
       if (els.startDateOptions?.querySelector('input[name="startDate"][value="custom"]')?.checked) {
         els.startDateOptions.querySelector('[data-custom-start-date]')?.focus();
       }
       return;
     }
 
-    saveCheckout({ readyForSigning: true, legalAcceptance: getLegalAcceptance(new Date().toISOString()) });
-
-    if (!window.DealettBankId?.open) {
-      saveSignedPurchase({});
-      showMessage(els.signMessage, 'Best\u00e4llningen \u00e4r signerad och sparad.');
-      signingComplete = true;
-      if (els.goToSignBtn) {
-        els.goToSignBtn.disabled = true;
-        els.goToSignBtn.textContent = 'Signerad med BankID';
-      }
-      return;
-    }
-
-    if (els.goToSignBtn) els.goToSignBtn.disabled = true;
-    showMessage(els.signMessage, 'Startar BankID...');
-
-    const totals = window.DealettCart?.getTotals(cart) || {
-      price: cart.reduce((sum, item) => sum + Math.max(Number(item.price) || 0, 0), 0),
-      reward: cart.reduce((sum, item) => sum + Math.max(Number(item.rewardTotal) || 0, 0), 0),
-    };
-
-    window.DealettBankId.open({
-      intent: 'sign',
-      title: 'Signera best\u00e4llningen',
-      description: 'Kontrollera uppgifterna i BankID och signera f\u00f6r att slutf\u00f6ra k\u00f6pet.',
-      userVisibleData: `Dealett best\u00e4llning: ${cart.length} val, ${formatCurrency(totals.price)} kr/m\u00e5n, start ${selectedStartDate}.`,
-      payload: {
-        cart,
-        contact: getContact(),
-        startDate: selectedStartDate,
-        totals,
-        legalAcceptance: getLegalAcceptance(new Date().toISOString()),
-      },
-      onComplete(result) {
-        saveSignedPurchase(result);
-        showMessage(els.signMessage, 'Best\u00e4llningen \u00e4r signerad med BankID och sparad p\u00e5 Mina sidor.');
-        signingComplete = true;
-        if (els.goToSignBtn) {
-          els.goToSignBtn.disabled = true;
-          els.goToSignBtn.textContent = 'Signerad med BankID';
-        }
-      },
-      onCancel() {
-        updateSignButtonState();
-        showMessage(els.signMessage, 'Signeringen avbr\u00f6ts. Du kan starta BankID igen.');
-      },
-      onError() {
-        updateSignButtonState();
-        showMessage(els.signMessage, 'BankID kunde inte slutf\u00f6ras. F\u00f6rs\u00f6k igen.');
-      },
+    saveCheckout({
+      readyForReview: true,
+      readyForSigning: false,
+      legalAcceptance: null,
     });
+    window.location.assign('bestallning.html');
   };
 
   const bindEvents = () => {
@@ -948,17 +889,11 @@
     els.confirmNumbersBtn?.addEventListener('click', handleConfirmNumbers);
     els.goToSignBtn?.addEventListener('click', handleSignContinue);
 
-    els.termsReviewContainer?.addEventListener('change', (event) => {
-      if (!event.target.matches('[data-legal-consent]')) return;
-
-      saveCheckout();
-      updateSignButtonState();
-    });
-
     els.startDateOptions?.addEventListener('change', (event) => {
       if (event.target.name === 'startDate') {
         updateStartDate(event.target.value);
         saveCheckout();
+        updateSignButtonState();
       }
     });
 
@@ -968,6 +903,7 @@
         if (customRadio) customRadio.checked = true;
         updateStartDate('custom');
         saveCheckout();
+        updateSignButtonState();
       }
     });
   };
@@ -977,7 +913,6 @@
     window.DEALETT_updateCartCount?.();
     renderCartSummary();
     renderStartDates();
-    renderTermsReview();
     updateSignButtonState();
     bindEvents();
   };

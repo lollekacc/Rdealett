@@ -557,19 +557,7 @@
   margin: 0;
 }
 
-.checkout-conditions > div > p {
-  margin: 0 0 8px;
-}
-
-.checkout-document-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 22px;
-  margin-top: 18px;
-}
-
-.checkout-document-list a,
-.agreement-document-link,
+.agreement-inline-link,
 .checkout-text-link,
 .document-dialog-actions a {
   color: var(--checkout-orange-dark);
@@ -579,44 +567,17 @@
   text-underline-offset: 3px;
 }
 
-.checkout-document-list a {
-  display: inline-flex;
-  gap: 8px;
-  align-items: flex-start;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.checkout-document-list a i {
-  margin-top: 3px;
-  font-size: 12px;
-}
-
 .agreement-card > p {
   margin: -5px 0 18px;
 }
 
-.agreement-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+.agreement-inline-link:hover {
+  color: var(--checkout-orange);
 }
 
-.agreement-document-link {
-  display: inline-flex;
-  min-height: 44px;
-  gap: 10px;
-  align-items: center;
-  padding: 9px 14px;
-  border: 1px solid #d7b28e;
-  border-radius: 10px;
-  background: #fffaf4;
-  text-decoration: none;
-}
-
-.agreement-document-link:hover {
-  border-color: var(--checkout-orange);
-  background: #fff5e9;
+.agreement-checkbox .agreement-inline-missing {
+  color: var(--checkout-error);
+  font-weight: 650;
 }
 
 .document-status {
@@ -935,8 +896,7 @@
 .checkout-secondary-button:focus-visible,
 .checkout-back-link:focus-visible,
 .checkout-summary-toggle:focus-visible,
-.agreement-document-link:focus-visible,
-.checkout-document-list a:focus-visible,
+.agreement-inline-link:focus-visible,
 .agreement-checkbox:has(input:focus-visible),
 .document-dialog-close:focus-visible,
 .document-dialog-actions a:focus-visible {
@@ -1063,9 +1023,6 @@
     font-size: 34px;
   }
 
-  .checkout-document-list {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 680px) {
@@ -1105,14 +1062,6 @@
   .checkout-field-grid {
     grid-template-columns: 1fr;
     gap: 8px;
-  }
-
-  .agreement-actions {
-    display: grid;
-  }
-
-  .agreement-document-link {
-    width: 100%;
   }
 
   .gift-card-heading {

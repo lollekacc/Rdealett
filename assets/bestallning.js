@@ -16,11 +16,10 @@
     paymentDetails: document.querySelector('#paymentDetails'),
     giftCardSection: document.querySelector('#giftCardSection'),
     giftCardDetails: document.querySelector('#giftCardDetails'),
-    conditionsIntro: document.querySelector('#conditionsIntro'),
-    conditionDocuments: document.querySelector('#conditionDocuments'),
-    agreementActions: document.querySelector('#agreementActions'),
     operatorAgreementLabel: document.querySelector('#operatorAgreementLabel'),
+    dealettTermsLabel: document.querySelector('#dealettTermsLabel'),
     withdrawalLabel: document.querySelector('#withdrawalLabel'),
+    privacyPolicyLabel: document.querySelector('#privacyPolicyLabel'),
     documentStatus: document.querySelector('#documentStatus'),
     paymentObligation: document.querySelector('#paymentObligation'),
     submitButton: document.querySelector('#submitOrderButton'),
@@ -465,71 +464,78 @@
     ].join('');
   };
 
-  const linkMarkup = ({ title, url, viewer = false, download = false }) => {
+  const inlineDocumentLink = ({ title, label = title, url, viewer = false }) => {
     if (!url) {
-      return `<span class="document-link-missing">${escapeHtml(title)} saknas</span>`;
+      return `<span class="agreement-inline-missing">${escapeHtml(label)} saknas</span>`;
     }
 
     const attributes = viewer
       ? `data-document-view data-document-title="${escapeHtml(title)}"`
       : 'target="_blank" rel="noopener"';
-    const downloadAttribute = download ? ' data-document-downloadable="true"' : '';
 
-    return [
-      `<a href="${escapeHtml(url)}" ${attributes}${downloadAttribute}>`,
-      '  <i class="fa-solid fa-file-lines" aria-hidden="true"></i>',
-      `  <span>${escapeHtml(title)}</span>`,
-      '</a>',
-    ].join('');
+    return `<a class="agreement-inline-link" href="${escapeHtml(url)}" ${attributes}>${escapeHtml(label)}</a>`;
   };
 
   const renderLegalSections = () => {
     const operatorName = order.operator || 'operatören';
 
-    els.conditionsIntro.innerHTML = [
-      `<p>Genom att slutföra beställningen bekräftar du att du har tagit del av ${escapeHtml(operatorName)}s avtalssammanfattning, abonnemangsvillkor och prislista.</p>`,
-      '<p>Du accepterar även Dealetts förmedlings- och presentkortsvillkor.</p>',
-    ].join('');
-
-    const conditionLinks = [
-      {
-        title: 'Operatörens avtalssammanfattning',
+    els.operatorAgreementLabel.innerHTML = [
+      'Jag har tagit del av ',
+      inlineDocumentLink({
+        title: `${operatorName}s avtalssammanfattning`,
+        label: `${operatorName}s avtalssammanfattning`,
         url: operatorDocuments.agreementSummaryUrl,
         viewer: true,
-        download: true,
-      },
-      { title: 'Operatörens allmänna villkor', url: operatorDocuments.generalTermsUrl },
-      { title: 'Operatörens särskilda villkor', url: operatorDocuments.specialTermsUrl },
-      { title: 'Operatörens prislista', url: operatorDocuments.priceListUrl },
-      {
+      }),
+      ' samt ',
+      inlineDocumentLink({
+        title: `${operatorName}s allmänna villkor`,
+        label: 'allmänna villkor',
+        url: operatorDocuments.generalTermsUrl,
+      }),
+      ', ',
+      inlineDocumentLink({
+        title: `${operatorName}s särskilda villkor`,
+        label: 'särskilda villkor',
+        url: operatorDocuments.specialTermsUrl,
+      }),
+      ' och ',
+      inlineDocumentLink({
+        title: `${operatorName}s prislista`,
+        label: 'prislista',
+        url: operatorDocuments.priceListUrl,
+      }),
+      ` och vill ingå abonnemangsavtalet med ${escapeHtml(operatorName)}.`,
+    ].join('');
+
+    els.dealettTermsLabel.innerHTML = [
+      'Jag accepterar ',
+      inlineDocumentLink({
         title: 'Dealetts förmedlings- och presentkortsvillkor',
         url: dealettDocuments.mediationAndGiftCardTermsUrl,
-      },
-      { title: 'Dealetts integritetspolicy', url: dealettDocuments.privacyPolicyUrl },
-      {
-        title: 'Information om ångerrätt',
-        url: dealettDocuments.withdrawalInformationUrl,
-      },
-    ];
-
-    els.conditionDocuments.innerHTML = conditionLinks.map(linkMarkup).join('');
-    els.agreementActions.innerHTML = [
-      linkMarkup({
-        title: 'Läs operatörens avtal',
-        url: operatorDocuments.agreementSummaryUrl,
-        viewer: true,
-        download: true,
-      }).replace('<a ', '<a class="agreement-document-link" '),
-      linkMarkup({
-        title: 'Läs Dealetts villkor',
-        url: dealettDocuments.mediationAndGiftCardTermsUrl,
-      }).replace('<a ', '<a class="agreement-document-link" '),
+      }),
+      '.',
     ].join('');
 
-    els.operatorAgreementLabel.textContent =
-      `Jag har tagit del av ${operatorName}s avtalssammanfattning och abonnemangsvillkor och vill ingå abonnemangsavtalet med ${operatorName}.`;
-    els.withdrawalLabel.textContent =
-      `Jag har tagit del av informationen om ångerrätt och förstår att ångerrätten för abonnemanget utövas gentemot ${operatorName}.`;
+    els.withdrawalLabel.innerHTML = [
+      'Jag har tagit del av ',
+      inlineDocumentLink({
+        title: 'Information om ångerrätt',
+        label: 'informationen om ångerrätt',
+        url: dealettDocuments.withdrawalInformationUrl,
+      }),
+      ` och förstår att ångerrätten för abonnemanget utövas gentemot ${escapeHtml(operatorName)}.`,
+    ].join('');
+
+    els.privacyPolicyLabel.innerHTML = [
+      'Jag har tagit del av ',
+      inlineDocumentLink({
+        title: 'Dealetts integritetspolicy',
+        url: dealettDocuments.privacyPolicyUrl,
+      }),
+      '.',
+    ].join('');
+
     els.paymentObligation.textContent =
       `Beställningen innebär betalningsskyldighet gentemot ${operatorName}.`;
   };

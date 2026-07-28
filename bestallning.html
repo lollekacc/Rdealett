@@ -125,17 +125,10 @@
               <div id="giftCardDetails"></div>
             </section>
 
-            <section class="checkout-card checkout-conditions" aria-labelledby="conditionsTitle">
-              <h2 id="conditionsTitle">Villkor</h2>
-              <div id="conditionsIntro"></div>
-              <nav class="checkout-document-list" id="conditionDocuments" aria-label="Villkor och köpinformation"></nav>
-            </section>
-
             <section class="checkout-card agreement-card" aria-labelledby="agreementTitle">
               <h2 id="agreementTitle">Avtal</h2>
-              <p>Innan du går vidare ber vi dig läsa igenom avtalen och bekräfta att du har tagit del av informationen.</p>
+              <p>Läs dokumenten via de markerade länkarna och bekräfta sedan att du har tagit del av informationen.</p>
 
-              <div class="agreement-actions" id="agreementActions"></div>
               <p class="document-status" id="documentStatus" role="status" aria-live="polite"></p>
 
               <fieldset class="agreement-confirmations">
@@ -148,7 +141,7 @@
 
                 <label class="agreement-checkbox">
                   <input type="checkbox" name="dealettTerms" data-required-confirmation />
-                  <span>Jag accepterar Dealetts förmedlings- och presentkortsvillkor.</span>
+                  <span id="dealettTermsLabel"></span>
                 </label>
 
                 <label class="agreement-checkbox">
@@ -158,7 +151,7 @@
 
                 <label class="agreement-checkbox agreement-checkbox--privacy">
                   <input type="checkbox" name="privacyPolicy" data-required-confirmation />
-                  <span>Jag har tagit del av Dealetts integritetspolicy.</span>
+                  <span id="privacyPolicyLabel"></span>
                 </label>
               </fieldset>
 

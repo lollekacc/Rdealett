@@ -261,6 +261,34 @@ const main = async () => {
       });
     }
 
+    await test('legal documents are linked directly in the agreement confirmations', async () => {
+      const page = await createPage(debugBase);
+      const state = await page.evaluate(`(() => {
+        const links = [...document.querySelectorAll('.agreement-confirmations .agreement-inline-link')];
+        const linkColor = links[0] ? getComputedStyle(links[0]).color : '';
+        const copyColor = getComputedStyle(document.querySelector('#operatorAgreementLabel')).color;
+        return {
+          hasDuplicateConditionsSection: Boolean(document.querySelector('#conditionsTitle')),
+          hasDuplicateAgreementActions: Boolean(document.querySelector('#agreementActions')),
+          linkCount: links.length,
+          linkText: links.map((link) => link.textContent.trim()),
+          linkColor,
+          copyColor,
+        };
+      })()`);
+      assert(!state.hasDuplicateConditionsSection, 'The duplicate conditions section still exists.');
+      assert(!state.hasDuplicateAgreementActions, 'The duplicate agreement action links still exist.');
+      assert(state.linkCount === 7, `Expected 7 inline legal links, got ${state.linkCount}.`);
+      assert(
+        state.linkText.includes('Dealetts förmedlings- och presentkortsvillkor') &&
+        state.linkText.includes('Dealetts integritetspolicy') &&
+        state.linkText.includes('informationen om ångerrätt'),
+        'One or more legal documents are not linked from their confirmation text.'
+      );
+      assert(state.linkColor !== state.copyColor, 'Legal links are not visually distinguished from the surrounding text.');
+      return page;
+    });
+
     await test('operator PDF opens in the accessible viewer', async () => {
       const page = await createPage(debugBase);
       const state = await page.evaluate(`(() => {
@@ -271,11 +299,13 @@ const main = async () => {
           frame: dialog.querySelector('iframe').getAttribute('src'),
           newTab: dialog.querySelector('[data-document-new-tab]').getAttribute('href'),
           download: dialog.querySelector('[data-document-download]').getAttribute('href'),
+          confirmationChecked: document.querySelector('input[name="operatorAgreement"]').checked,
         };
       })()`);
       assert(state.open, 'The document dialog did not open.');
       assert(state.frame.endsWith('.pdf'), 'The PDF was not loaded in the viewer.');
       assert(state.newTab === state.download, 'Document actions do not point to the same original PDF.');
+      assert(!state.confirmationChecked, 'Opening a document incorrectly accepted the agreement.');
       return page;
     });
 

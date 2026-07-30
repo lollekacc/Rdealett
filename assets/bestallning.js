@@ -32,7 +32,6 @@
     documentDialog: document.querySelector('#documentDialog'),
     documentDialogTitle: document.querySelector('#documentDialogTitle'),
     documentFrame: document.querySelector('[data-document-frame]'),
-    documentNewTab: document.querySelector('[data-document-new-tab]'),
     documentDownload: document.querySelector('[data-document-download]'),
   };
 
@@ -464,16 +463,16 @@
     ].join('');
   };
 
-  const inlineDocumentLink = ({ title, label = title, url, viewer = false }) => {
+  const inlineDocumentLink = ({ title, label = title, url }) => {
     if (!url) {
       return `<span class="agreement-inline-missing">${escapeHtml(label)} saknas</span>`;
     }
 
-    const attributes = viewer
-      ? `data-document-view data-document-title="${escapeHtml(title)}"`
-      : 'target="_blank" rel="noopener"';
-
-    return `<a class="agreement-inline-link" href="${escapeHtml(url)}" ${attributes}>${escapeHtml(label)}</a>`;
+    return [
+      `<a class="agreement-inline-link" href="${escapeHtml(url)}"`,
+      ` data-document-view data-document-title="${escapeHtml(title)}">`,
+      `${escapeHtml(label)}</a>`,
+    ].join('');
   };
 
   const renderLegalSections = () => {
@@ -485,7 +484,6 @@
         title: `${operatorName}s avtalssammanfattning`,
         label: `${operatorName}s avtalssammanfattning`,
         url: operatorDocuments.agreementSummaryUrl,
-        viewer: true,
       }),
       ' samt ',
       inlineDocumentLink({
@@ -955,9 +953,8 @@
 
     els.documentDialogTitle.textContent = link.dataset.documentTitle || 'Avtalsdokument';
     els.documentFrame.src = url;
-    els.documentNewTab.href = url;
     els.documentDownload.href = url;
-    els.documentDownload.toggleAttribute('download', isLocalDocument(url));
+    els.documentDownload.hidden = !isLocalDocument(url);
 
     if (typeof els.documentDialog.showModal === 'function') {
       els.documentDialog.showModal();

@@ -154,6 +154,10 @@ const runViewport = async (debugBase, viewport) => {
     await capture(page, `${viewport.name}-middle.png`);
     await scrollTo(page, '#agreementTitle');
     await capture(page, `${viewport.name}-agreement.png`);
+    await page.evaluate(`document.querySelector('#dealettTermsLabel .agreement-inline-link')?.click()`);
+    await delay(200);
+    await capture(page, `${viewport.name}-document-popup.png`);
+    await page.evaluate(`document.querySelector('[data-close-document]')?.click()`);
   }
 
   if (viewport.width === 390) {
@@ -163,6 +167,10 @@ const runViewport = async (debugBase, viewport) => {
     await page.evaluate(`document.querySelector('.checkout-summary-toggle')?.click()`);
     await scrollTo(page, '#agreementTitle');
     await capture(page, `${viewport.name}-agreement.png`);
+    await page.evaluate(`document.querySelector('#dealettTermsLabel .agreement-inline-link')?.click()`);
+    await delay(200);
+    await capture(page, `${viewport.name}-document-popup.png`);
+    await page.evaluate(`document.querySelector('[data-close-document]')?.click()`);
     await scrollTo(page, '#paymentObligation');
     await capture(page, `${viewport.name}-final-action.png`);
   }

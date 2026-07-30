@@ -557,6 +557,10 @@
   margin: 0;
 }
 
+.legal-document-page .dealett-chat {
+  display: none;
+}
+
 .agreement-inline-link,
 .checkout-text-link,
 .document-dialog-actions a {
@@ -1026,6 +1030,10 @@
 }
 
 @media (max-width: 680px) {
+  .bestallning-page .dealett-chat {
+    display: none;
+  }
+
   .checkout-main-inner {
     padding: 24px 16px 48px;
   }
@@ -1105,6 +1113,8 @@
   }
 
   .document-dialog {
+    position: fixed;
+    inset: 0;
     width: 100vw;
     height: 100dvh;
     max-width: none;

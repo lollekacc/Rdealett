@@ -272,6 +272,8 @@ const main = async () => {
           hasDuplicateAgreementActions: Boolean(document.querySelector('#agreementActions')),
           linkCount: links.length,
           linkText: links.map((link) => link.textContent.trim()),
+          popupLinkCount: links.filter((link) => link.hasAttribute('data-document-view')).length,
+          newTabLinkCount: links.filter((link) => link.hasAttribute('target')).length,
           linkColor,
           copyColor,
         };
@@ -285,6 +287,8 @@ const main = async () => {
         state.linkText.includes('informationen om ångerrätt'),
         'One or more legal documents are not linked from their confirmation text.'
       );
+      assert(state.popupLinkCount === state.linkCount, 'One or more legal links do not use the same-page popup.');
+      assert(state.newTabLinkCount === 0, 'A legal link still opens directly in a new tab.');
       assert(state.linkColor !== state.copyColor, 'Legal links are not visually distinguished from the surrounding text.');
       return page;
     });
@@ -297,15 +301,36 @@ const main = async () => {
         return {
           open: dialog.open,
           frame: dialog.querySelector('iframe').getAttribute('src'),
-          newTab: dialog.querySelector('[data-document-new-tab]').getAttribute('href'),
           download: dialog.querySelector('[data-document-download]').getAttribute('href'),
+          hasNewTabAction: Boolean(dialog.querySelector('[data-document-new-tab]')),
           confirmationChecked: document.querySelector('input[name="operatorAgreement"]').checked,
         };
       })()`);
       assert(state.open, 'The document dialog did not open.');
       assert(state.frame.endsWith('.pdf'), 'The PDF was not loaded in the viewer.');
-      assert(state.newTab === state.download, 'Document actions do not point to the same original PDF.');
+      assert(state.download === state.frame, 'The download action does not point to the original PDF.');
+      assert(!state.hasNewTabAction, 'The popup still offers a new-tab action.');
       assert(!state.confirmationChecked, 'Opening a document incorrectly accepted the agreement.');
+      return page;
+    });
+
+    await test('Dealett terms open in the same-page document popup', async () => {
+      const page = await createPage(debugBase);
+      const state = await page.evaluate(`(() => {
+        const link = document.querySelector('#dealettTermsLabel .agreement-inline-link');
+        link.click();
+        const dialog = document.querySelector('#documentDialog');
+        return {
+          open: dialog.open,
+          frame: dialog.querySelector('iframe').getAttribute('src'),
+          title: document.querySelector('#documentDialogTitle').textContent,
+          confirmationChecked: document.querySelector('input[name="dealettTerms"]').checked,
+        };
+      })()`);
+      assert(state.open, 'The same-page document popup did not open.');
+      assert(state.frame.endsWith('villkor.html'), 'The popup did not load Dealett terms.');
+      assert(state.title.includes('Dealetts förmedlings- och presentkortsvillkor'), 'The popup title is wrong.');
+      assert(!state.confirmationChecked, 'Opening Dealett terms incorrectly accepted the agreement.');
       return page;
     });
 

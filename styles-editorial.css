@@ -4335,6 +4335,11 @@ body:has(.home-intro) .newsletter-section,
   font: 500 14px/1 Arial, Helvetica, sans-serif !important;
 }
 
+.site-header .language-switcher select {
+  width: 124px !important;
+  padding-inline: 4px !important;
+}
+
 .site-header .header-account-link {
   padding: 0 0 4px !important;
   border-bottom: 1px solid #C96F24 !important;
@@ -4364,6 +4369,15 @@ body:has(.home-intro) .newsletter-section,
   border: 0 !important;
   color: #0D1726 !important;
   box-shadow: none !important;
+}
+
+html[dir="rtl"] .site-header .header-inner {
+  direction: ltr;
+}
+
+html[dir="rtl"] .site-header .site-nav,
+html[dir="rtl"] .site-header .header-topbar-group--right {
+  direction: rtl;
 }
 
 @media (max-width: 900px) {

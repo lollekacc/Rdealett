@@ -5,15 +5,125 @@
   };
 
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  const supportedLanguages = ['sv', 'en', 'ar', 'so', 'fa'];
-  const rtlLanguages = new Set(['ar', 'fa']);
+  const languageCatalog = [
+    ['sv', 'Svenska'],
+    ['en', 'English'],
+    ['ar', 'العربية'],
+    ['so', 'Soomaali'],
+    ['fa', 'فارسی'],
+    ['fi', 'Suomi'],
+    ['de', 'Deutsch'],
+    ['fr', 'Français'],
+    ['es', 'Español'],
+    ['pl', 'Polski'],
+    ['uk', 'Українська'],
+    ['ru', 'Русский'],
+    ['tr', 'Türkçe'],
+    ['ku', 'Kurdî'],
+    ['ti', 'ትግርኛ'],
+    ['am', 'አማርኛ'],
+    ['da', 'Dansk'],
+    ['no', 'Norsk'],
+    ['nl', 'Nederlands'],
+    ['it', 'Italiano'],
+    ['pt', 'Português'],
+    ['ro', 'Română'],
+    ['cs', 'Čeština'],
+    ['hu', 'Magyar'],
+    ['el', 'Ελληνικά'],
+    ['he', 'עברית'],
+    ['ur', 'اردو'],
+    ['hi', 'हिन्दी'],
+    ['bn', 'বাংলা'],
+    ['zh', '中文'],
+    ['ja', '日本語'],
+    ['ko', '한국어'],
+    ['th', 'ไทย'],
+    ['vi', 'Tiếng Việt'],
+  ];
+  const supportedLanguages = languageCatalog.map(([code]) => code);
+  const primaryLanguages = new Set(['sv', 'en', 'ar', 'so', 'fa']);
+  const rtlLanguages = new Set(['ar', 'fa', 'he', 'ur']);
+  const preservedExactTexts = new Set([
+    'Amazon Prime',
+    'Apollo',
+    'Apple',
+    'BankID',
+    'Dealett',
+    'Disney+',
+    'Elgiganten',
+    'Facebook',
+    'Google',
+    'H&M',
+    'HBO',
+    'ICA Maxi',
+    'Instagram',
+    'Kivra',
+    'Mio',
+    'Netflix',
+    'Swish',
+    'Tele2',
+    'Telia',
+    'Telenor',
+    'Ticketmaster',
+    'TikTok',
+    'Tre',
+    'TV4',
+    'Viaplay',
+    'YouTube',
+    'Zalando',
+  ]);
+  const translatableAttributeNames = [
+    'alt',
+    'aria-description',
+    'aria-label',
+    'aria-placeholder',
+    'aria-valuetext',
+    'label',
+    'placeholder',
+    'title',
+  ];
   const textNodeMemory = new WeakMap();
   const attrMemory = new WeakMap();
-  let activeLanguage = 'en';
+  const remoteTranslationCache = new Map();
+  const translationCacheStorageKey = 'dealettTranslationCache:v2';
+  const maxStoredTranslations = 2500;
+  const attemptedRemoteTranslations = new Set();
+  const remoteTranslationFailures = new Map();
+  const localFrontendPorts = new Set(['5500', '5501', '5173', '8080']);
+  const configuredApiBase = String(
+    window.DEALETT_API_BASE ||
+    (localFrontendPorts.has(window.location.port) || window.location.protocol === 'file:'
+      ? 'http://127.0.0.1:3000'
+      : '')
+  ).replace(/\/$/, '');
+  const translationEndpoint = `${configuredApiBase}/api/translate`;
+  const queuedRemoteTranslations = new Set();
+  let activeLanguage = 'sv';
   let translationObserver = null;
   let translationFrame = 0;
+  let translationRequestTimer = 0;
+  let queuedTranslationLanguage = 'sv';
   let isApplyingTranslations = false;
   let originalDocumentTitle = '';
+
+  try {
+    const storedTranslations = JSON.parse(localStorage.getItem(translationCacheStorageKey) || '[]');
+    if (Array.isArray(storedTranslations)) {
+      storedTranslations.slice(-maxStoredTranslations).forEach((entry) => {
+        if (
+          Array.isArray(entry) &&
+          entry.length === 2 &&
+          typeof entry[0] === 'string' &&
+          typeof entry[1] === 'string'
+        ) {
+          remoteTranslationCache.set(entry[0], entry[1]);
+        }
+      });
+    }
+  } catch {
+    // Translation continues with an in-memory cache when browser storage is unavailable.
+  }
 
   const translations = {
     en: {
@@ -496,6 +606,31 @@
 
   const normalizeTranslationKey = (value) => String(value || '').replace(/\s+/g, ' ').trim();
 
+  const persistRemoteTranslations = () => {
+    try {
+      localStorage.setItem(
+        translationCacheStorageKey,
+        JSON.stringify([...remoteTranslationCache.entries()].slice(-maxStoredTranslations))
+      );
+    } catch {
+      // Translation still works for the current page if browser storage is unavailable.
+    }
+  };
+
+  const setTranslationState = (state) => {
+    document.documentElement.dataset.translationState = state;
+    if (state === 'ready' || state === 'error') {
+      document.documentElement.removeAttribute('data-translation-boot');
+    }
+  };
+
+  const isPreservedTranslationText = (text) => {
+    const normalized = normalizeTranslationKey(text);
+    if (preservedExactTexts.has(normalized)) return true;
+    if (/^(?:[A-ZÅÄÖ0-9]{1,6}|[235]G|eSIM|GB|Mbit\/s|N)$/.test(normalized)) return true;
+    return false;
+  };
+
   const getSavedLanguage = () => {
     const saved = localStorage.getItem('dealettLanguage');
     return supportedLanguages.includes(saved) ? saved : 'sv';
@@ -556,7 +691,123 @@
 
   const translateKey = (key, language = activeLanguage) => {
     if (!key) return key;
-    return translations[language]?.[key] || applyPatternTranslation(key, language) || key;
+    const cached = remoteTranslationCache.get(`${language}\u0000${key}`);
+    return translations[language]?.[key] || applyPatternTranslation(key, language) || cached || key;
+  };
+
+  const isRemoteTranslatable = (text) => {
+    if (!text || text.length > 1200) return false;
+    if (!/[\p{L}]/u.test(text)) return false;
+    if (/^(?:https?:\/\/|mailto:|tel:)/i.test(text)) return false;
+    if (isPreservedTranslationText(text)) return false;
+    return true;
+  };
+
+  const requestTranslationBatch = async (language, texts) => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 25_000);
+
+    try {
+      const response = await fetch(translationEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language, texts }),
+        signal: controller.signal,
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !Array.isArray(payload.translations)) {
+        throw new Error(payload.error || 'Translation request failed');
+      }
+
+      payload.translations.forEach(({ source, translated }) => {
+        if (source && translated) {
+          remoteTranslationCache.set(`${language}\u0000${source}`, translated);
+          attemptedRemoteTranslations.delete(`${language}\u0000${source}`);
+          remoteTranslationFailures.delete(`${language}\u0000${source}`);
+        }
+      });
+      persistRemoteTranslations();
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  };
+
+  const flushRemoteTranslations = async () => {
+    translationRequestTimer = 0;
+    const language = queuedTranslationLanguage;
+    const texts = [...queuedRemoteTranslations].filter((text) => {
+      const key = `${language}\u0000${text}`;
+      return !remoteTranslationCache.has(key) && !attemptedRemoteTranslations.has(key);
+    });
+    queuedRemoteTranslations.clear();
+
+    if (language === 'sv' || !texts.length) return;
+
+    texts.forEach((text) => attemptedRemoteTranslations.add(`${language}\u0000${text}`));
+    setTranslationState('loading');
+
+    try {
+      const batches = [];
+      let batch = [];
+      let batchCharacters = 0;
+
+      texts.forEach((text) => {
+        if (batch.length >= 35 || (batch.length && batchCharacters + text.length > 12_000)) {
+          batches.push(batch);
+          batch = [];
+          batchCharacters = 0;
+        }
+        batch.push(text);
+        batchCharacters += text.length;
+      });
+      if (batch.length) batches.push(batch);
+
+      for (const translationBatch of batches) {
+        await requestTranslationBatch(language, translationBatch);
+      }
+      setTranslationState('ready');
+      if (activeLanguage === language) applyTranslations();
+    } catch {
+      const retryTexts = new Set();
+      texts.forEach((text) => {
+        const key = `${language}\u0000${text}`;
+        attemptedRemoteTranslations.delete(key);
+        const failures = (remoteTranslationFailures.get(key) || 0) + 1;
+        remoteTranslationFailures.set(key, failures);
+        if (failures < 3) retryTexts.add(text);
+      });
+
+      if (activeLanguage === language && retryTexts.size) {
+        setTranslationState('loading');
+        window.setTimeout(() => queueRemoteTranslation(retryTexts, language), 500);
+      } else {
+        setTranslationState('error');
+      }
+    }
+  };
+
+  const queueRemoteTranslation = (texts, language = activeLanguage) => {
+    if (language === 'sv' || !texts?.size) return;
+
+    if (queuedTranslationLanguage !== language) {
+      queuedRemoteTranslations.clear();
+      queuedTranslationLanguage = language;
+    }
+
+    texts.forEach((text) => {
+      const key = `${language}\u0000${text}`;
+      if (
+        isRemoteTranslatable(text) &&
+        !remoteTranslationCache.has(key) &&
+        !attemptedRemoteTranslations.has(key)
+      ) {
+        queuedRemoteTranslations.add(text);
+      }
+    });
+
+    if (!queuedRemoteTranslations.size) return;
+    window.clearTimeout(translationRequestTimer);
+    translationRequestTimer = window.setTimeout(flushRemoteTranslations, 60);
   };
 
   const withOriginalWhitespace = (source, translated) => {
@@ -565,7 +816,7 @@
     return `${leading}${translated}${trailing}`;
   };
 
-  const translateTextNode = (node) => {
+  const translateTextNode = (node, missingTranslations) => {
     const rawValue = node.nodeValue || '';
     const key = normalizeTranslationKey(rawValue);
 
@@ -576,6 +827,16 @@
     const existing = textNodeMemory.get(node);
     const original = existing && key === existing.lastKey ? existing.original : key;
     const translated = translateKey(original);
+    const remoteKey = `${activeLanguage}\u0000${original}`;
+
+    if (
+      activeLanguage !== 'sv' &&
+      translated === original &&
+      !remoteTranslationCache.has(remoteKey) &&
+      isRemoteTranslatable(original)
+    ) {
+      missingTranslations.add(original);
+    }
 
     if (translated !== key) {
       const nextValue = withOriginalWhitespace(rawValue, translated);
@@ -592,19 +853,37 @@
   const shouldSkipNode = (node) => {
     const parent = node.parentElement;
     return !parent ||
-      ['SCRIPT', 'STYLE', 'NOSCRIPT', 'OPTION'].includes(parent.tagName) ||
-      Boolean(parent.closest('[data-no-translate]'));
+      ['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(parent.tagName) ||
+      Boolean(parent.closest('[data-no-translate], [data-translation-complete], [data-translation-preserve], [translate="no"]')) ||
+      Boolean(parent.tagName === 'OPTION' && parent.closest('[data-language-switcher]'));
   };
 
-  const translateAttributes = (root) => {
-    const attributeNames = ['aria-label', 'placeholder', 'title'];
+  const getTranslatableAttributeNames = (element) => {
+    const names = [...translatableAttributeNames];
+    if (
+      element.tagName === 'INPUT' &&
+      ['button', 'reset', 'submit'].includes(String(element.type || '').toLowerCase())
+    ) {
+      names.push('value');
+    }
+    return names;
+  };
+
+  const shouldSkipAttribute = (element, attributeName) => {
+    if (
+      element.closest('[data-translation-complete], [data-translation-preserve], [translate="no"]') ||
+      (element.closest('[data-no-translate]') && attributeName !== 'aria-label')
+    ) return true;
+    return false;
+  };
+
+  const translateAttributes = (root, missingTranslations) => {
     const elements = root.nodeType === Node.ELEMENT_NODE ? [root, ...root.querySelectorAll('*')] : [];
 
     elements.forEach((element) => {
-      if (element.tagName === 'OPTION') return;
-
-      attributeNames.forEach((attributeName) => {
+      getTranslatableAttributeNames(element).forEach((attributeName) => {
         if (!element.hasAttribute(attributeName)) return;
+        if (shouldSkipAttribute(element, attributeName)) return;
 
         const current = element.getAttribute(attributeName);
         const key = normalizeTranslationKey(current);
@@ -614,6 +893,16 @@
         const stored = storedForElement[attributeName];
         const original = stored && key === stored.lastKey ? stored.original : key;
         const translated = translateKey(original);
+        const remoteKey = `${activeLanguage}\u0000${original}`;
+
+        if (
+          activeLanguage !== 'sv' &&
+          translated === original &&
+          !remoteTranslationCache.has(remoteKey) &&
+          isRemoteTranslatable(original)
+        ) {
+          missingTranslations.add(original);
+        }
 
         if (translated !== key) {
           element.setAttribute(attributeName, translated);
@@ -631,15 +920,25 @@
     if (!root) return;
 
     isApplyingTranslations = true;
+    const missingTranslations = new Set();
     document.documentElement.lang = activeLanguage;
     document.documentElement.dir = rtlLanguages.has(activeLanguage) ? 'rtl' : 'ltr';
 
     if (document.title) {
       originalDocumentTitle ||= normalizeTranslationKey(document.title);
-      document.title = translateKey(originalDocumentTitle);
+      const translatedTitle = translateKey(originalDocumentTitle);
+      document.title = translatedTitle;
+      if (
+        activeLanguage !== 'sv' &&
+        translatedTitle === originalDocumentTitle &&
+        !remoteTranslationCache.has(`${activeLanguage}\u0000${originalDocumentTitle}`) &&
+        isRemoteTranslatable(originalDocumentTitle)
+      ) {
+        missingTranslations.add(originalDocumentTitle);
+      }
     }
 
-    translateAttributes(root);
+    translateAttributes(root, missingTranslations);
 
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) => (shouldSkipNode(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
@@ -647,11 +946,81 @@
 
     let node = walker.nextNode();
     while (node) {
-      translateTextNode(node);
+      translateTextNode(node, missingTranslations);
       node = walker.nextNode();
     }
 
     isApplyingTranslations = false;
+    if (activeLanguage === 'sv' || !missingTranslations.size) {
+      setTranslationState('ready');
+    }
+    queueRemoteTranslation(missingTranslations);
+  };
+
+  const auditTranslationCoverage = (root = document.body) => {
+    if (!root || activeLanguage === 'sv') return [];
+
+    const issues = [];
+    const inspect = ({ kind, source, current, element, attribute = null }) => {
+      const normalizedSource = normalizeTranslationKey(source);
+      if (!isRemoteTranslatable(normalizedSource)) return;
+
+      const expected = normalizeTranslationKey(translateKey(normalizedSource));
+      if (normalizeTranslationKey(current) === expected && expected !== normalizedSource) return;
+      if (
+        expected === normalizedSource &&
+        remoteTranslationCache.has(`${activeLanguage}\u0000${normalizedSource}`)
+      ) return;
+
+      issues.push({
+        kind,
+        source: normalizedSource,
+        current: normalizeTranslationKey(current),
+        attribute,
+        element: element?.tagName?.toLowerCase() || 'document',
+      });
+    };
+
+    if (originalDocumentTitle) {
+      inspect({
+        kind: 'document-title',
+        source: originalDocumentTitle,
+        current: document.title,
+      });
+    }
+
+    const elements = root.nodeType === Node.ELEMENT_NODE ? [root, ...root.querySelectorAll('*')] : [];
+    elements.forEach((element) => {
+      getTranslatableAttributeNames(element).forEach((attributeName) => {
+        if (!element.hasAttribute(attributeName) || shouldSkipAttribute(element, attributeName)) return;
+        const current = element.getAttribute(attributeName);
+        const stored = attrMemory.get(element)?.[attributeName];
+        inspect({
+          kind: 'attribute',
+          source: stored?.original || current,
+          current,
+          element,
+          attribute: attributeName,
+        });
+      });
+    });
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => (shouldSkipNode(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
+    });
+    let node = walker.nextNode();
+    while (node) {
+      const current = node.nodeValue || '';
+      inspect({
+        kind: 'text',
+        source: textNodeMemory.get(node)?.original || current,
+        current,
+        element: node.parentElement,
+      });
+      node = walker.nextNode();
+    }
+
+    return issues;
   };
 
   const scheduleTranslation = () => {
@@ -663,21 +1032,76 @@
     });
   };
 
+  const populateLanguageSwitcher = (select) => {
+    const groups = [
+      {
+        label: 'Huvudspråk',
+        languages: languageCatalog.filter(([code]) => primaryLanguages.has(code)),
+      },
+      {
+        label: 'Fler språk',
+        languages: languageCatalog.filter(([code]) => !primaryLanguages.has(code)),
+      },
+    ];
+    const options = document.createDocumentFragment();
+    groups.forEach(({ label, languages }) => {
+      const group = document.createElement('optgroup');
+      group.label = label;
+      languages.forEach(([code, name]) => {
+        const option = document.createElement('option');
+        option.value = code;
+        option.textContent = `${code.toUpperCase()} - ${name}`;
+        group.append(option);
+      });
+      options.append(group);
+    });
+    select.replaceChildren(options);
+  };
+
   const setLanguage = (language) => {
-    activeLanguage = supportedLanguages.includes(language) ? language : 'en';
-    localStorage.setItem('dealettLanguage', activeLanguage);
+    activeLanguage = supportedLanguages.includes(language) ? language : 'sv';
+    try {
+      localStorage.setItem('dealettLanguage', activeLanguage);
+    } catch {
+      // Keep the language active for this page if browser storage is unavailable.
+    }
+    attemptedRemoteTranslations.forEach((key) => {
+      if (key.startsWith(`${activeLanguage}\u0000`)) attemptedRemoteTranslations.delete(key);
+    });
     document.querySelectorAll('[data-language-switcher]').forEach((select) => {
       select.value = activeLanguage;
     });
+    setTranslationState(activeLanguage === 'sv' ? 'ready' : 'loading');
     applyTranslations();
+    document.dispatchEvent(new CustomEvent('dealett:language-changed', {
+      detail: { language: activeLanguage },
+    }));
+  };
+
+  const reloadWithLanguage = (language) => {
+    const nextLanguage = supportedLanguages.includes(language) ? language : 'sv';
+    if (nextLanguage === activeLanguage) return;
+
+    try {
+      localStorage.setItem('dealettLanguage', nextLanguage);
+    } catch {
+      setLanguage(nextLanguage);
+      return;
+    }
+
+    document.documentElement.lang = nextLanguage;
+    document.documentElement.dir = rtlLanguages.has(nextLanguage) ? 'rtl' : 'ltr';
+    document.documentElement.dataset.translationBoot = 'pending';
+    window.location.reload();
   };
 
   const initTranslations = () => {
     activeLanguage = getSavedLanguage();
 
     document.querySelectorAll('[data-language-switcher]').forEach((select) => {
+      populateLanguageSwitcher(select);
       select.value = activeLanguage;
-      select.addEventListener('change', () => setLanguage(select.value));
+      select.addEventListener('change', () => reloadWithLanguage(select.value));
     });
 
     applyTranslations();
@@ -686,12 +1110,18 @@
     translationObserver = new MutationObserver((mutations) => {
       if (isApplyingTranslations) return;
 
-      if (mutations.some((mutation) => mutation.type === 'childList' || mutation.type === 'characterData')) {
+      if (mutations.some((mutation) => (
+        mutation.type === 'childList' ||
+        mutation.type === 'characterData' ||
+        mutation.type === 'attributes'
+      ))) {
         scheduleTranslation();
       }
     });
 
     translationObserver.observe(document.body, {
+      attributeFilter: [...translatableAttributeNames, 'value'],
+      attributes: true,
       childList: true,
       characterData: true,
       subtree: true
@@ -699,9 +1129,11 @@
   };
 
   window.DEALETT_I18N = {
+    audit: auditTranslationCoverage,
     setLanguage,
     translate: translateKey,
-    getLanguage: () => activeLanguage
+    getLanguage: () => activeLanguage,
+    getSupportedLanguages: () => languageCatalog.map(([code, name]) => ({ code, name })),
   };
 
   const readCartCount = () => {
@@ -738,9 +1170,14 @@
 
       try {
         const template = document.createElement('template');
-        const html = await window.DealettNetwork.fetchText(partialPath, {
-          label: `Partial ${includeName}`,
-        });
+        const html = window.DealettNetwork?.fetchText
+          ? await window.DealettNetwork.fetchText(partialPath, {
+            label: `Partial ${includeName}`,
+          })
+          : await fetch(partialPath).then((response) => {
+            if (!response.ok) throw new Error(`Partial ${includeName} could not be loaded`);
+            return response.text();
+          });
         template.innerHTML = html.trim();
         target.replaceWith(template.content.cloneNode(true));
       } catch {
@@ -967,7 +1404,7 @@
         title: 'Dealett assistant',
         status: 'AI-rådgivare',
         greeting: 'Hej! Jag kan hjälpa dig jämföra mobilabonnemang, bredband, täckning och presentkort. Vad vill du börja med?',
-        placeholder: 'Ask AI anything...',
+        placeholder: 'Fråga AI om vad som helst...',
         send: 'Skicka',
         typing: 'Dealett assistant skriver...',
         error: 'Jag kunde inte svara just nu. Kontrollera att AI-tjänsten är konfigurerad och försök igen.',
@@ -1001,9 +1438,9 @@
       },
     };
 
-    const getChatLanguage = () => (window.DEALETT_I18N?.getLanguage?.() === 'en' ? 'en' : 'sv');
+    const getChatLanguage = () => window.DEALETT_I18N?.getLanguage?.() || 'sv';
     let chatLanguage = getChatLanguage();
-    let text = copy[chatLanguage];
+    let text = copy[chatLanguage] || copy.sv;
     const messages = [];
     const qualificationKey = 'dealettChatQualification';
     const offerCalculationKey = 'dealettChatOfferCalculation';
@@ -1016,7 +1453,6 @@
     const root = document.createElement('section');
     root.id = 'dealettChat';
     root.className = 'dealett-chat';
-    root.dataset.noTranslate = 'true';
     root.innerHTML = [
       `<button class="dealett-chat-toggle" type="button" aria-label="${text.open}" aria-expanded="false">`,
       '  <i class="fa-solid fa-message" aria-hidden="true"></i>',
@@ -1058,7 +1494,7 @@
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
 
-    const getChatTimeLabel = () => new Intl.DateTimeFormat(chatLanguage === 'en' ? 'en-US' : 'sv-SE', {
+    const getChatTimeLabel = () => new Intl.DateTimeFormat(chatLanguage, {
       hour: '2-digit',
       minute: '2-digit',
     }).format(new Date());
@@ -1236,14 +1672,28 @@
       return { label };
     };
 
-    const syncLanguage = () => {
+    const syncLanguage = (event) => {
+      const previousLanguage = chatLanguage;
       chatLanguage = getChatLanguage();
-      text = copy[chatLanguage];
+      text = copy[chatLanguage] || copy.sv;
       status.textContent = text.status;
       input.placeholder = text.placeholder;
       toggle.setAttribute('aria-label', text.open);
       closeButton.setAttribute('aria-label', text.close);
       root.querySelector('.dealett-chat-send')?.setAttribute('aria-label', text.send);
+
+      if (
+        event?.type === 'dealett:language-changed' &&
+        previousLanguage !== chatLanguage &&
+        messages.length
+      ) {
+        messages.splice(0, messages.length);
+        messageList.replaceChildren();
+        suggestionArea.replaceChildren();
+        lastAssistantResponse = null;
+        hasUserStartedChat = false;
+        if (!panel.hidden) loadInitialGreeting();
+      }
     };
 
     const scrollMessages = () => {
@@ -1419,6 +1869,7 @@
         button.type = 'button';
         button.className = 'dealett-chat-quick-reply';
         button.textContent = label;
+        button.setAttribute('data-translation-complete', '');
         button.addEventListener('click', () => {
           if (isSending) return;
           wrap.querySelectorAll('button').forEach((item) => {
@@ -1442,8 +1893,8 @@
       const card = document.createElement('div');
       card.className = 'dealett-chat-embedded-widget dealett-chat-coverage-selector';
       card.innerHTML = [
-        `<strong class="dealett-chat-widget-title">${escapeChatText(widget.title || 'Kontrollera täckning')}</strong>`,
-        widget.description ? `<p class="dealett-chat-widget-description">${escapeChatText(widget.description)}</p>` : '',
+        `<strong class="dealett-chat-widget-title"${widget.title ? ' data-translation-complete' : ''}>${escapeChatText(widget.title || 'Kontrollera täckning')}</strong>`,
+        widget.description ? `<p class="dealett-chat-widget-description" data-translation-complete>${escapeChatText(widget.description)}</p>` : '',
         '<div class="dealett-chat-widget-actions"></div>',
         '<div class="dealett-chat-address-row" hidden>',
         '  <input class="dealett-chat-address-input" type="text" autocomplete="street-address" placeholder="Skriv adress" />',
@@ -1518,6 +1969,7 @@
         button.type = 'button';
         button.className = 'dealett-chat-widget-button';
         button.textContent = action.label;
+        button.setAttribute('data-translation-complete', '');
         button.addEventListener('click', () => handleAction(action.id, button));
         actions.append(button);
       });
@@ -1540,14 +1992,18 @@
       }
     };
 
-    const addMessage = (role, content) => {
+    const addMessage = (role, content, options = {}) => {
       const item = document.createElement('article');
       item.className = `dealett-chat-message dealett-chat-message--${role}`;
       const isUser = role === 'user';
+      const contentAttributes = [
+        isUser ? 'data-no-translate' : '',
+        options.contentLanguage ? `lang="${escapeChatText(options.contentLanguage)}" data-translation-complete` : '',
+      ].filter(Boolean).join(' ');
       item.innerHTML = [
         isUser ? '' : '<span class="dealett-chat-avatar dealett-chat-avatar--bot" aria-hidden="true"><span><b></b></span></span>',
         '<div class="dealett-chat-bubble">',
-        `  <p>${escapeChatText(content)}</p>`,
+        `  <p${contentAttributes ? ` ${contentAttributes}` : ''}>${escapeChatText(content)}</p>`,
         `  <time class="dealett-chat-time">${escapeChatText(getChatTimeLabel())}</time>`,
         isUser ? '  <span class="dealett-chat-check" aria-hidden="true"></span>' : '',
         '</div>',
@@ -1673,7 +2129,9 @@
         ...response,
         reply: assistantText,
       };
-      const assistantItem = addMessage('assistant', assistantText);
+      const assistantItem = addMessage('assistant', assistantText, {
+        contentLanguage: chatLanguage,
+      });
       renderQuickReplies(assistantItem, response.quickReplies);
       renderChatOfferCards(assistantItem, response.offerCards);
       renderEmbeddedWidget(assistantItem, response.embeddedWidget);
@@ -1699,7 +2157,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             sessionId: chatSessionId,
-            message: chatLanguage === 'en' ? 'hello' : 'hej',
+            message: chatLanguage === 'sv' ? 'hej' : 'hello',
             language: chatLanguage,
             messages: [],
             qualification: createEmptyQualification(),
@@ -1902,6 +2360,8 @@
         closePanel();
       }
     });
+
+    document.addEventListener('dealett:language-changed', syncLanguage);
   };
 
   const initHomePremiumMotion = () => {
